@@ -3,76 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AAET Hotel - Menu</title>
+    <title>AA Entertainment - Menu</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Service Type Modal -->
     <div id="serviceModal" class="modal">
         <div class="modal-content">
-            <h2>Please select your service type:</h2>
+            <h2>Select Service Type</h2>
             <button onclick="selectService('room')">Room Service</button>
-            <button onclick="selectService('restaurant')">Restaurant & Bar</button>
+            <button onclick="selectService('restaurant')">Restaurant</button>
         </div>
     </div>
 
     <!-- Navigation -->
     <nav>
-        <div class="nav-brand">
-            <img src="logo.png" alt="AAET Hotel" class="logo">
-        </div>
         <div class="nav-links">
-            <a href="#foods" class="active">FOODS</a>
-            <a href="#drinks">DRINKS</a>
+            <a href="#specials" class="active">Specials</a>
+            <a href="#foods">Foods</a>
+            <a href="#drinks">Drinks</a>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header class="hero">
-        <div class="hero-overlay">
-            <h1>Our Menu</h1>
-        </div>
-    </header>
-
-    <!-- Specials Section -->
-    <section id="specials" class="section">
-        <h2>Specials</h2>
-        <div class="menu-grid">
-            <!-- Menu items will be dynamically populated -->
-        </div>
+    <!-- Menu Sections -->
+    <section id="specials">
+        <h2>Today's Specials</h2>
+        <div class="menu-grid"></div>
     </section>
 
-    <!-- Food Section -->
-    <section id="foods" class="section">
-        <div class="section-header">
-            <h2>Food</h2>
-        </div>
-        <div class="menu-grid">
-            <!-- Menu items will be dynamically populated -->
-        </div>
+    <section id="foods">
+        <h2>Main Menu</h2>
+        <div class="menu-grid"></div>
     </section>
 
-    <!-- Drinks Section -->
-    <section id="drinks" class="section">
-        <div class="section-header">
-            <h2>Drinks</h2>
-        </div>
-        <div class="menu-grid">
-            <!-- Menu items will be dynamically populated -->
-        </div>
+    <section id="drinks">
+        <h2>Drinks</h2>
+        <div class="menu-grid"></div>
     </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-brand">
-                <img src="logo.png" alt="AAET Hotel" class="logo">
-            </div>
-            <p>All rights reserved</p>
-        </div>
-    </footer>
-
-    <script src="js/main.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html> 

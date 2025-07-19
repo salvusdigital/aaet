@@ -1,3 +1,6 @@
+import SessionService from './services/session-service.js';
+import config from './config/config.js';
+
 // Sample menu data - In a real application, this would come from a backend API
 const menuData = {
     specials: [
@@ -173,8 +176,9 @@ const menuData = {
     ]
 };
 
-// Service type handling
-let currentService = localStorage.getItem('serviceType') || null;
+// Initialize session service
+const serviceTypeSession = new SessionService('serviceType');
+let currentService = serviceTypeSession.get();
 
 // Show modal if service type not selected
 if (!currentService) {
@@ -182,12 +186,21 @@ if (!currentService) {
 }
 
 // Service selection handler
-function selectService(type) {
+export function selectService(type) {
     currentService = type;
-    localStorage.setItem('serviceType', type);
+    serviceTypeSession.set(type);
     document.getElementById('serviceModal').style.display = 'none';
     renderMenu();
 }
+
+// Make selectService available globally for onclick handlers
+window.selectService = selectService;
+
+// Start session expiry check
+serviceTypeSession.startExpiryCheck(() => {
+    currentService = null;
+    document.getElementById('serviceModal').style.display = 'block';
+});
 
 // Format price with currency
 function formatPrice(price) {
