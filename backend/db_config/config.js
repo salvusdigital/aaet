@@ -6,8 +6,8 @@ const mongoose = require('mongoose');
 
 const connectDb = async () => {
     try {
-        const connect = await mongoose.connect(process.env.MongoDB_URI || mongodb + srv://johnayomide31:6IL0h2A6ApC1ejpk@cluster0.ykzgmfz.mongodb.net/aaet_menu);
-            console.log('Connected to DB', connect.connection.host, connect.connection.name);
+        const connect = await mongoose.connect(process.env.MongoDB_URI || "mongodb+srv://johnayomide31:6IL0h2A6ApC1ejpk@cluster0.ykzgmfz.mongodb.net/aaet_menu");
+        console.log('Connected to DB', connect.connection.host, connect.connection.name);
     } catch (err) {
         console.log('Error: ' + err);
         process.exit(1);
