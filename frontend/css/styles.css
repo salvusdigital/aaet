@@ -1,0 +1,312 @@
+:root {
+    --primary-color: #5A5A5A;
+    --accent-color: #E30613;
+    --background-color: #FFFFFF;
+    --text-color: #333333;
+    --highlight-color: #CCCCCC;
+    --modal-bg: rgba(0, 0, 0, 0.5);
+    --container-padding: 1rem;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Base Container */
+.container {
+    width: 100%;
+    padding: 0 var(--container-padding);
+    margin: 0 auto;
+}
+
+/* Modal Styles - Mobile First */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--modal-bg);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--background-color);
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    width: 90%;
+    max-width: 320px;
+}
+
+.modal-content button {
+    width: 100%;
+    margin: 0.5rem 0;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--accent-color);
+    color: white;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+/* Navigation - Mobile First */
+nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.95);
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 0.75rem var(--container-padding);
+}
+
+.nav-brand .logo {
+    height: 30px;
+}
+
+.nav-links a {
+    color: var(--primary-color);
+    text-decoration: none;
+    margin-left: 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Hero Section - Mobile First */
+.hero {
+    height: 40vh;
+    background-image: url('../images/header-1583x1080 (1).jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    margin-top: 48px;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero h1 {
+    color: white;
+    font-size: 2rem;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Menu Section - Mobile First */
+.section {
+    padding: 2rem 0;
+    margin: 0 auto;
+}
+
+.section h2 {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    text-align: left;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0 var(--container-padding);
+}
+
+.menu-grid {
+    width: 100%;
+    padding: 0 var(--container-padding);
+}
+
+.menu-item {
+    margin-bottom: 1.25rem;
+}
+
+.menu-item-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    position: relative;
+    margin-bottom: 0.4rem;
+}
+
+.menu-item-header::after {
+    content: "";
+    position: absolute;
+    bottom: 0.4em;
+    left: 0;
+    right: 0;
+    border-bottom: 1px dotted var(--highlight-color);
+    margin: 0 0.5rem;
+    z-index: 1;
+}
+
+.menu-item h3 {
+    color: var(--primary-color);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    padding-right: 0.5rem;
+    background: white;
+    z-index: 2;
+}
+
+.menu-item .price {
+    color: var(--accent-color);
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding-left: 0.5rem;
+    background: white;
+    z-index: 2;
+}
+
+.menu-item p {
+    color: var(--text-color);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin: 0;
+    opacity: 0.8;
+}
+
+/* Footer - Mobile First */
+footer {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1.5rem var(--container-padding);
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.footer-content {
+    width: 100%;
+}
+
+.footer-brand .logo {
+    height: 40px;
+    margin-bottom: 1rem;
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+    :root {
+        --container-padding: 2rem;
+    }
+
+    .modal-content {
+        padding: 2rem;
+        max-width: 400px;
+    }
+
+    .modal-content button {
+        width: auto;
+        margin: 1rem;
+        padding: 0.8rem 1.5rem;
+    }
+
+    nav {
+        padding: 1rem var(--container-padding);
+    }
+
+    .nav-brand .logo {
+        height: 40px;
+    }
+
+    .nav-links a {
+        font-size: 1rem;
+        margin-left: 2rem;
+    }
+
+    .hero {
+        height: 50vh;
+        margin-top: 60px;
+    }
+
+    .hero h1 {
+        font-size: 3rem;
+    }
+
+    .section {
+        padding: 3rem 0;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+    }
+
+    .menu-grid {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .menu-item {
+        margin-bottom: 1.5rem;
+    }
+
+    .menu-item h3 {
+        font-size: 1.1rem;
+    }
+
+    .menu-item .price {
+        font-size: 1rem;
+    }
+
+    .menu-item p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+}
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+    .menu-grid {
+        max-width: 800px;
+    }
+
+    .hero {
+        height: 60vh;
+    }
+
+    .hero h1 {
+        font-size: 3.5rem;
+    }
+
+    .section h2 {
+        font-size: 2rem;
+    }
+
+    .menu-item {
+        margin-bottom: 1.75rem;
+    }
+
+    .menu-item h3 {
+        font-size: 1.2rem;
+    }
+
+    .menu-item p {
+        max-width: 90%;
+    }
+} 
