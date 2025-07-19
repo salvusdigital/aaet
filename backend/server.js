@@ -1,11 +1,10 @@
 const express = require('express'),
     app = express(),
-    mongoose = require('mongoose'),
     cors = require('cors'),
     dotenv = require('dotenv'),
     bodyParser = require('body-parser'),
-    connectDb = require('./db_config/config'),
-    port = process.env.PORT || 8000;
+    connectDb = require('./db_config/config');
+const port = process.env.PORT || 8000;
 
 // Load environment variables
 dotenv.config();
