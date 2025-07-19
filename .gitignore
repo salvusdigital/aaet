@@ -2,3 +2,15 @@
 backend/node_modules
 backend/scripts
 backend/generated
+enriched_hotel_menu_website.node_modules
+package-lock.json
+"Screenshot 2025-07-16 122543.png"
+.DS_Store
+.vscode/
+.idea/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.development
+.env.test
