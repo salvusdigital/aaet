@@ -3,121 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AA Entertainment Hotel - Admin Dashboard</title>
-    <link rel="stylesheet" href="css/admin.css">
-    <!-- Add Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>AA Entertainment Hotel - Admin</title>
+    <script>
+        // Redirect to the new admin folder structure
+        window.location.href = 'admin/';
+    </script>
 </head>
 <body>
-    <!-- Login Form -->
-    <div id="loginForm" class="auth-container">
-        <div class="auth-box">
-            <h2>Admin Login</h2>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <button type="submit">Login</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Admin Dashboard -->
-    <div id="adminDashboard" class="dashboard-container" style="display: none;">
-        <nav class="sidebar">
-            <div class="logo">
-                <img src="logo.png" alt="AA Entertainment Hotel">
-            </div>
-            <ul class="nav-links">
-                <li class="active" data-section="menu-items">
-                    <i class="fas fa-utensils"></i> Menu Items
-                </li>
-                <li data-section="categories">
-                    <i class="fas fa-tags"></i> Categories
-                </li>
-                <li data-section="settings">
-                    <i class="fas fa-cog"></i> Settings
-                </li>
-                <li id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </li>
-            </ul>
-        </nav>
-
-        <main class="main-content">
-            <header>
-                <h1>Menu Management</h1>
-                <button id="addItemBtn" class="primary-btn">
-                    <i class="fas fa-plus"></i> Add New Item
-                </button>
-            </header>
-
-            <!-- Menu Items Section -->
-            <section id="menu-items" class="content-section">
-                <div class="filters">
-                    <input type="text" id="searchItems" placeholder="Search menu items...">
-                    <select id="categoryFilter">
-                        <option value="">All Categories</option>
-                    </select>
-                </div>
-                <div class="items-grid" id="menuItemsGrid"></div>
-            </section>
-
-            <!-- Add/Edit Item Modal -->
-            <div id="itemModal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2 id="modalTitle">Add Menu Item</h2>
-                    <form id="itemForm">
-                        <div class="form-group">
-                            <label for="itemName">Name</label>
-                            <input type="text" id="itemName" name="name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="itemDescription">Description</label>
-                            <textarea id="itemDescription" name="description" required></textarea>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="restaurantPrice">Restaurant Price</label>
-                                <input type="number" id="restaurantPrice" name="restaurantPrice" step="0.01" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="roomServicePrice">Room Service Price</label>
-                                <input type="number" id="roomServicePrice" name="roomServicePrice" step="0.01" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="itemCategory">Category</label>
-                            <select id="itemCategory" name="category" required>
-                                <option value="">Select Category</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="itemImage">Image</label>
-                            <input type="file" id="itemImage" name="image" accept="image/*">
-                        </div>
-                        <div class="form-group">
-                            <label>Tags</label>
-                            <div class="tags-container">
-                                <label><input type="checkbox" name="tags" value="spicy"> Spicy</label>
-                                <label><input type="checkbox" name="tags" value="vegetarian"> Vegetarian</label>
-                                <label><input type="checkbox" name="tags" value="vegan"> Vegan</label>
-                                <label><input type="checkbox" name="tags" value="gluten-free"> Gluten-free</label>
-                            </div>
-                        </div>
-                        <button type="submit" class="primary-btn">Save Item</button>
-                    </form>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <script src="js/admin.js"></script>
+    <p>Redirecting to admin panel...</p>
+    <p>If you are not redirected automatically, <a href="admin/">click here</a>.</p>
 </body>
 </html> 
