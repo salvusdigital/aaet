@@ -1,0 +1,148 @@
+# AA Entertainment API Routes Documentation
+# Base URL: http://localhost:8000/api
+
+###
+# PUBLIC ENDPOINTS
+###
+
+### Get all menu items
+GET http://localhost:8000/api/menu
+
+### Get menu items by category
+GET http://localhost:8000/api/menu?category=specials
+
+### Get specific menu item by ID
+GET http://localhost:8000/api/menu/60d21b4667d0d8992e610c85
+
+### Get all categories
+GET http://localhost:8000/api/menu/categories
+
+###
+# AUTHENTICATION
+###
+
+### Login to get token
+POST http://localhost:8000/api/admin/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "newpassword123"
+}
+
+### Reset password (requires authentication)
+POST http://localhost:8000/api/admin/reset-password
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2I5NjE3OWVlMGJjN2RhZjFiZGVjYSIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoic3VwZXJfYWRtaW4iLCJpYXQiOjE3NTMwODkyMjMsImV4cCI6MTc1MzE3NTYyM30.cZ4Byg7MaC6R3tcVd5PsKH1GQjodJS-xhl66V7cxUM
+
+{
+  "username": "admin",
+  "newPassword": "newpassword123"
+}
+
+###
+# ADMIN MENU MANAGEMENT (Protected)
+###
+
+### Get all menu items (admin access)
+GET http://localhost:8000/api/admin/menu
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2I5NjE3OWVlMGJjN2RhZjFiZGVjYSIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoic3VwZXJfYWRtaW4iLCJpYXQiOjE3NTMwODkyMjMsImV4cCI6MTc1MzE3NTYyM30.cZ4Byg7MaC6R3tcVd5PsKH1GQjodJS-xhl66V7cxUM
+
+### Create new menu item
+POST http://localhost:8000/api/admin/menu
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2I5NjE3OWVlMGJjN2RhZjFiZGVjYSIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoic3VwZXJfYWRtaW4iLCJpYXQiOjE3NTMwODkyMjMsImV4cCI6MTc1MzE3NTYyM30.cZ4Byg7MaC6R3tcVd5PsKH1GQjodJS-xhl66V7cxUM
+
+{
+  "name": "Jollof Rice Special",
+  "description": "Nigerian jollof rice with chicken and plantain",
+  "price": {
+    "restaurant": 5000,
+    "room": 6000
+  },
+  "category": "specials",
+  "tags": ["popular", "spicy"],
+  "image": "/images/jollof-rice.jpg"
+}
+
+### Update menu item
+PUT http://localhost:8000/api/admin/menu/60d21b4667d0d8992e610c85
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2I5NjE3OWVlMGJjN2RhZjFiZGVjYSIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoic3VwZXJfYWRtaW4iLCJpYXQiOjE3NTMwODkyMjMsImV4cCI6MTc1MzE3NTYyM30.cZ4Byg7MaC6R3tcVd5PsKH1GQjodJS-xhl66V7cxUM
+
+{
+  "name": "Updated Jollof Rice Special",
+  "description": "Updated description with special sauce",
+  "price": {
+    "restaurant": 5500,
+    "room": 6500
+  },
+  "category": "specials",
+  "tags": ["popular", "spicy", "chef's choice"],
+  "image": "/images/jollof-rice-updated.jpg"
+}
+
+### Delete menu item
+DELETE http://localhost:8000/api/admin/menu/60d21b4667d0d8992e610c85
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2I5NjE3OWVlMGJjN2RhZjFiZGVjYSIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoic3VwZXJfYWRtaW4iLCJpYXQiOjE3NTMwODkyMjMsImV4cCI6MTc1MzE3NTYyM30.cZ4Byg7MaC6R3tcVd5PsKH1GQjodJS-xhl66V7cxUM
+
+###
+# ADMIN CATEGORY MANAGEMENT (Protected)
+###
+
+### Get all categories (admin access)
+GET http://localhost:8000/api/admin/categories
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2I5NjE3OWVlMGJjN2RhZjFiZGVjYSIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoic3VwZXJfYWRtaW4iLCJpYXQiOjE3NTMwODkyMjMsImV4cCI6MTc1MzE3NTYyM30.cZ4Byg7MaC6R3tcVd5PsKH1GQjodJS-xhl66V7cxUM
+
+### Create new category
+POST http://localhost:8000/api/admin/categories
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2I5NjE3OWVlMGJjN2RhZjFiZGVjYSIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoic3VwZXJfYWRtaW4iLCJpYXQiOjE3NTMwODkyMjMsImV4cCI6MTc1MzE3NTYyM30.cZ4Byg7MaC6R3tcVd5PsKH1GQjodJS-xhl66V7cxUM
+
+{
+  "name": "desserts",
+  "description": "Sweet treats and desserts",
+  "isActive": true,
+  "sortOrder": 6
+}
+
+### Update category
+PUT http://localhost:8000/api/admin/categories/60d21b4667d0d8992e610c85
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2I5NjE3OWVlMGJjN2RhZjFiZGVjYSIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoic3VwZXJfYWRtaW4iLCJpYXQiOjE3NTMwODkyMjMsImV4cCI6MTc1MzE3NTYyM30.cZ4Byg7MaC6R3tcVd5PsKH1GQjodJS-xhl66V7cxUM
+
+{
+  "name": "desserts",
+  "description": "Updated dessert selection",
+  "isActive": true,
+  "sortOrder": 5
+}
+
+### Delete category
+DELETE http://localhost:8000/api/admin/categories/60d21b4667d0d8992e610c85
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4N2I5NjE3OWVlMGJjN2RhZjFiZGVjYSIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoic3VwZXJfYWRtaW4iLCJpYXQiOjE3NTMwODkyMjMsImV4cCI6MTc1MzE3NTYyM30.cZ4Byg7MaC6R3tcVd5PsKH1GQjodJS-xhl66V7cxUM
+
+###
+# TESTING EXAMPLES WITH CURL
+###
+
+# 1. Login and get token
+# curl -X POST http://localhost:8000/api/admin/login \
+#   -H "Content-Type: application/json" \
+#   -d '{"username":"admin","password":"password123"}'
+
+# 2. Get all menu items
+# curl -X GET http://localhost:8000/api/menu
+
+# 3. Get all categories
+# curl -X GET http://localhost:8000/api/categories
+
+# 4. Create a menu item (requires authentication)
+# curl -X POST http://localhost:8000/api/admin/menu \
+#   -H "Content-Type: application/json" \
+#   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+#   -d '{"name":"Test Dish","description":"Test Description","price":{"restaurant":5000,"room":6000},"category":"specials"}'
+
+# 5. Delete a menu item (requires authentication)
+# curl -X DELETE http://localhost:8000/api/admin/menu/ITEM_ID_HERE \
+#   -H "Authorization: Bearer YOUR_TOKEN_HERE"

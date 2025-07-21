@@ -11,6 +11,9 @@ let menuData = {
 // Service type handling
 let currentService = localStorage.getItem('serviceType') || null;
 
+// Initialize session service for service type
+const serviceTypeSession = new SessionService('serviceType');
+
 // Show modal if service type not selected
 if (!currentService) {
     document.getElementById('serviceModal').style.display = 'block';
@@ -20,6 +23,7 @@ if (!currentService) {
 export function selectService(type) {
     currentService = type;
     localStorage.setItem('serviceType', type);
+    serviceTypeSession.set(type);
     document.getElementById('serviceModal').style.display = 'none';
     renderMenu();
 }
@@ -30,6 +34,7 @@ window.selectService = selectService;
 // Start session expiry check
 serviceTypeSession.startExpiryCheck(() => {
     currentService = null;
+    localStorage.removeItem('serviceType');
     document.getElementById('serviceModal').style.display = 'block';
 });
 

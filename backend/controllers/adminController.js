@@ -2,6 +2,7 @@ const Admin = require('../models/Admin');
 const jwt = require('jsonwebtoken');
 const MenuItem = require('../models/MenuItem');
 const asyncHandler = require('express-async-handler');
+const Category = require('../models/Category');
 
 // Helper function to generate JWT token
 const generateToken = (admin) => {
@@ -12,7 +13,7 @@ const generateToken = (admin) => {
     );
 };
 
-exports.login = async (req, res) => {
+const login = async (req, res) => {
     try {
         const { username, password } = req.body;
 
@@ -49,8 +50,28 @@ exports.login = async (req, res) => {
     }
 };
 
+const resetPassword = async (req, res) => {
+    try {
+        const { username, newPassword } = req.body;
+        const admin = await Admin.findOne({ username });
+        if (!admin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+
+        // Update password
+        admin.password = newPassword;
+        await admin.save();
+
+        res.json({ message: 'Password reset successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// const getAllAdmins = async (req, res) => {
+
 // Menu Management Functions
-exports.createMenuItem = async (req, res) => {
+const createMenuItem = async (req, res) => {
     try {
         const menuItem = new MenuItem(req.body);
         await menuItem.save();
@@ -60,7 +81,7 @@ exports.createMenuItem = async (req, res) => {
     }
 };
 
-exports.updateMenuItem = async (req, res) => {
+const updateMenuItem = async (req, res) => {
     try {
         const { id } = req.params;
         const menuItem = await MenuItem.findByIdAndUpdate(id, req.body, { new: true });
@@ -73,7 +94,7 @@ exports.updateMenuItem = async (req, res) => {
     }
 };
 
-exports.deleteMenuItem = async (req, res) => {
+const deleteMenuItem = async (req, res) => {
     try {
         const { id } = req.params;
         const menuItem = await MenuItem.findByIdAndDelete(id);
@@ -86,11 +107,49 @@ exports.deleteMenuItem = async (req, res) => {
     }
 };
 
-exports.getMenuItems = async (req, res) => {
+const getMenuItems = async (req, res) => {
     try {
         const menuItems = await MenuItem.find();
         res.json(menuItems);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching menu items', error: error.message });
     }
+};
+
+
+const getCategories = async (req, res) => {
+    try {
+        const categories = await Category.find();
+        res.json(categories);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching categories', error: error.message });
+    }
+};
+
+const deleteCategory = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const category = await Category.findByIdAndDelete(id);
+        if (!category) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+
+        res.json({ message: 'Category deleted successfully' });
+    } catch (error) {
+        res.status(400).json({ message: 'Error deleting category', error: error.message });
+    }
+};
+
+
+module.exports = {
+    login,
+    resetPassword,
+    createMenuItem,
+    updateMenuItem,
+    deleteMenuItem,
+    getMenuItems,
+    getCategories,
+    // createCategory,
+    // updateCategory,
+    deleteCategory
 };
