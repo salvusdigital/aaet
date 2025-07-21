@@ -23,3 +23,5 @@ backend-routes.rest
 menuDemo/*
 backend/data/hotel_menu_seed.json
 backend/data/park_inn_menu.json
+backend/data/aaet_menu.json
+.gitignore
