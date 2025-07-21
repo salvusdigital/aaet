@@ -5,10 +5,9 @@
     "description": "Jaiyelo API",
     "version": "1.0.0"
   },
-  "host": "localhost:8000",
+  "host": "https://aaet.onrender.com/",
   "basePath": "/",
   "schemes": [
-    "http",
     "https"
   ],
   "paths": {
