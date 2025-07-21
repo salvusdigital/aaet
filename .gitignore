@@ -17,3 +17,12 @@ package-lock.json
 .env.test
 enriched_hotel_menu_website.md
 Screenshot 2025-07-16 122543.png
+menuDemo
+menuDemo/*
+frontend2
+frontend2/*
+
+
+.gitignore
+backend/backend-routes.rest
+backend/data/
