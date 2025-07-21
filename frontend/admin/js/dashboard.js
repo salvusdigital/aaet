@@ -36,7 +36,7 @@ function setupNavigation() {
 }
 
 function navigateToSection(section) {
-    switch(section) {
+    switch (section) {
         case 'categories':
             window.location.href = 'categories.html';
             break;
@@ -143,13 +143,13 @@ async function deleteMenuItem(id) {
 function displayMenuItems(items) {
     itemsGrid.innerHTML = items.map(item => `
         <div class="item-card">
-            <img src="${item.image || '../images/placeholder.jpg'}" alt="${item.name}" onerror="this.src='../images/placeholder.jpg'">
+            <img src="${item.image || 'https://placehold.co/300x200/f0f0f0/666666?text=No+Image'}" alt="${item.name}" onerror="this.src='https://placehold.co/300x200/f0f0f0/666666?text=No+Image'">
             <div class="item-card-content">
                 <h3>${item.name}</h3>
                 <p>${item.description}</p>
                 <div class="price-info">
-                    <span><strong>Restaurant:</strong> $${item.restaurantPrice}</span>
-                    <span><strong>Room Service:</strong> $${item.roomServicePrice}</span>
+                    <span><strong>Restaurant:</strong> ₦${item.restaurantPrice}</span>
+                    <span><strong>Room Service:</strong> ₦${item.roomServicePrice}</span>
                 </div>
                 <div class="category-tag">
                     <span class="tag">${item.category || 'Uncategorized'}</span>
@@ -220,9 +220,9 @@ function showError(message) {
         z-index: 1000;
         animation: slideIn 0.3s ease;
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
@@ -244,25 +244,25 @@ function showSuccess(message) {
         z-index: 1000;
         animation: slideIn 0.3s ease;
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
 }
 
 // Global functions for onclick handlers
-window.editItem = function(id) {
+window.editItem = function (id) {
     // Fetch item data and show modal
     fetch(`${API_URL}/admin/menu/${id}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
     })
-    .then(response => response.json())
-    .then(item => showItemModal(item))
-    .catch(error => showError('Failed to load item data'));
+        .then(response => response.json())
+        .then(item => showItemModal(item))
+        .catch(error => showError('Failed to load item data'));
 };
 
 // Event Listeners
