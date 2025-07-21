@@ -1,19 +1,16 @@
 const router = require('express').Router();
-
 const menuController = require('../controllers/menuController');
 
-// Get all menu items
+// Get all menu items (can be filtered by category using query param)
 router.get('/', menuController.getAllItems);
 
+// Get all categories
+router.get('/categories', menuController.getAllCategories);
 
-// Get menu items by service type
-router.get('/service/:service', menuController.getItemsByService);
+// Get menu items by category ID
+router.get('/category/:categoryId', menuController.getItemsByCategory);
 
-// Get each menu item by id
-router.get('/item/:id', menuController.getItemById);
-
-// Get menu items by category
-router.get('/category/:category', menuController.getItemsByCategory);
-
+// Get specific menu item by ID
+router.get('/:id', menuController.getItemById);
 
 module.exports = router; 

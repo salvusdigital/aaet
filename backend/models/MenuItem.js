@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const menuItemSchema = new mongoose.Schema({
+const menuItemSchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -8,40 +9,42 @@ const menuItemSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: true,
         trim: true
     },
-    price: {
-        room: {
-            type: Number,
-            required: true,
-            min: 0
-        },
-        restaurant: {
-            type: Number,
-            required: true,
-            min: 0
-        }
+    category_id: {
+        type: Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true
     },
-    category: {
-        type: String,
+    price_room: {
+        type: Number,
         required: true,
-        enum: ['specials', 'foods', 'drinks']
+        min: 0
+    },
+    price_restaurant: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    available: {
+        type: Boolean,
+        default: true
+    },
+    image_url: {
+        type: String,
+        default: null
     },
     tags: [{
         type: String,
         enum: ['Spicy', 'Vegetarian', "Chef's Special", 'New', 'Popular', 'Healthy', 'Classic', 'Dessert']
-    }],
-    image: {
-        type: String,
-        required: true
-    },
-    isActive: {
-        type: Boolean,
-        default: true
-    }
+    }]
 }, {
-    timestamps: true
+    timestamps: true // This adds createdAt and updatedAt fields automatically
 });
+
+// Create indexes for common queries
+menuItemSchema.index({ category_id: 1 });
+menuItemSchema.index({ available: 1 });
+menuItemSchema.index({ name: 'text', description: 'text' }); // Text search index
 
 module.exports = mongoose.model('MenuItem', menuItemSchema); 
