@@ -1,3 +1,6 @@
+import SessionService from './services/session-service.js';
+import config from './config/config.js';
+
 // Global menu data variable
 let menuData = {
     specials: [],
@@ -6,82 +9,34 @@ let menuData = {
 };
 
 // Service type handling
-let currentService = null; // Always start with null to show modal
+let currentService = localStorage.getItem('serviceType') || null;
 
-// Fetch menu data from API
-async function fetchMenuData() {
-    try {
-        // Show loading state
-        showLoadingState();
-        
-        const response = await fetch('https://aaet.onrender.com/api/menu');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        
-        // Process the data and categorize items
-        menuData = {
-            specials: data.filter(item => item.category === 'specials' && item.isActive),
-            foods: data.filter(item => item.category === 'foods' && item.isActive),
-            drinks: data.filter(item => item.category === 'drinks' && item.isActive)
-        };
-        
-        // Hide loading state
-        hideLoadingState();
-        
-        // Render menu if service type is already selected
-        if (currentService) {
-            renderMenu();
-        }
-        
-        console.log('Menu data loaded successfully:', menuData);
-    } catch (error) {
-        console.error('Error fetching menu data:', error);
-        // Hide loading state
-        hideLoadingState();
-        // Show error state
-        showErrorState();
-        // Fallback to empty data if API fails
-        menuData = { specials: [], foods: [], drinks: [] };
-    }
+// Initialize session service for service type
+const serviceTypeSession = new SessionService('serviceType');
+
+// Show modal if service type not selected
+if (!currentService) {
+    document.getElementById('serviceModal').style.display = 'block';
 }
-
-// Show loading state
-function showLoadingState() {
-    const sections = ['#specials', '#foods', '#drinks'];
-    sections.forEach(selector => {
-        const grid = document.querySelector(`${selector} .menu-grid`);
-        if (grid) {
-            grid.innerHTML = '<div class="loading">Loading menu items...</div>';
-        }
-    });
-}
-
-// Hide loading state
-function hideLoadingState() {
-    // Loading state will be replaced when renderMenu() is called
-}
-
-// Show error state
-function showErrorState() {
-    const sections = ['#specials', '#foods', '#drinks'];
-    sections.forEach(selector => {
-        const grid = document.querySelector(`${selector} .menu-grid`);
-        if (grid) {
-            grid.innerHTML = '<div class="error">Unable to load menu items. Please try again later.</div>';
-        }
-    });
-}
-
-
 
 // Service selection handler
-function selectService(type) {
+export function selectService(type) {
     currentService = type;
+    localStorage.setItem('serviceType', type);
+    serviceTypeSession.set(type);
     document.getElementById('serviceModal').style.display = 'none';
     renderMenu();
 }
+
+// Make selectService available globally for onclick handlers
+window.selectService = selectService;
+
+// Start session expiry check
+serviceTypeSession.startExpiryCheck(() => {
+    currentService = null;
+    localStorage.removeItem('serviceType');
+    document.getElementById('serviceModal').style.display = 'block';
+});
 
 // Format price with currency
 function formatPrice(price) {
@@ -92,7 +47,7 @@ function formatPrice(price) {
 function createMenuItemHTML(item) {
     const price = currentService === 'room' ? item.price.room : item.price.restaurant;
     const tagsHTML = item.tags ? item.tags.map(tag => `<span class="menu-item-tag">${tag}</span>`).join('') : '';
-    
+
     return `
         <div class="menu-item">
             <div class="menu-item-header">
@@ -110,12 +65,12 @@ function showItemDetails(itemId) {
     // Find the item
     const allItems = [...menuData.specials, ...menuData.foods, ...menuData.drinks];
     const item = allItems.find(item => item._id === itemId);
-    
+
     if (item) {
         // For now, just log the item details
         // This can be expanded to show a modal with more details
         console.log('Item details:', item);
-        
+
         // You can add a modal here to show more details
         // showItemModal(item);
     }
@@ -149,10 +104,10 @@ function renderMenu() {
 }
 
 // Initial setup
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Fetch menu data when page loads
     fetchMenuData();
-    
+
     // Add loading state for section banner images
     const sectionBanners = document.querySelectorAll('.section-banner');
     sectionBanners.forEach(banner => {
@@ -160,10 +115,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (backgroundImage) {
             const url = backgroundImage.replace(/url\(['"]?(.*?)['"]?\)/i, '$1');
             const img = new Image();
-            img.onload = function() {
+            img.onload = function () {
                 banner.style.opacity = '1';
             };
-            img.onerror = function() {
+            img.onerror = function () {
                 // Fallback background if image fails to load
                 banner.style.backgroundImage = 'linear-gradient(135deg, var(--accent-color), #c70512)';
             };
