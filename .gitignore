@@ -17,3 +17,9 @@ package-lock.json
 .env.test
 enriched_hotel_menu_website.md
 Screenshot 2025-07-16 122543.png
+frontend2/*
+backend-routes.rest
+.gitignore
+menuDemo/*
+backend/data/hotel_menu_seed.json
+backend/data/park_inn_menu.json

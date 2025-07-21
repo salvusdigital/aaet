@@ -1,3 +1,36 @@
+const categories = [
+    {
+        name: "specials",
+        description: "Chef's special dishes and featured items",
+        isActive: true,
+        sortOrder: 1
+    },
+    {
+        name: "foods",
+        description: "Main course dishes and entrees",
+        isActive: true,
+        sortOrder: 2
+    },
+    {
+        name: "drinks",
+        description: "Beverages, cocktails, and refreshments",
+        isActive: true,
+        sortOrder: 3
+    },
+    {
+        name: "appetizers",
+        description: "Starters and small plates",
+        isActive: true,
+        sortOrder: 4
+    },
+    {
+        name: "desserts",
+        description: "Sweet treats and desserts",
+        isActive: true,
+        sortOrder: 5
+    }
+];
+
 const menuItems = [
     {
         name: "Classic Beef Burger",
@@ -73,4 +106,4 @@ const menuItems = [
     }
 ];
 
-module.exports = menuItems; 
+module.exports = { menuItems, categories }; 

@@ -1,72 +1,83 @@
 const MenuItem = require('../models/MenuItem');
+const Category = require('../models/Category');
 const asyncHandler = require('express-async-handler');
 
 // Get all menu items
 const getAllItems = asyncHandler(async (req, res) => {
-    console.log('getAllContacts endpoint reached');
-    const items = await MenuItem.find();
-    res.json(items);
+    // #swagger.tags = ['Menu']
+    try {
+        const { category } = req.query;
+
+        let query = { available: true };
+
+        // If category is provided, filter by category
+        if (category) {
+            const categoryDoc = await Category.findOne({ name: category });
+            if (categoryDoc) {
+                query.category_id = categoryDoc._id;
+            }
+        }
+
+        const items = await MenuItem.find(query)
+            .populate('category_id', 'name description')
+            .sort({ name: 1 });
+
+        res.json(items);
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: error.message });
+    }
 });
 
-// Get menu items by category
+// Get menu items by category ID
 const getItemsByCategory = asyncHandler(async (req, res) => {
-    const { category } = req.params;
-    const items = await MenuItem.find({ category, isActive: true });
-    res.json(items);
-});
-
-// Create a new menu item
-const createItem = async (req, res) => {
+    // #swagger.tags = ['Menu']
     try {
-        const menuItem = new MenuItem(req.body);
-        const newItem = await menuItem.save();
-        res.status(201).json(newItem);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
+        const { categoryId } = req.params;
 
-// Update a menu item
-const updateItem = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const updatedItem = await MenuItem.findByIdAndUpdate(
-            id,
-            req.body,
-            { new: true, runValidators: true }
-        );
-        if (!updatedItem) {
-            return res.status(404).json({ message: 'Menu item not found' });
-        }
-        res.json(updatedItem);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
+        const items = await MenuItem.find({
+            category_id: categoryId,
+            available: true
+        }).populate('category_id', 'name description');
 
-// Delete a menu item (soft delete)
-const deleteItem = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const deletedItem = await MenuItem.findByIdAndUpdate(
-            id,
-            { isActive: false },
-            { new: true }
-        );
-        if (!deletedItem) {
-            return res.status(404).json({ message: 'Menu item not found' });
-        }
-        res.json({ message: 'Menu item deleted successfully' });
+        res.json(items);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-};
+});
 
+// Get each menu item by id
+const getItemById = asyncHandler(async (req, res) => {
+    // #swagger.tags = ['Menu']
+    try {
+        const { id } = req.params;
+        const item = await MenuItem.findById(id)
+            .populate('category_id', 'name description');
+
+        if (!item) {
+            return res.status(404).json({ message: 'Menu item not found' });
+        }
+
+        res.json(item);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Get all categories
+const getAllCategories = asyncHandler(async (req, res) => {
+    // #swagger.tags = ['Menu']
+    try {
+        const categories = await Category.getSortedCategories();
+        res.json(categories);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 module.exports = {
     getAllItems,
     getItemsByCategory,
-    createItem,
-    updateItem,
-    deleteItem
+    getItemById,
+    getAllCategories
 };
