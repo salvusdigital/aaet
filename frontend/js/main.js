@@ -9,15 +9,151 @@ let menuData = {
 };
 
 // Service type handling
-let currentService = localStorage.getItem('serviceType') || null;
+let currentService = null; // Always start with null to show modal
 
-// Initialize session service for service type
-const serviceTypeSession = new SessionService('serviceType');
-
-// Show modal if service type not selected
-if (!currentService) {
-    document.getElementById('serviceModal').style.display = 'block';
+// Group menu items by category name
+function groupMenuByCategory(items) {
+    const grouped = {};
+    items.forEach(item => {
+        const category = item.category_id && item.category_id.name ? item.category_id.name : 'Uncategorized';
+        if (!grouped[category]) grouped[category] = [];
+        grouped[category].push(item);
+    });
+    return grouped;
 }
+
+// Remove static sections for Chef Special, Main Dishes, and Beverages if present
+function removeStaticMenuSections() {
+    ['specials', 'foods', 'drinks'].forEach(id => {
+        const section = document.getElementById(id);
+        if (section) section.remove();
+    });
+}
+
+// Helper: Map category name to main section
+function getMainSection(categoryName) {
+    const name = categoryName.toLowerCase();
+    if (/snack|grill|platter|special/.test(name)) return 'specials';
+    if (/soup|rice|main|dish|pepper|food|entree/.test(name)) return 'foods';
+    if (/drink|juice|cocktail|beverage|smoothie|wine|beer/.test(name)) return 'drinks';
+    return 'others';
+}
+
+// Render menu sections grouped by main section
+function renderMenu() {
+    removeStaticMenuSections();
+    const menuGridContainer = document.querySelector('main') || document.body;
+    // Remove old dynamic sections
+    document.querySelectorAll('.dynamic-menu-section').forEach(el => el.remove());
+
+    // Group items by main section and then by category
+    const grouped = { specials: {}, foods: {}, drinks: {}, others: {} };
+    menuDataRaw.forEach(item => {
+        const category = item.category_id && item.category_id.name ? item.category_id.name : 'Uncategorized';
+        const mainSection = getMainSection(category);
+        if (!grouped[mainSection][category]) grouped[mainSection][category] = [];
+        grouped[mainSection][category].push(item);
+    });
+
+    // Section display order
+    const sectionOrder = [
+        { id: 'specials', label: "Chef's Specials" },
+        { id: 'foods', label: 'Main Dishes' },
+        { id: 'drinks', label: 'Beverages' }
+    ];
+
+    sectionOrder.forEach(({ id, label }) => {
+        const categories = grouped[id];
+        const allItems = Object.values(categories).flat();
+        if (!allItems.length) return;
+        // Create anchor for navbar
+        const anchor = document.createElement('a');
+        anchor.id = id;
+        menuGridContainer.insertBefore(anchor, menuGridContainer.firstChild);
+        // Create section
+        const section = document.createElement('section');
+        section.className = 'section dynamic-menu-section';
+        section.innerHTML = `
+            <div class="section-banner"><h2>${label}</h2></div>
+            ${Object.entries(categories).map(([cat, items]) => `
+                <h3 style="margin-top:1rem;">${cat}</h3>
+                <div class="menu-grid">
+                    ${items.map(item => `
+                        <div class="menu-item">
+                            <div class="menu-item-header">
+                                <h3>${item.name}</h3>
+                                <span class="price">
+                                    ₦${currentService === 'room'
+                                        ? (item.price_room || item.price_restaurant || '')
+                                        : (item.price_restaurant || item.price_room || '')}
+                                </span>
+                            </div>
+                            <p>${item.description || ''}</p>
+                            ${item.tags && item.tags.length ? `<div class="menu-item-tags">${item.tags.map(tag => `<span class='menu-item-tag'>${tag}</span>`).join('')}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('')}
+        `;
+        // Insert before footer
+        const footer = document.querySelector('footer');
+        menuGridContainer.insertBefore(section, footer);
+    });
+}
+
+// Store raw menu data globally
+let menuDataRaw = [];
+
+// Fetch menu data from API
+async function fetchMenuData() {
+    try {
+        showLoadingState();
+        const response = await fetch('https://aaet.onrender.com/api/menu');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('Raw menu data received:', data);
+        menuDataRaw = data;
+        hideLoadingState();
+        renderMenu();
+        console.log('Menu data loaded and rendered by category:', menuDataRaw);
+    } catch (error) {
+        console.error('Error fetching menu data:', error);
+        hideLoadingState();
+        showErrorState();
+        menuDataRaw = [];
+    }
+}
+
+// Show loading state
+function showLoadingState() {
+    const sections = ['#specials', '#foods', '#drinks'];
+    sections.forEach(selector => {
+        const grid = document.querySelector(`${selector} .menu-grid`);
+        if (grid) {
+            grid.innerHTML = '<div class="loading">Loading menu items...</div>';
+        }
+    });
+}
+
+// Hide loading state
+function hideLoadingState() {
+    // Loading state will be replaced when renderMenu() is called
+}
+
+// Show error state
+function showErrorState() {
+    const sections = ['#specials', '#foods', '#drinks'];
+    sections.forEach(selector => {
+        const grid = document.querySelector(`${selector} .menu-grid`);
+        if (grid) {
+            grid.innerHTML = '<div class="error">Unable to load menu items. Please try again later.</div>';
+        }
+    });
+}
+
+
 
 // Service selection handler
 export function selectService(type) {
@@ -76,35 +212,32 @@ function showItemDetails(itemId) {
     }
 }
 
-// Render menu sections
-function renderMenu() {
-    // Render specials
-    const specialsGrid = document.querySelector('#specials .menu-grid');
-    if (menuData.specials.length > 0) {
-        specialsGrid.innerHTML = menuData.specials.map(item => createMenuItemHTML(item)).join('');
-    } else {
-        specialsGrid.innerHTML = '<div class="empty-state">No specials available at the moment.</div>';
-    }
-
-    // Render foods
-    const foodsGrid = document.querySelector('#foods .menu-grid');
-    if (menuData.foods.length > 0) {
-        foodsGrid.innerHTML = menuData.foods.map(item => createMenuItemHTML(item)).join('');
-    } else {
-        foodsGrid.innerHTML = '<div class="empty-state">No main dishes available at the moment.</div>';
-    }
-
-    // Render drinks
-    const drinksGrid = document.querySelector('#drinks .menu-grid');
-    if (menuData.drinks.length > 0) {
-        drinksGrid.innerHTML = menuData.drinks.map(item => createMenuItemHTML(item)).join('');
-    } else {
-        drinksGrid.innerHTML = '<div class="empty-state">No beverages available at the moment.</div>';
+// Fetch menu data from /api/menu and log the response
+async function fetchAndLogMenuData() {
+    try {
+        const response = await fetch('https://aaet.onrender.com/api/menu');
+        const data = await response.json();
+        console.log('Menu data from /api/menu:', data);
+    } catch (error) {
+        console.error('Error fetching /api/menu:', error);
     }
 }
 
+// Wrap async event listeners to catch errors
+function safeAsyncListener(fn) {
+    return function(event) {
+        Promise.resolve(fn(event)).catch(err => {
+            console.error('Async event listener error:', err);
+        });
+    };
+}
+
+// Example usage for async listeners (if any):
+// document.querySelector('selector').addEventListener('event', safeAsyncListener(async (e) => { ... }));
+
 // Initial setup
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
+    fetchAndLogMenuData();
     // Fetch menu data when page loads
     fetchMenuData();
 

@@ -1,5 +1,5 @@
 // API Configuration
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://aaet.onrender.com/api';
 let token = localStorage.getItem('adminToken');
 
 // DOM Elements
@@ -12,6 +12,8 @@ const logoutBtn = document.getElementById('logoutBtn');
 const searchInput = document.getElementById('searchItems');
 const categoryFilter = document.getElementById('categoryFilter');
 const navLinks = document.querySelectorAll('.nav-links li');
+
+let categoriesList = [];
 
 // Check Authentication
 function checkAuth() {
@@ -67,6 +69,7 @@ async function loadMenuItems() {
         }
 
         const items = await response.json();
+        console.log('Menu items received:', items); // Log the data
         displayMenuItems(items);
     } catch (error) {
         showError(error.message);
@@ -83,30 +86,62 @@ async function loadCategories() {
 
         if (response.ok) {
             const categories = await response.json();
+            categoriesList = categories;
             populateCategoryFilter(categories);
+            populateMenuFormCategoryDropdown(categories);
         }
     } catch (error) {
         console.error('Failed to load categories:', error);
     }
 }
 
+function populateMenuFormCategoryDropdown(categories) {
+    const itemCategory = document.getElementById('itemCategory');
+    if (!itemCategory) return;
+    itemCategory.innerHTML = '<option value="">Select Category</option>';
+    categories.forEach(category => {
+        itemCategory.innerHTML += `<option value="${category._id}">${category.name}</option>`;
+    });
+}
+
 async function saveMenuItem(formData) {
     try {
-        const method = formData.get('id') ? 'PUT' : 'POST';
-        const url = formData.get('id')
-            ? `${API_URL}/admin/menu/${formData.get('id')}`
+        const id = formData.get('id');
+        const method = id ? 'PUT' : 'POST';
+        const url = id
+            ? `${API_URL}/admin/menu/${id}`
             : `${API_URL}/admin/menu`;
+
+        // Build the correct data structure
+        const data = {
+            name: formData.get('name'),
+            description: formData.get('description'),
+            category_id: formData.get('category'),
+            price_room: formData.get('roomServicePrice'),
+            price: formData.get('restaurantPrice'), // fallback for legacy
+            price_restaurant: formData.get('restaurantPrice'),
+            available: true, // or get from form if you have a toggle
+            image_url: '', // handle image upload if needed
+            image: '', // handle image upload if needed
+            tags: Array.from(formData.getAll('tags'))
+        };
+
+        console.log('Sending menu item data:', data);
 
         const response = await fetch(url, {
             method,
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             },
-            body: formData
+            body: JSON.stringify(data)
         });
 
+        const responseData = await response.json().catch(() => null);
+        console.log('Server response:', responseData);
+
         if (!response.ok) {
-            throw new Error('Failed to save menu item');
+            throw new Error((responseData && responseData.message) || 'Failed to save menu item');
         }
 
         closeItemModal();
@@ -141,18 +176,22 @@ async function deleteMenuItem(id) {
 
 // UI Functions
 function displayMenuItems(items) {
-    itemsGrid.innerHTML = items.map(item => `
+    itemsGrid.innerHTML = items.map(item => {
+        // Use correct property names for prices and category
+        const restaurantPrice = item.price_restaurant !== undefined ? item.price_restaurant : 'N/A';
+        const roomServicePrice = item.price_room !== undefined ? item.price_room : 'N/A';
+        const categoryName = item.category_id && item.category_id.name ? item.category_id.name : 'Uncategorized';
+        return `
         <div class="item-card">
-            <img src="${item.image || 'https://placehold.co/300x200/f0f0f0/666666?text=No+Image'}" alt="${item.name}" onerror="this.src='https://placehold.co/300x200/f0f0f0/666666?text=No+Image'">
             <div class="item-card-content">
                 <h3>${item.name}</h3>
-                <p>${item.description}</p>
+                <p>${item.description || ''}</p>
                 <div class="price-info">
-                    <span><strong>Restaurant:</strong> ₦${item.restaurantPrice}</span>
-                    <span><strong>Room Service:</strong> ₦${item.roomServicePrice}</span>
+                    <span><strong>Restaurant:</strong> ₦${restaurantPrice}</span>
+                    <span><strong>Room Service:</strong> ₦${roomServicePrice}</span>
                 </div>
                 <div class="category-tag">
-                    <span class="tag">${item.category || 'Uncategorized'}</span>
+                    <span class="tag">${categoryName}</span>
                 </div>
                 <div class="item-actions">
                     <button onclick="editItem('${item._id}')" class="primary-btn">Edit</button>
@@ -160,7 +199,8 @@ function displayMenuItems(items) {
                 </div>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function populateCategoryFilter(categories) {
@@ -176,20 +216,34 @@ function showItemModal(item = null) {
 
     if (item) {
         // Populate form with item data
-        Object.keys(item).forEach(key => {
-            const input = itemForm.elements[key];
-            if (input) {
-                if (input.type === 'checkbox') {
-                    input.checked = item[key] && item[key].includes(input.value);
-                } else {
-                    input.value = item[key];
-                }
-            }
+        itemForm.reset();
+        itemForm.elements['name'].value = item.name || '';
+        itemForm.elements['description'].value = item.description || '';
+        itemForm.elements['restaurantPrice'].value = item.price_restaurant || '';
+        itemForm.elements['roomServicePrice'].value = item.price_room || '';
+        itemForm.elements['category'].value = item.category_id && item.category_id._id ? item.category_id._id : (item.category_id || '');
+        // Set tags
+        const tags = Array.isArray(item.tags) ? item.tags : [];
+        Array.from(itemForm.elements['tags']).forEach(checkbox => {
+            checkbox.checked = tags.includes(checkbox.value);
         });
+        // Set id for editing
+        if (!itemForm.elements['id']) {
+            const hiddenId = document.createElement('input');
+            hiddenId.type = 'hidden';
+            hiddenId.name = 'id';
+            hiddenId.value = item._id;
+            itemForm.appendChild(hiddenId);
+        } else {
+            itemForm.elements['id'].value = item._id;
+        }
     } else {
+        // Remove id field if present
+        if (itemForm.elements['id']) {
+            itemForm.elements['id'].remove();
+        }
         itemForm.reset();
     }
-
     itemModal.style.display = 'block';
 }
 
@@ -253,16 +307,21 @@ function showSuccess(message) {
 }
 
 // Global functions for onclick handlers
-window.editItem = function (id) {
-    // Fetch item data and show modal
-    fetch(`${API_URL}/admin/menu/${id}`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
+window.editItem = async function(id) {
+    try {
+        const response = await fetch(`${API_URL}/admin/menu/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch menu item');
         }
-    })
-        .then(response => response.json())
-        .then(item => showItemModal(item))
-        .catch(error => showError('Failed to load item data'));
+        const item = await response.json();
+        showItemModal(item);
+    } catch (error) {
+        showError(error.message);
+    }
 };
 
 // Event Listeners

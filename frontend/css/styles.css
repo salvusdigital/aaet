@@ -243,7 +243,7 @@ nav {
 
 /* Menu Item Styles - Clean List Style */
 .menu-item {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     padding: 1.5rem;
     transition: all 0.3s ease;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
@@ -395,7 +395,7 @@ footer {
 /* Small Mobile (320px and up) */
 @media (min-width: 320px) {
     .menu-item {
-        margin-bottom: 1.5rem;
+        margin-bottom: 0.75rem;
         padding: 1.25rem;
     }
     
@@ -512,7 +512,7 @@ footer {
     }
 
     .menu-item {
-        margin-bottom: 2.5rem;
+        margin-bottom: 1.25rem;
         padding: 2rem;
     }
 
@@ -531,7 +531,7 @@ footer {
     .menu-item p {
         font-size: 1rem;
     }
-    
+
     .section-banner {
         height: 300px;
         margin-bottom: 4rem;
@@ -583,8 +583,8 @@ footer {
     }
 
     .menu-item {
-        margin-bottom: 3rem;
-        padding: 2.5rem;
+        margin-bottom: 1.5rem;
+        padding: 2.25rem;
     }
     
     .menu-item:hover {
@@ -628,7 +628,7 @@ footer {
         max-width: 1400px;
         gap: 3.5rem;
     }
-    
+
     .menu-item {
         margin-bottom: 3.5rem;
         padding: 3rem;
