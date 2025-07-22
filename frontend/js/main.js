@@ -1,6 +1,3 @@
-import SessionService from './services/session-service.js';
-import config from './config/config.js';
-
 // Global menu data variable
 let menuData = {
     specials: [],
@@ -55,14 +52,14 @@ function renderMenu() {
         grouped[mainSection][category].push(item);
     });
 
-    // Section display order
+    // Section display order and African food banner images
     const sectionOrder = [
-        { id: 'specials', label: "Chef's Specials" },
-        { id: 'foods', label: 'Main Dishes' },
-        { id: 'drinks', label: 'Beverages' }
+        { id: 'specials', label: "Chef's Specials", banner: 'https://img.freepik.com/free-photo/jollof-rice-with-grilled-chicken-plantains_23-2148715455.jpg' },
+        { id: 'foods', label: 'Main Dishes', banner: 'https://img.freepik.com/free-photo/spicy-pepper-soup_23-2148715469.jpg' },
+        { id: 'drinks', label: 'Beverages', banner: 'https://img.freepik.com/free-photo/chapman-cocktail_23-2148715484.jpg' }
     ];
 
-    sectionOrder.forEach(({ id, label }) => {
+    sectionOrder.forEach(({ id, label, banner }) => {
         const categories = grouped[id];
         const allItems = Object.values(categories).flat();
         if (!allItems.length) return;
@@ -74,9 +71,9 @@ function renderMenu() {
         const section = document.createElement('section');
         section.className = 'section dynamic-menu-section';
         section.innerHTML = `
-            <div class="section-banner"><h2>${label}</h2></div>
+            <div class="section-banner" style="background-image: url('${banner}');"><h2>${label}</h2></div>
             ${Object.entries(categories).map(([cat, items]) => `
-                <h3 style="margin-top:1rem;">${cat}</h3>
+                <h3 style="margin-top:2rem;">${cat}</h3>
                 <div class="menu-grid">
                     ${items.map(item => `
                         <div class="menu-item">
@@ -156,23 +153,11 @@ function showErrorState() {
 
 
 // Service selection handler
-export function selectService(type) {
+function selectService(type) {
     currentService = type;
-    localStorage.setItem('serviceType', type);
-    serviceTypeSession.set(type);
     document.getElementById('serviceModal').style.display = 'none';
     renderMenu();
 }
-
-// Make selectService available globally for onclick handlers
-window.selectService = selectService;
-
-// Start session expiry check
-serviceTypeSession.startExpiryCheck(() => {
-    currentService = null;
-    localStorage.removeItem('serviceType');
-    document.getElementById('serviceModal').style.display = 'block';
-});
 
 // Format price with currency
 function formatPrice(price) {
@@ -183,7 +168,7 @@ function formatPrice(price) {
 function createMenuItemHTML(item) {
     const price = currentService === 'room' ? item.price.room : item.price.restaurant;
     const tagsHTML = item.tags ? item.tags.map(tag => `<span class="menu-item-tag">${tag}</span>`).join('') : '';
-
+    
     return `
         <div class="menu-item">
             <div class="menu-item-header">
@@ -201,12 +186,12 @@ function showItemDetails(itemId) {
     // Find the item
     const allItems = [...menuData.specials, ...menuData.foods, ...menuData.drinks];
     const item = allItems.find(item => item._id === itemId);
-
+    
     if (item) {
         // For now, just log the item details
         // This can be expanded to show a modal with more details
         console.log('Item details:', item);
-
+        
         // You can add a modal here to show more details
         // showItemModal(item);
     }
@@ -235,12 +220,18 @@ function safeAsyncListener(fn) {
 // Example usage for async listeners (if any):
 // document.querySelector('selector').addEventListener('event', safeAsyncListener(async (e) => { ... }));
 
+// Helper: Get query parameter from URL
+function getQueryParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
 // Initial setup
 document.addEventListener('DOMContentLoaded', function() {
     fetchAndLogMenuData();
     // Fetch menu data when page loads
     fetchMenuData();
-
+    
     // Add loading state for section banner images
     const sectionBanners = document.querySelectorAll('.section-banner');
     sectionBanners.forEach(banner => {
@@ -248,10 +239,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (backgroundImage) {
             const url = backgroundImage.replace(/url\(['"]?(.*?)['"]?\)/i, '$1');
             const img = new Image();
-            img.onload = function () {
+            img.onload = function() {
                 banner.style.opacity = '1';
             };
-            img.onerror = function () {
+            img.onerror = function() {
                 // Fallback background if image fails to load
                 banner.style.backgroundImage = 'linear-gradient(135deg, var(--accent-color), #c70512)';
             };
@@ -259,9 +250,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Show modal if service type not selected
-    if (!currentService) {
-        document.getElementById('serviceModal').style.display = 'block';
+    // Check for service param in URL
+    const serviceParam = getQueryParam('service');
+    if (serviceParam === 'room' || serviceParam === 'restaurant') {
+        currentService = serviceParam;
+        document.getElementById('serviceModal').style.display = 'none';
+        renderMenu();
+    } else {
+        // Show modal if service type not selected
+        if (!currentService) {
+            document.getElementById('serviceModal').style.display = 'block';
+        }
     }
 });
 
