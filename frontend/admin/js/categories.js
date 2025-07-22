@@ -35,7 +35,7 @@ function setupNavigation() {
 }
 
 function navigateToSection(section) {
-    switch(section) {
+    switch (section) {
         case 'menu-items':
             window.location.href = 'dashboard.html';
             break;
@@ -51,6 +51,12 @@ function navigateToSection(section) {
 // API Calls
 async function loadCategories() {
     try {
+        // First check if we have a valid token
+        if (!token) {
+            window.location.href = 'login.html';
+            return;
+        }
+
         const response = await fetch(`${API_URL}/admin/categories`, {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -62,41 +68,102 @@ async function loadCategories() {
                 logout();
                 return;
             }
-            throw new Error('Failed to load categories');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to load categories');
         }
 
         const categories = await response.json();
-        console.log('Categories received:', categories); // Log the data
-        displayCategories(categories);
+
+        // Fetch menu items count for each category
+        const categoriesWithCounts = await Promise.all(categories.map(async (category) => {
+            try {
+                const itemsResponse = await fetch(`${API_URL}/menu/category/${category._id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!itemsResponse.ok) {
+                    console.error(`Error fetching items for category ${category.name}: ${itemsResponse.status}`);
+                    return {
+                        ...category,
+                        itemCount: '?'
+                    };
+                }
+
+                const items = await itemsResponse.json();
+                return {
+                    ...category,
+                    itemCount: items.length
+                };
+            } catch (error) {
+                console.error(`Error fetching items for category ${category.name}:`, error);
+                return {
+                    ...category,
+                    itemCount: '?'
+                };
+            }
+        }));
+
+        if (categoriesWithCounts.length === 0) {
+            categoriesGrid.innerHTML = `
+                <div class="no-data-message">
+                    <p>No categories found. Click the "Add Category" button to create one.</p>
+                </div>
+            `;
+            return;
+        }
+
+        console.log('Categories with counts:', categoriesWithCounts);
+        displayCategories(categoriesWithCounts);
     } catch (error) {
-        showError(error.message);
+        console.error('Error in loadCategories:', error);
+        showError(error.message || 'Failed to load categories. Please try refreshing the page.');
+
+        // Show user-friendly empty state
+        categoriesGrid.innerHTML = `
+            <div class="error-message">
+                <p>Unable to load categories. Please try again later.</p>
+                <button onclick="loadCategories()" class="primary-btn">
+                    <i class="fas fa-sync"></i> Retry
+                </button>
+            </div>
+        `;
     }
 }
 
 async function saveCategory(formData) {
     try {
-        const method = formData.get('id') ? 'PUT' : 'POST';
-        const url = formData.get('id')
-            ? `${API_URL}/admin/categories/${formData.get('id')}`
+        console.log('Saving category with data:', Object.fromEntries(formData));
+        const categoryId = formData.get('id');
+        const method = categoryId ? 'PUT' : 'POST';
+        const url = categoryId
+            ? `${API_URL}/admin/categories/${categoryId}`
             : `${API_URL}/admin/categories`;
 
         const response = await fetch(url, {
             method,
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             },
-            body: formData
+            body: JSON.stringify(Object.fromEntries(formData))
         });
 
         if (!response.ok) {
-            throw new Error('Failed to save category');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to save category');
         }
+
+        const savedCategory = await response.json();
+        console.log('Category saved successfully:', savedCategory);
 
         closeCategoryModal();
         loadCategories();
         showSuccess('Category saved successfully!');
     } catch (error) {
-        showError(error.message);
+        console.error('Error saving category:', error);
+        showError(error.message || 'Failed to save category');
     }
 }
 
@@ -124,51 +191,103 @@ async function deleteCategory(id) {
 
 // UI Functions
 function displayCategories(categories) {
-    categoriesGrid.innerHTML = categories.map(category => `
-        <div class="item-card">
-            <div class="category-header" style="background-color: ${category.color || '#5A5A5A'}; padding: 1rem; color: white;">
-                <i class="${category.icon || 'fas fa-tag'}" style="font-size: 2rem;"></i>
-                <h3>${category.name}</h3>
-            </div>
-            <div class="item-card-content">
-                <p>${category.description || 'No description available'}</p>
-                <div class="category-info">
-                    <span class="status-badge ${category.status}">${category.status}</span>
-                    <span class="item-count">${category.itemCount || 0} items</span>
-                </div>
-                <div class="item-actions">
-                    <button onclick="editCategory('${category._id}')" class="primary-btn">Edit</button>
-                    <button onclick="deleteCategory('${category._id}')" class="danger-btn">Delete</button>
-                </div>
-            </div>
-        </div>
-    `).join('');
+    categoriesGrid.innerHTML = `
+        <table class="categories-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Items</th>
+                    <th style="width: 150px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                ${categories.map(category => `
+                    <tr data-category-id="${category._id}">
+                        <td>
+                            <div class="category-name">
+                                <span class="color-indicator" style="background-color: ${category.color || '#5A5A5A'}"></span>
+                                ${category.name}
+                            </div>
+                        </td>
+                        <td class="category-description">${category.description || 'No description available'}</td>
+                        <td><span class="status-badge ${category.status || 'active'}">${category.status || 'active'}</span></td>
+                        <td class="item-count">${category.itemCount || 0}</td>
+                        <td class="action-buttons">
+                            <button onclick="editCategory('${category._id}')" class="icon-btn edit-btn" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteCategory('${category._id}')" class="icon-btn delete-btn" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
 }
 
 function showCategoryModal(category = null) {
+    console.log('Opening modal with category data:', category);
     const modalTitle = document.getElementById('modalTitle');
     modalTitle.textContent = category ? 'Edit Category' : 'Add Category';
 
+    // Get form elements
+    const nameInput = document.getElementById('categoryName');
+    const descriptionInput = document.getElementById('categoryDescription');
+    const iconInput = document.getElementById('categoryIcon');
+    const colorInput = document.getElementById('categoryColor');
+    const statusInput = document.getElementById('categoryStatus');
+
     if (category) {
+        console.log('Populating form with category:', category);
         // Populate form with category data
-        Object.keys(category).forEach(key => {
-            const input = categoryForm.elements[key];
-            if (input) {
-                input.value = category[key];
-            }
-        });
+        nameInput.value = category.name || '';
+        descriptionInput.value = category.description || '';
+        iconInput.value = category.icon || '';
+        colorInput.value = category.color || '#5A5A5A';
+        statusInput.value = category.status || 'active';
+
+        // Add hidden input for category ID
+        let idInput = document.getElementById('categoryId');
+        if (!idInput) {
+            idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.id = 'categoryId';
+            idInput.name = 'id';
+            categoryForm.appendChild(idInput);
+        }
+        idInput.value = category._id;
     } else {
+        console.log('Resetting form for new category');
         categoryForm.reset();
-        // Set default color
-        document.getElementById('categoryColor').value = '#5A5A5A';
+        // Remove category ID if exists
+        const idInput = document.getElementById('categoryId');
+        if (idInput) {
+            idInput.remove();
+        }
+        // Set default values
+        colorInput.value = '#5A5A5A';
+        statusInput.value = 'active';
     }
 
-    categoryModal.style.display = 'block';
+    // Show modal with fade-in effect
+    const modal = document.getElementById('categoryModal');
+    modal.style.display = 'block';
+    setTimeout(() => {
+        modal.style.opacity = '1';
+    }, 10);
 }
 
 function closeCategoryModal() {
-    categoryModal.style.display = 'none';
-    categoryForm.reset();
+    const modal = document.getElementById('categoryModal');
+    modal.style.opacity = '0';
+    setTimeout(() => {
+        modal.style.display = 'none';
+        categoryForm.reset();
+    }, 200);
 }
 
 function logout() {
@@ -181,20 +300,8 @@ function showError(message) {
     const notification = document.createElement('div');
     notification.className = 'notification error';
     notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background-color: #dc3545;
-        color: white;
-        padding: 1rem;
-        border-radius: 4px;
-        z-index: 1000;
-        animation: slideIn 0.3s ease;
-    `;
-    
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
@@ -204,35 +311,37 @@ function showSuccess(message) {
     const notification = document.createElement('div');
     notification.className = 'notification success';
     notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background-color: #28a745;
-        color: white;
-        padding: 1rem;
-        border-radius: 4px;
-        z-index: 1000;
-        animation: slideIn 0.3s ease;
-    `;
-    
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
 }
 
 // Global functions for onclick handlers
-window.editCategory = function(id) {
-    fetch(`${API_URL}/admin/categories/${id}`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
+window.editCategory = async function (id) {
+    try {
+        console.log('Editing category with ID:', id);
+        const categoryRow = document.querySelector(`[data-category-id="${id}"]`);
+        if (!categoryRow) {
+            throw new Error('Category not found in DOM');
         }
-    })
-    .then(response => response.json())
-    .then(category => showCategoryModal(category))
-    .catch(error => showError('Failed to load category data'));
+
+        console.log('Found category row:', categoryRow);
+        const categoryData = {
+            _id: id,
+            name: categoryRow.querySelector('.category-name').textContent.trim(),
+            description: categoryRow.querySelector('.category-description').textContent.trim(),
+            status: categoryRow.querySelector('.status-badge').textContent.trim(),
+            color: categoryRow.querySelector('.color-indicator').style.backgroundColor || '#5A5A5A'
+        };
+
+        console.log('Extracted category data:', categoryData);
+        showCategoryModal(categoryData);
+    } catch (error) {
+        console.error('Error editing category:', error);
+        showError('Failed to load category data. Please try again.');
+    }
 };
 
 // Event Listeners

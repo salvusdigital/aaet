@@ -30,80 +30,20 @@
             </ul>
         </nav>
 
+        
+
+
         <main class="main-content">
             <header>
-                <h1>System Settings</h1>
+                <h1>Manage Account</h1>
             </header>
 
             <!-- Settings Section -->
             <section id="settings" class="content-section">
                 <div class="settings-grid">
-                    <!-- Hotel Information -->
-                    <div class="settings-card">
-                        <h3><i class="fas fa-hotel"></i> Hotel Information</h3>
-                        <form id="hotelInfoForm">
-                            <div class="form-group">
-                                <label for="hotelName">Hotel Name</label>
-                                <input type="text" id="hotelName" name="hotelName" value="AA Entertainment Hotel">
-                            </div>
-                            <div class="form-group">
-                                <label for="hotelAddress">Address</label>
-                                <textarea id="hotelAddress" name="hotelAddress" rows="3"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="hotelPhone">Phone</label>
-                                <input type="tel" id="hotelPhone" name="hotelPhone">
-                            </div>
-                            <div class="form-group">
-                                <label for="hotelEmail">Email</label>
-                                <input type="email" id="hotelEmail" name="hotelEmail">
-                            </div>
-                            <button type="submit" class="primary-btn">Save Hotel Info</button>
-                        </form>
-                    </div>
-
-                    <!-- System Settings -->
-                    <div class="settings-card">
-                        <h3><i class="fas fa-cogs"></i> System Settings</h3>
-                        <form id="systemSettingsForm">
-                            <div class="form-group">
-                                <label for="currency">Currency</label>
-                                <select id="currency" name="currency">
-                                    <option value="USD">USD ($)</option>
-                                    <option value="EUR">EUR (€)</option>
-                                    <option value="GBP">GBP (£)</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="timezone">Timezone</label>
-                                <select id="timezone" name="timezone">
-                                    <option value="UTC">UTC</option>
-                                    <option value="EST">Eastern Time</option>
-                                    <option value="PST">Pacific Time</option>
-                                    <option value="GMT">GMT</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="language">Language</label>
-                                <select id="language" name="language">
-                                    <option value="en">English</option>
-                                    <option value="es">Spanish</option>
-                                    <option value="fr">French</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>
-                                    <input type="checkbox" id="maintenanceMode" name="maintenanceMode">
-                                    Maintenance Mode
-                                </label>
-                            </div>
-                            <button type="submit" class="primary-btn">Save System Settings</button>
-                        </form>
-                    </div>
-
                     <!-- Admin Account -->
                     <div class="settings-card">
-                        <h3><i class="fas fa-user-shield"></i> Admin Account</h3>
+                        <h3><i class="fas fa-user-shield"></i> Update Account</h3>
                         <form id="adminAccountForm">
                             <div class="form-group">
                                 <label for="adminUsername">Username</label>
@@ -124,25 +64,7 @@
                             <button type="submit" class="primary-btn">Change Password</button>
                         </form>
                     </div>
-
-                    <!-- Backup & Restore -->
-                    <div class="settings-card">
-                        <h3><i class="fas fa-database"></i> Backup & Restore</h3>
-                        <div class="backup-actions">
-                            <button id="backupBtn" class="primary-btn">
-                                <i class="fas fa-download"></i> Create Backup
-                            </button>
-                            <button id="restoreBtn" class="secondary-btn">
-                                <i class="fas fa-upload"></i> Restore Backup
-                            </button>
-                            <input type="file" id="restoreFile" accept=".json" style="display: none;">
-                        </div>
-                        <div class="backup-info">
-                            <p><strong>Last Backup:</strong> <span id="lastBackup">Never</span></p>
-                            <p><strong>Backup Size:</strong> <span id="backupSize">0 KB</span></p>
-                        </div>
-                    </div>
-                </div>
+             </div>
             </section>
         </main>
     </div>

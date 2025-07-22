@@ -35,7 +35,7 @@ function setupNavigation() {
 }
 
 function navigateToSection(section) {
-    switch(section) {
+    switch (section) {
         case 'menu-items':
             window.location.href = 'dashboard.html';
             break;
@@ -128,7 +128,7 @@ async function saveSystemSettings(formData) {
 async function changePassword(formData) {
     try {
         const data = Object.fromEntries(formData);
-        
+
         if (data.newPassword !== data.confirmPassword) {
             throw new Error('New passwords do not match');
         }
@@ -255,9 +255,9 @@ function showError(message) {
         z-index: 1000;
         animation: slideIn 0.3s ease;
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
@@ -278,50 +278,62 @@ function showSuccess(message) {
         z-index: 1000;
         animation: slideIn 0.3s ease;
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
 }
 
 // Event Listeners
-hotelInfoForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    saveHotelInfo(formData);
-});
+if (hotelInfoForm) {
+    hotelInfoForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        saveHotelInfo(formData);
+    });
+}
 
-systemSettingsForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    saveSystemSettings(formData);
-});
+if (systemSettingsForm) {
+    systemSettingsForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        saveSystemSettings(formData);
+    });
+}
 
-adminAccountForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    changePassword(formData);
-});
+if (adminAccountForm) {
+    adminAccountForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        changePassword(formData);
+    });
+}
 
-backupBtn.addEventListener('click', createBackup);
+if (backupBtn) {
+    backupBtn.addEventListener('click', createBackup);
+}
 
-restoreBtn.addEventListener('click', () => {
-    restoreFile.click();
-});
+if (restoreBtn && restoreFile) {
+    restoreBtn.addEventListener('click', () => {
+        restoreFile.click();
+    });
 
-restoreFile.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        if (confirm('Are you sure you want to restore from this backup? This will overwrite current data.')) {
-            restoreBackup(file);
+    restoreFile.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (confirm('Are you sure you want to restore from this backup? This will overwrite current data.')) {
+                restoreBackup(file);
+            }
+            e.target.value = ''; // Reset file input
         }
-        e.target.value = ''; // Reset file input
-    }
-});
+    });
+}
 
-logoutBtn.addEventListener('click', logout);
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', logout);
+}
 
 // Initialize
 checkAuth();

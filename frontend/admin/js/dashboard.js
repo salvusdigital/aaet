@@ -15,6 +15,14 @@ const navLinks = document.querySelectorAll('.nav-links li');
 
 let categoriesList = [];
 
+// Add currency formatter
+const currencyFormatter = new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+});
+
 // Check Authentication
 function checkAuth() {
     if (!token) {
@@ -106,27 +114,35 @@ function populateMenuFormCategoryDropdown(categories) {
 
 async function saveMenuItem(formData) {
     try {
-        const id = formData.get('id');
-        const method = id ? 'PUT' : 'POST';
-        const url = id
-            ? `${API_URL}/admin/menu/${id}`
+        const itemId = formData.get('id');
+        const method = itemId ? 'PUT' : 'POST';
+        const url = itemId
+            ? `${API_URL}/admin/menu/${itemId}`
             : `${API_URL}/admin/menu`;
 
-        // Build the correct data structure
-        const data = {
+        // Get selected tags
+        const selectedTags = Array.from(document.querySelectorAll('input[name="tags"]:checked'))
+            .map(checkbox => checkbox.value);
+
+        // Create the request body
+        const requestData = {
             name: formData.get('name'),
             description: formData.get('description'),
+            price_restaurant: parseFloat(formData.get('restaurantPrice')),
+            price_room: parseFloat(formData.get('roomServicePrice')),
             category_id: formData.get('category'),
-            price_room: formData.get('roomServicePrice'),
-            price: formData.get('restaurantPrice'), // fallback for legacy
-            price_restaurant: formData.get('restaurantPrice'),
-            available: true, // or get from form if you have a toggle
-            image_url: '', // handle image upload if needed
-            image: '', // handle image upload if needed
-            tags: Array.from(formData.getAll('tags'))
+            tags: selectedTags
         };
 
-        console.log('Sending menu item data:', data);
+        // Handle image if provided
+        const imageFile = formData.get('image');
+        if (imageFile && imageFile.size > 0) {
+            // Here you would typically upload the image first and get a URL
+            // For now, we'll skip image handling
+            console.log('Image file provided:', imageFile);
+        }
+
+        console.log('Saving menu item with data:', requestData);
 
         const response = await fetch(url, {
             method,
@@ -134,21 +150,23 @@ async function saveMenuItem(formData) {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(requestData)
         });
 
-        const responseData = await response.json().catch(() => null);
-        console.log('Server response:', responseData);
-
         if (!response.ok) {
-            throw new Error((responseData && responseData.message) || 'Failed to save menu item');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to save menu item');
         }
+
+        const savedItem = await response.json();
+        console.log('Menu item saved successfully:', savedItem);
 
         closeItemModal();
         loadMenuItems();
         showSuccess('Menu item saved successfully!');
     } catch (error) {
-        showError(error.message);
+        console.error('Error saving menu item:', error);
+        showError(error.message || 'Failed to save menu item');
     }
 }
 
@@ -176,23 +194,30 @@ async function deleteMenuItem(id) {
 
 // UI Functions
 function displayMenuItems(items) {
-    itemsGrid.innerHTML = items.map(item => {
-        // Use correct property names for prices and category
-        const restaurantPrice = item.price_restaurant !== undefined ? item.price_restaurant : 'N/A';
-        const roomServicePrice = item.price_room !== undefined ? item.price_room : 'N/A';
-        const categoryName = item.category_id && item.category_id.name ? item.category_id.name : 'Uncategorized';
+    const menuItemsGrid = document.getElementById('menuItemsGrid');
+    menuItemsGrid.innerHTML = items.map(item => {
+        const restaurantPrice = currencyFormatter.format(item.price_restaurant || 0);
+        const roomServicePrice = currencyFormatter.format(item.price_room || 0);
+        const categoryName = item.category_id ? item.category_id.name : 'Uncategorized';
+        const tags = item.tags || [];
+
         return `
-        <div class="item-card">
+        <div class="item-card" data-item-id="${item._id}" data-category-id="${item.category_id?._id || item.category_id}">
             <div class="item-card-content">
                 <h3>${item.name}</h3>
                 <p>${item.description || ''}</p>
                 <div class="price-info">
-                    <span><strong>Restaurant:</strong> ₦${restaurantPrice}</span>
-                    <span><strong>Room Service:</strong> ₦${roomServicePrice}</span>
+                    <span><strong>Restaurant:</strong> ${restaurantPrice}</span>
+                    <span><strong>Room Service:</strong> ${roomServicePrice}</span>
                 </div>
                 <div class="category-tag">
                     <span class="tag">${categoryName}</span>
                 </div>
+                ${tags.length > 0 ? `
+                <div class="item-tags">
+                    ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                </div>
+                ` : ''}
                 <div class="item-actions">
                     <button onclick="editItem('${item._id}')" class="primary-btn">Edit</button>
                     <button onclick="deleteMenuItem('${item._id}')" class="danger-btn">Delete</button>
@@ -210,46 +235,70 @@ function populateCategoryFilter(categories) {
     });
 }
 
+// Update showItemModal function
 function showItemModal(item = null) {
+    console.log('Opening modal with item data:', item);
     const modalTitle = document.getElementById('modalTitle');
     modalTitle.textContent = item ? 'Edit Menu Item' : 'Add Menu Item';
 
+    // Get form elements
+    const nameInput = document.getElementById('itemName');
+    const descriptionInput = document.getElementById('itemDescription');
+    const restaurantPriceInput = document.getElementById('restaurantPrice');
+    const roomServicePriceInput = document.getElementById('roomServicePrice');
+    const categorySelect = document.getElementById('itemCategory');
+    const tagInputs = document.querySelectorAll('input[name="tags"]');
+
     if (item) {
+        console.log('Populating form with item:', item);
         // Populate form with item data
-        itemForm.reset();
-        itemForm.elements['name'].value = item.name || '';
-        itemForm.elements['description'].value = item.description || '';
-        itemForm.elements['restaurantPrice'].value = item.price_restaurant || '';
-        itemForm.elements['roomServicePrice'].value = item.price_room || '';
-        itemForm.elements['category'].value = item.category_id && item.category_id._id ? item.category_id._id : (item.category_id || '');
-        // Set tags
-        const tags = Array.isArray(item.tags) ? item.tags : [];
-        Array.from(itemForm.elements['tags']).forEach(checkbox => {
-            checkbox.checked = tags.includes(checkbox.value);
+        nameInput.value = item.name || '';
+        descriptionInput.value = item.description || '';
+        restaurantPriceInput.value = item.price_restaurant || '';
+        roomServicePriceInput.value = item.price_room || '';
+        categorySelect.value = item.category_id || '';
+
+        // Handle tags
+        tagInputs.forEach(input => {
+            input.checked = item.tags && item.tags.includes(input.value);
         });
-        // Set id for editing
-        if (!itemForm.elements['id']) {
-            const hiddenId = document.createElement('input');
-            hiddenId.type = 'hidden';
-            hiddenId.name = 'id';
-            hiddenId.value = item._id;
-            itemForm.appendChild(hiddenId);
-        } else {
-            itemForm.elements['id'].value = item._id;
+
+        // Add hidden input for item ID
+        let idInput = document.getElementById('itemId');
+        if (!idInput) {
+            idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.id = 'itemId';
+            idInput.name = 'id';
+            itemForm.appendChild(idInput);
         }
+        idInput.value = item._id;
     } else {
-        // Remove id field if present
-        if (itemForm.elements['id']) {
-            itemForm.elements['id'].remove();
-        }
+        console.log('Resetting form for new item');
         itemForm.reset();
+        // Remove item ID if exists
+        const idInput = document.getElementById('itemId');
+        if (idInput) {
+            idInput.remove();
+        }
     }
-    itemModal.style.display = 'block';
+
+    // Show modal with fade-in effect
+    const modal = document.getElementById('itemModal');
+    modal.style.display = 'block';
+    requestAnimationFrame(() => {
+        modal.classList.add('show');
+    });
 }
 
+// Update closeItemModal function
 function closeItemModal() {
-    itemModal.style.display = 'none';
-    itemForm.reset();
+    const modal = document.getElementById('itemModal');
+    modal.classList.remove('show');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        itemForm.reset();
+    }, 200);
 }
 
 function logout() {
@@ -306,21 +355,33 @@ function showSuccess(message) {
     }, 3000);
 }
 
-// Global functions for onclick handlers
-window.editItem = async function(id) {
+// Update editItem function
+window.editItem = async function (id) {
     try {
-        const response = await fetch(`${API_URL}/admin/menu/${id}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        if (!response.ok) {
-            throw new Error('Failed to fetch menu item');
+        console.log('Editing item with ID:', id);
+
+        // Find the item in the existing items list
+        const itemCard = document.querySelector(`[data-item-id="${id}"]`);
+        if (!itemCard) {
+            throw new Error('Menu item not found');
         }
-        const item = await response.json();
+
+        // Get the item data from the data attributes
+        const item = {
+            _id: id,
+            name: itemCard.querySelector('h3').textContent,
+            description: itemCard.querySelector('p').textContent,
+            price_restaurant: parseFloat(itemCard.querySelector('.price-info span:first-child').textContent.match(/₦([\d,]+)/)[1].replace(/,/g, '')),
+            price_room: parseFloat(itemCard.querySelector('.price-info span:last-child').textContent.match(/₦([\d,]+)/)[1].replace(/,/g, '')),
+            category_id: itemCard.getAttribute('data-category-id'),
+            tags: Array.from(itemCard.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase())
+        };
+
+        console.log('Found item data:', item);
         showItemModal(item);
     } catch (error) {
-        showError(error.message);
+        console.error('Error editing item:', error);
+        showError('Failed to load menu item. Please try again.');
     }
 };
 
@@ -332,7 +393,13 @@ itemForm.addEventListener('submit', (e) => {
 });
 
 addItemBtn.addEventListener('click', () => showItemModal());
-closeModal.addEventListener('click', closeItemModal);
+document.querySelector('#itemModal .close').addEventListener('click', closeItemModal);
+window.addEventListener('click', (e) => {
+    const modal = document.getElementById('itemModal');
+    if (e.target === modal) {
+        closeItemModal();
+    }
+});
 logoutBtn.addEventListener('click', logout);
 
 searchInput.addEventListener('input', (e) => {
@@ -358,13 +425,6 @@ categoryFilter.addEventListener('change', (e) => {
         // Show all items
         const items = document.querySelectorAll('.item-card');
         items.forEach(item => item.style.display = 'block');
-    }
-});
-
-// Close modal when clicking outside
-window.addEventListener('click', (e) => {
-    if (e.target === itemModal) {
-        closeItemModal();
     }
 });
 

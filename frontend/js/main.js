@@ -10,6 +10,7 @@ let menuData = {
 
 // Service type handling
 let currentService = null; // Always start with null to show modal
+const serviceTypeSession = new SessionService('serviceType');
 
 // Group menu items by category name
 function groupMenuByCategory(items) {
@@ -84,8 +85,8 @@ function renderMenu() {
                                 <h3>${item.name}</h3>
                                 <span class="price">
                                     ₦${currentService === 'room'
-                                        ? (item.price_room || item.price_restaurant || '')
-                                        : (item.price_restaurant || item.price_room || '')}
+                ? (item.price_room || item.price_restaurant || '')
+                : (item.price_restaurant || item.price_room || '')}
                                 </span>
                             </div>
                             <p>${item.description || ''}</p>
@@ -159,7 +160,7 @@ function showErrorState() {
 export function selectService(type) {
     currentService = type;
     localStorage.setItem('serviceType', type);
-    serviceTypeSession.set(type);
+    serviceTypeSession.set(type);  // Use the SessionService instance
     document.getElementById('serviceModal').style.display = 'none';
     renderMenu();
 }
@@ -225,7 +226,7 @@ async function fetchAndLogMenuData() {
 
 // Wrap async event listeners to catch errors
 function safeAsyncListener(fn) {
-    return function(event) {
+    return function (event) {
         Promise.resolve(fn(event)).catch(err => {
             console.error('Async event listener error:', err);
         });
@@ -236,7 +237,7 @@ function safeAsyncListener(fn) {
 // document.querySelector('selector').addEventListener('event', safeAsyncListener(async (e) => { ... }));
 
 // Initial setup
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     fetchAndLogMenuData();
     // Fetch menu data when page loads
     fetchMenuData();
