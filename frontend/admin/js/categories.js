@@ -207,7 +207,6 @@ function displayCategories(categories) {
                     <tr data-category-id="${category._id}">
                         <td>
                             <div class="category-name">
-                                <span class="color-indicator" style="background-color: ${category.color || '#5A5A5A'}"></span>
                                 ${category.name}
                             </div>
                         </td>
@@ -237,8 +236,6 @@ function showCategoryModal(category = null) {
     // Get form elements
     const nameInput = document.getElementById('categoryName');
     const descriptionInput = document.getElementById('categoryDescription');
-    const iconInput = document.getElementById('categoryIcon');
-    const colorInput = document.getElementById('categoryColor');
     const statusInput = document.getElementById('categoryStatus');
 
     if (category) {
@@ -246,8 +243,6 @@ function showCategoryModal(category = null) {
         // Populate form with category data
         nameInput.value = category.name || '';
         descriptionInput.value = category.description || '';
-        iconInput.value = category.icon || '';
-        colorInput.value = category.color || '#5A5A5A';
         statusInput.value = category.status || 'active';
 
         // Add hidden input for category ID
@@ -269,7 +264,6 @@ function showCategoryModal(category = null) {
             idInput.remove();
         }
         // Set default values
-        colorInput.value = '#5A5A5A';
         statusInput.value = 'active';
     }
 
@@ -332,8 +326,7 @@ window.editCategory = async function (id) {
             _id: id,
             name: categoryRow.querySelector('.category-name').textContent.trim(),
             description: categoryRow.querySelector('.category-description').textContent.trim(),
-            status: categoryRow.querySelector('.status-badge').textContent.trim(),
-            color: categoryRow.querySelector('.color-indicator').style.backgroundColor || '#5A5A5A'
+            status: categoryRow.querySelector('.status-badge').textContent.trim()
         };
 
         console.log('Extracted category data:', categoryData);
