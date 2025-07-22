@@ -1,5 +1,5 @@
 // API Configuration
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://aaet.onrender.com/api';
 let token = localStorage.getItem('adminToken');
 
 // DOM Elements
@@ -66,6 +66,7 @@ async function loadCategories() {
         }
 
         const categories = await response.json();
+        console.log('Categories received:', categories); // Log the data
         displayCategories(categories);
     } catch (error) {
         showError(error.message);

@@ -1,5 +1,5 @@
 // API Configuration
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://aaet.onrender.com/api';
 
 // DOM Elements
 const loginForm = document.getElementById('login-form');
@@ -25,12 +25,20 @@ async function login(username, password) {
         });
 
         if (!response.ok) {
-            throw new Error('Invalid credentials');
+            let errorMsg = 'Invalid credentials';
+            try {
+                const errorData = await response.json();
+                if (errorData && errorData.message) {
+                    errorMsg = errorData.message;
+                }
+            } catch (e) {
+                // Ignore JSON parse errors
+            }
+            throw new Error(errorMsg);
         }
 
         const data = await response.json();
         localStorage.setItem('adminToken', data.token);
-        
         // Redirect to dashboard
         window.location.href = 'dashboard.html';
     } catch (error) {
