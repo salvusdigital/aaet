@@ -38,7 +38,7 @@ function setupNavigation() {
 }
 
 function navigateToSection(section) {
-    switch(section) {
+    switch (section) {
         case 'categories':
             window.location.href = 'categories.html';
             break;
@@ -274,9 +274,9 @@ function showError(message) {
         z-index: 1000;
         animation: slideIn 0.3s ease;
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
@@ -298,9 +298,9 @@ function showSuccess(message) {
         z-index: 1000;
         animation: slideIn 0.3s ease;
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);

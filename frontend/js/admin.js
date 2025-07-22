@@ -1,6 +1,75 @@
+import SessionService from './services/session-service.js';
+import config from './config/config.js';
+
 // API Configuration
-const API_URL = 'http://localhost:8000/api';
-let token = localStorage.getItem('adminToken');
+const API_URL = config.api.baseUrl;
+const authSession = new SessionService('adminAuth');
+let token = authSession.get();
+
+// Make functions available globally for onclick handlers
+window.deleteMenuItem = async (id) => {
+    if (!confirm('Are you sure you want to delete this item?')) return;
+
+    try {
+        await apiRequest(`/admin/menu/${id}`, {
+            method: 'DELETE'
+        });
+        loadMenuItems();
+    } catch (error) {
+        handleError(error, 'Delete menu item');
+    }
+};
+
+window.editItem = async (id) => {
+    try {
+        const item = await apiRequest(`/admin/menu/${id}`);
+        showItemModal(item);
+    } catch (error) {
+        handleError(error, 'Load menu item');
+    }
+};
+
+// Error handling utility
+const handleError = (error, context) => {
+    if (config.features.debugMode) {
+        console.error(`${context} error:`, error);
+    }
+
+    // User-friendly error message
+    const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
+    alert(message);
+};
+
+// API utility for making authenticated requests
+async function apiRequest(endpoint, options = {}) {
+    try {
+        const url = `${API_URL}${endpoint}`;
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+            ...options.headers
+        };
+
+        const response = await fetch(url, {
+            ...options,
+            headers,
+            signal: AbortSignal.timeout(config.api.timeout)
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                logout();
+                throw new Error('Session expired. Please login again.');
+            }
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        handleError(error, `API request to ${endpoint}`);
+        throw error;
+    }
+}
 
 // DOM Elements
 const loginForm = document.getElementById('loginForm');
@@ -16,6 +85,7 @@ const categoryFilter = document.getElementById('categoryFilter');
 
 // Check Authentication
 function checkAuth() {
+    token = authSession.get();
     if (!token) {
         showLoginForm();
     } else {
@@ -23,6 +93,12 @@ function checkAuth() {
         loadMenuItems();
     }
 }
+
+// Start session expiry check
+authSession.startExpiryCheck(() => {
+    token = null;
+    showLoginForm();
+});
 
 // Show/Hide Functions
 function showLoginForm() {
@@ -38,95 +114,46 @@ function showDashboard() {
 // API Calls
 async function login(username, password) {
     try {
-        const response = await fetch(`${API_URL}/admin/login`, {
+        const data = await apiRequest('/admin/login', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({ username, password })
         });
 
-        if (!response.ok) {
-            throw new Error('Invalid credentials');
-        }
-
-        const data = await response.json();
         token = data.token;
-        localStorage.setItem('adminToken', token);
+        authSession.set(token);
         showDashboard();
         loadMenuItems();
     } catch (error) {
-        alert(error.message);
+        handleError(error, 'Login');
     }
 }
 
-async function loadMenuItems() {
+async function loadMenuItems(category = '') {
     try {
-        const response = await fetch(`${API_URL}/admin/menu`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                logout();
-                return;
-            }
-            throw new Error('Failed to load menu items');
-        }
-
-        const items = await response.json();
+        const endpoint = category ? `/admin/menu?category=${category}` : '/admin/menu';
+        const items = await apiRequest(endpoint);
         displayMenuItems(items);
     } catch (error) {
-        alert(error.message);
+        handleError(error, 'Load menu items');
     }
 }
 
 async function saveMenuItem(formData) {
     try {
         const method = formData.get('id') ? 'PUT' : 'POST';
-        const url = formData.get('id')
-            ? `${API_URL}/admin/menu/${formData.get('id')}`
-            : `${API_URL}/admin/menu`;
+        const endpoint = formData.get('id')
+            ? `/admin/menu/${formData.get('id')}`
+            : '/admin/menu';
 
-        const response = await fetch(url, {
+        await apiRequest(endpoint, {
             method,
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
             body: formData
         });
-
-        if (!response.ok) {
-            throw new Error('Failed to save menu item');
-        }
 
         closeItemModal();
         loadMenuItems();
     } catch (error) {
-        alert(error.message);
-    }
-}
-
-async function deleteMenuItem(id) {
-    if (!confirm('Are you sure you want to delete this item?')) return;
-
-    try {
-        const response = await fetch(`${API_URL}/admin/menu/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to delete menu item');
-        }
-
-        loadMenuItems();
-    } catch (error) {
-        alert(error.message);
+        handleError(error, 'Save menu item');
     }
 }
 
@@ -139,8 +166,8 @@ function displayMenuItems(items) {
                 <h3>${item.name}</h3>
                 <p>${item.description}</p>
                 <div class="price-info">
-                    <span>Restaurant: $${item.restaurantPrice}</span>
-                    <span>Room Service: $${item.roomServicePrice}</span>
+                    <span>Restaurant: ₦${item.price?.restaurant?.toLocaleString() || 'N/A'}</span>
+                    <span>Room Service: ₦${item.price?.room?.toLocaleString() || 'N/A'}</span>
                 </div>
                 <div class="item-actions">
                     <button onclick="editItem('${item._id}')" class="primary-btn">Edit</button>
@@ -157,12 +184,14 @@ function showItemModal(item = null) {
 
     if (item) {
         // Populate form with item data
-        Object.keys(item).forEach(key => {
-            const input = itemForm.elements[key];
-            if (input) {
-                input.value = item[key];
-            }
-        });
+        itemForm.elements.name.value = item.name || '';
+        itemForm.elements.description.value = item.description || '';
+        itemForm.elements.restaurantPrice.value = item.price?.restaurant || '';
+        itemForm.elements.roomServicePrice.value = item.price?.room || '';
+        itemForm.elements.category.value = item.category || '';
+        if (item._id) {
+            itemForm.elements.id.value = item._id;
+        }
     } else {
         itemForm.reset();
     }
@@ -176,7 +205,7 @@ function closeItemModal() {
 }
 
 function logout() {
-    localStorage.removeItem('adminToken');
+    authSession.clear();
     token = null;
     showLoginForm();
 }
@@ -189,10 +218,58 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
     login(username, password);
 });
 
-itemForm.addEventListener('submit', (e) => {
+itemForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    saveMenuItem(formData);
+
+    // Structure the data correctly
+    const menuItemData = {
+        name: formData.get('name'),
+        description: formData.get('description'),
+        price: {
+            restaurant: Number(formData.get('restaurantPrice')),
+            room: Number(formData.get('roomServicePrice'))
+        },
+        category: formData.get('category')
+    };
+
+    // Add ID if it exists
+    const id = formData.get('id');
+    if (id) {
+        menuItemData.id = id;
+    }
+
+    // Handle image file if provided
+    const imageFile = formData.get('image');
+    if (imageFile && imageFile.size > 0) {
+        menuItemData.image = imageFile;
+    }
+
+    try {
+        const method = id ? 'PUT' : 'POST';
+        const endpoint = id ? `/admin/menu/${id}` : '/admin/menu';
+
+        // Use FormData for multipart/form-data (needed for file upload)
+        const submitFormData = new FormData();
+        Object.entries(menuItemData).forEach(([key, value]) => {
+            if (key === 'price') {
+                submitFormData.append('price', JSON.stringify(value));
+            } else {
+                submitFormData.append(key, value);
+            }
+        });
+
+        await apiRequest(endpoint, {
+            method,
+            body: submitFormData,
+            headers: {} // Let browser set content-type for FormData
+        });
+
+        closeItemModal();
+        loadMenuItems();
+    } catch (error) {
+        handleError(error, 'Save menu item');
+    }
 });
 
 addItemBtn.addEventListener('click', () => showItemModal());
@@ -215,4 +292,8 @@ categoryFilter.addEventListener('change', (e) => {
 });
 
 // Initialize
-checkAuth(); 
+if (config.security.requireHttps && window.location.protocol === 'http:') {
+    window.location.href = window.location.href.replace('http:', 'https:');
+} else {
+    checkAuth();
+} 
