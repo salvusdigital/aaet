@@ -208,7 +208,7 @@ function displayCategories(categories) {
                         <td>
                             <div class="category-name">
                                 ${category.name}
-                            </div>
+            </div>
                         </td>
                         <td class="category-description">${category.description || 'No description available'}</td>
                         <td><span class="status-badge ${category.status || 'active'}">${category.status || 'active'}</span></td>
@@ -216,10 +216,10 @@ function displayCategories(categories) {
                         <td class="action-buttons">
                             <button onclick="editCategory('${category._id}')" class="icon-btn edit-btn" title="Edit">
                                 <i class="fas fa-edit"></i>
-                            </button>
+                    </button>
                             <button onclick="deleteCategory('${category._id}')" class="icon-btn delete-btn" title="Delete">
                                 <i class="fas fa-trash"></i>
-                            </button>
+                    </button>
                         </td>
                     </tr>
                 `).join('')}
