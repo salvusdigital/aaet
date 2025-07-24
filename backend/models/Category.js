@@ -8,6 +8,11 @@ const categorySchema = new Schema({
         unique: true,
         trim: true
     },
+    group: {
+        type: String,
+        enum: ['Dishes', 'Drinks'],
+        default: 'Dishes'
+    },
     sort_order: {
         type: Number,
         default: 0
@@ -19,10 +24,11 @@ const categorySchema = new Schema({
 // Create indexes for common queries
 categorySchema.index({ sort_order: 1 });
 categorySchema.index({ name: 'text' });
+categorySchema.index({ group: 1 });
 
 // Static method to get sorted categories
 categorySchema.statics.getSortedCategories = function () {
-    return this.find().sort({ sort_order: 1, name: 1 });
+    return this.find().sort({ group: 1, sort_order: 1, name: 1 });
 };
 
 module.exports = mongoose.model('Category', categorySchema); 
