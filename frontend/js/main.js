@@ -7,6 +7,7 @@ let menuData = {
 
 // Service type handling
 let currentService = null; // Always start with null to show modal
+const serviceTypeSession = new SessionService('serviceType');
 
 // Group menu items by category name
 function groupMenuByCategory(items) {
@@ -81,8 +82,8 @@ function renderMenu() {
                                 <h3>${item.name}</h3>
                                 <span class="price">
                                     ₦${currentService === 'room'
-                                        ? (item.price_room || item.price_restaurant || '')
-                                        : (item.price_restaurant || item.price_room || '')}
+                ? (item.price_room || item.price_restaurant || '')
+                : (item.price_restaurant || item.price_room || '')}
                                 </span>
                             </div>
                             <p>${item.description || ''}</p>
@@ -155,6 +156,8 @@ function showErrorState() {
 // Service selection handler
 function selectService(type) {
     currentService = type;
+    localStorage.setItem('serviceType', type);
+    serviceTypeSession.set(type);  // Use the SessionService instance
     document.getElementById('serviceModal').style.display = 'none';
     renderMenu();
 }
@@ -168,7 +171,7 @@ function formatPrice(price) {
 function createMenuItemHTML(item) {
     const price = currentService === 'room' ? item.price.room : item.price.restaurant;
     const tagsHTML = item.tags ? item.tags.map(tag => `<span class="menu-item-tag">${tag}</span>`).join('') : '';
-    
+
     return `
         <div class="menu-item">
             <div class="menu-item-header">
@@ -186,12 +189,12 @@ function showItemDetails(itemId) {
     // Find the item
     const allItems = [...menuData.specials, ...menuData.foods, ...menuData.drinks];
     const item = allItems.find(item => item._id === itemId);
-    
+
     if (item) {
         // For now, just log the item details
         // This can be expanded to show a modal with more details
         console.log('Item details:', item);
-        
+
         // You can add a modal here to show more details
         // showItemModal(item);
     }
@@ -210,7 +213,7 @@ async function fetchAndLogMenuData() {
 
 // Wrap async event listeners to catch errors
 function safeAsyncListener(fn) {
-    return function(event) {
+    return function (event) {
         Promise.resolve(fn(event)).catch(err => {
             console.error('Async event listener error:', err);
         });
@@ -227,11 +230,11 @@ function getQueryParam(name) {
 }
 
 // Initial setup
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     fetchAndLogMenuData();
     // Fetch menu data when page loads
     fetchMenuData();
-    
+
     // Add loading state for section banner images
     const sectionBanners = document.querySelectorAll('.section-banner');
     sectionBanners.forEach(banner => {
@@ -239,10 +242,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (backgroundImage) {
             const url = backgroundImage.replace(/url\(['"]?(.*?)['"]?\)/i, '$1');
             const img = new Image();
-            img.onload = function() {
+            img.onload = function () {
                 banner.style.opacity = '1';
             };
-            img.onerror = function() {
+            img.onerror = function () {
                 // Fallback background if image fails to load
                 banner.style.backgroundImage = 'linear-gradient(135deg, var(--accent-color), #c70512)';
             };

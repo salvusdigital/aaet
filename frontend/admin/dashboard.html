@@ -57,20 +57,20 @@
                     <form id="itemForm">
                         <div class="form-group">
                             <label for="itemName">Name</label>
-                            <input type="text" id="itemName" name="name" required>
+                            <input type="text" id="itemName" name="name" required placeholder="Enter Item Name">
                         </div>
                         <div class="form-group">
                             <label for="itemDescription">Description</label>
-                            <textarea id="itemDescription" name="description" required></textarea>
+                            <textarea id="itemDescription" name="description" placeholder="Enter Item Description"></textarea>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="restaurantPrice">Restaurant Price</label>
-                                <input type="number" id="restaurantPrice" name="restaurantPrice" step="0.01" required>
+                                <input type="number" id="restaurantPrice" name="restaurantPrice" step="0.01" required placeholder="Enter Restaurant Price">
                             </div>
                             <div class="form-group">
                                 <label for="roomServicePrice">Room Service Price</label>
-                                <input type="number" id="roomServicePrice" name="roomServicePrice" step="0.01" required>
+                                <input type="number" id="roomServicePrice" name="roomServicePrice" step="0.01" required placeholder="Enter Room Service Price">
                             </div>
                         </div>
                         <div class="form-group">
@@ -83,7 +83,7 @@
                             <label for="itemImage">Image</label>
                             <input type="file" id="itemImage" name="image" accept="image/*">
                         </div>
-                        <div class="form-group">
+                        <!-- <div class="form-group">
                             <label>Tags</label>
                             <div class="tags-container">
                                 <label><input type="checkbox" name="tags" value="spicy"> Spicy</label>
@@ -91,7 +91,7 @@
                                 <label><input type="checkbox" name="tags" value="vegan"> Vegan</label>
                                 <label><input type="checkbox" name="tags" value="gluten-free"> Gluten-free</label>
                             </div>
-                        </div>
+                        </div> -->
                         <button type="submit" class="primary-btn">Save Item</button>
                     </form>
                 </div>
