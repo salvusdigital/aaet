@@ -98,29 +98,99 @@ function renderMenu() {
     });
 }
 
-// Store raw menu data globally
-let menuDataRaw = [];
+function renderCategoryScroll(categories) {
+    const scrollDiv = document.querySelector('.category-scroll');
+    scrollDiv.innerHTML = '';
+    categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'category-scroll-btn';
+        btn.textContent = cat.toUpperCase();
+        btn.setAttribute('data-category', cat);
+        btn.onclick = () => {
+            const section = document.getElementById('cat-' + cat.replace(/\s+/g, '-').toLowerCase());
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        };
+        scrollDiv.appendChild(btn);
+    });
+}
 
-// Fetch menu data from API
-async function fetchMenuData() {
-    try {
-        showLoadingState();
-        const response = await fetch('https://aaet.onrender.com/api/menu');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log('Raw menu data received:', data);
-        menuDataRaw = data;
-        hideLoadingState();
-        renderMenu();
-        console.log('Menu data loaded and rendered by category:', menuDataRaw);
-    } catch (error) {
-        console.error('Error fetching menu data:', error);
-        hideLoadingState();
-        showErrorState();
-        menuDataRaw = [];
-    }
+// Remove old grouping and static section logic
+
+function renderMenuByCategory(menuDataRaw) {
+    const main = document.getElementById('menu-main');
+    main.innerHTML = '';
+    if (!Array.isArray(menuDataRaw) || !menuDataRaw.length) return;
+
+    // Group items by category name
+    const grouped = {};
+    menuDataRaw.forEach(item => {
+        const category = item.category_id && item.category_id.name ? item.category_id.name : 'Uncategorized';
+        if (!grouped[category]) grouped[category] = [];
+        grouped[category].push(item);
+    });
+
+    // Render category scroll bar
+    const categories = Object.keys(grouped);
+    renderCategoryScroll(categories);
+
+    Object.entries(grouped).forEach(([category, items]) => {
+        const section = document.createElement('section');
+        section.className = 'menu-section';
+        section.id = 'cat-' + category.replace(/\s+/g, '-').toLowerCase();
+        section.innerHTML = `
+            <h2 class="category-header">${category.toUpperCase()}</h2>
+            <div class="menu-list">
+                ${items.map(item => `
+                    <div class="menu-item">
+                        <span class="item-name">${item.name}</span>
+                        <span class="dots"></span>
+                        <span class="item-price">₦${currentService === 'room' ? (item.price_room || item.price_restaurant || '') : (item.price_restaurant || item.price_room || '')}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        main.appendChild(section);
+    });
+
+    // Highlight active category as user scrolls
+    window.addEventListener('scroll', function() {
+        let activeCat = null;
+        categories.forEach(cat => {
+            const section = document.getElementById('cat-' + cat.replace(/\s+/g, '-').toLowerCase());
+            if (section) {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 120 && rect.bottom > 120) {
+                    activeCat = cat;
+                }
+            }
+        });
+        document.querySelectorAll('.category-scroll-btn').forEach(btn => {
+            if (btn.getAttribute('data-category') === activeCat) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    });
+}
+
+// Replace old renderMenu call with new one after fetching data
+function fetchMenuData() {
+    showLoadingState();
+    fetch('https://aaet.onrender.com/api/menu')
+        .then(res => res.json())
+        .then(data => {
+            console.log('Raw menu data received:', data);
+            menuDataRaw = data;
+            renderMenuByCategory(menuDataRaw);
+            hideLoadingState();
+        })
+        .catch(err => {
+            showErrorState('Failed to load menu.');
+            hideLoadingState();
+        });
 }
 
 // Show loading state
@@ -156,7 +226,7 @@ function showErrorState() {
 function selectService(type) {
     currentService = type;
     document.getElementById('serviceModal').style.display = 'none';
-    renderMenu();
+    renderMenuByCategory(menuDataRaw);
 }
 
 // Format price with currency
@@ -255,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (serviceParam === 'room' || serviceParam === 'restaurant') {
         currentService = serviceParam;
         document.getElementById('serviceModal').style.display = 'none';
-        renderMenu();
+        renderMenuByCategory(menuDataRaw);
     } else {
         // Show modal if service type not selected
         if (!currentService) {
