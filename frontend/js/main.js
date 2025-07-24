@@ -4,6 +4,8 @@ let menuData = {
     foods: [],
     drinks: []
 };
+import SessionService from './services/session-service.js';
+
 
 // Service type handling
 let currentService = null; // Always start with null to show modal
@@ -156,7 +158,7 @@ function renderMenuByCategory(menuDataRaw) {
     });
 
     // Highlight active category as user scrolls
-    window.addEventListener('scroll', function() {
+    window.addEventListener('scroll', function () {
         let activeCat = null;
         categories.forEach(cat => {
             const section = document.getElementById('cat-' + cat.replace(/\s+/g, '-').toLowerCase());

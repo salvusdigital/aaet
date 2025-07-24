@@ -6,6 +6,24 @@ const BASE_URL = 'https://aaet.onrender.com/api/menu';
 // Store raw menu data globally
 let menuDataRaw = [];
 
+// Service type handling
+let currentService = null; // Always start with null to show modal
+
+// Helper: Get query parameter from URL
+function getQueryParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
+function selectService(type) {
+    currentService = type;
+    localStorage.setItem('serviceType', type);
+    serviceTypeSession.set(type);
+    document.getElementById('serviceModal').style.display = 'none';
+    renderMenu();
+}
+window.selectService = selectService;
+
 // Fetch menu data from API
 async function fetchMenuData() {
     try {
@@ -96,9 +114,9 @@ async function renderMenu() {
                 group: category.group,
                 items: categoryItems.map(item => ({
                     name: item.name.toUpperCase(),
-                    price: typeof item.price_restaurant === 'number'
+                    price: typeof item.price_restaurant === 'number' && currentService === 'restaurant'
                         ? `N${item.price_restaurant.toLocaleString()}`
-                        : (typeof item.price_room === 'number'
+                        : (typeof item.price_room === 'number' && currentService === 'room'
                             ? `N${item.price_room.toLocaleString()}`
                             : '')
                 }))
@@ -184,6 +202,28 @@ function setupMobileMenu() {
 
 // Call renderMenu when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Service type modal logic
+    const serviceParam = getQueryParam('service');
+    let storedService = localStorage.getItem('serviceType') || serviceTypeSession.get();
+    if (serviceParam === 'room' || serviceParam === 'restaurant') {
+        currentService = serviceParam;
+        serviceTypeSession.set(serviceParam);
+        document.getElementById('serviceModal').style.display = 'none';
+        renderMenu();
+    } else if (storedService === 'room' || storedService === 'restaurant') {
+        currentService = storedService;
+        document.getElementById('serviceModal').style.display = 'none';
+        renderMenu();
+    } else {
+        document.getElementById('serviceModal').style.display = 'flex';
+    }
+    // Modal button handlers
+    const roomBtn = document.getElementById('roomServiceBtn');
+    const restBtn = document.getElementById('restaurantBtn');
+    if (roomBtn && restBtn) {
+        roomBtn.onclick = () => selectService('room');
+        restBtn.onclick = () => selectService('restaurant');
+    }
     renderMenu();
     setupMobileMenu();
 
