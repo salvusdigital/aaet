@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AA Entertainment Hotel - Admin</title>
     <script>
-        // Check if user is already logged in
+        // Improved redirect logic to prevent infinite loops
         const token = localStorage.getItem('adminToken');
-        if (token) {
-            // Redirect to dashboard if already logged in
+        const current = window.location.pathname.split('/').pop();
+        if (token && current !== 'dashboard.html') {
             window.location.href = 'dashboard.html';
-        } else {
-            // Redirect to login if not logged in
+        } else if (!token && current !== 'login.html') {
             window.location.href = 'login.html';
         }
     </script>
