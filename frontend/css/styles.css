@@ -408,6 +408,25 @@ footer {
     font-style: italic;
 }
 
+/* Add or update styles for category headers */
+.category-header {
+    padding: 0.5rem 1.5rem 0.5rem 1.5rem !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Reduce margin-top for category containers */
+.menu-section {
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+/* Reduce vertical margin for each menu item */
+.menu-item {
+    margin: 0.3rem 0 !important;
+    padding: 0.3rem 0.5rem !important;
+}
+
 .category-header {
     display: inline-block;
     position: relative;
@@ -841,5 +860,39 @@ footer {
     .category-scroll-btn {
         font-size: 0.93rem;
         padding: 0.4rem 0.7rem;
+    }
+} 
+
+/* Add horizontal margin to category containers */
+.menu-section {
+    margin: 1.5rem 1.5rem !important;
+    /* top/bottom 1.5rem, left/right 1.5rem */
+}
+
+/* Add horizontal margin to menu list inside each section */
+.menu-list {
+    margin: 0 0.5rem !important;
+}
+
+/* Make the category scroll bar sticky */
+.category-scroll {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255,255,255,0.95); /* or use your site background color */
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+@media (max-width: 600px) {
+    .menu-section {
+        margin: 1rem 0.3rem !important;
+    }
+    .menu-list {
+        margin: 0 0.1rem !important;
+    }
+    .category-scroll {
+        padding: 0.3rem 0;
     }
 } 
