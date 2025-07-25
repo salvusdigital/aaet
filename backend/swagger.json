@@ -1,16 +1,29 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Jaiyelo API",
-    "description": "Jaiyelo API",
+    "title": "Jayéọba API",
+    "description": "Jayéọba API",
     "version": "1.0.0"
   },
-  "host": "aaet.onrender.com",
+  "host": [
+    "aaet.onrender.com"
+  ],
   "basePath": "/",
   "schemes": [
+    "http",
     "https"
   ],
   "paths": {
+    "/api-docs": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/menu/": {
       "get": {
         "tags": [
