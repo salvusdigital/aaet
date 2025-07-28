@@ -104,6 +104,7 @@ nav {
     justify-content: space-between;
     align-items: center;
     backdrop-filter: blur(10px);
+    height: 60px; /* Set explicit height */
 }
 
 .nav-brand .logo {
@@ -140,31 +141,36 @@ nav {
     background-size: cover;
     background-position: center;
     position: relative;
-    margin-top: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    margin-top: 60px; /* Match the navigation height exactly */
 }
 
 .hero-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 2;
     width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 100%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    padding: 0 2rem;
 }
 
-.hero h1 {
-    color: white;
-    font-size: 2.5rem;
-    text-align: center;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+.hero-overlay h1 {
+    font-size: 3rem;
     font-weight: 700;
-    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    display: block;
+}
+
+.hero-overlay h2 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    color: #f0f0f0;
+    display: block;
 }
 
 /* Menu Section - Mobile First */
@@ -437,7 +443,7 @@ footer {
     margin-bottom: 1.2rem;
     margin-top: 2.5rem;
     letter-spacing: 1px;
-    background: linear-gradient(90deg, #ff7f2a 80%, #ffb366 100%);
+    background: linear-gradient(90deg, #E30613 80%, #e3061549 100%);
     border-radius: 40px 15px 40px 15px/30px 10px 30px 10px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.07);
     overflow: hidden;
@@ -480,7 +486,7 @@ footer {
 }
 .menu-item .item-price {
     font-weight: 600;
-    color: #ff7f2a;
+    color: #E30613;
     flex: 0 0 auto;
 }
 
@@ -836,7 +842,7 @@ footer {
 }
 .category-scroll-btn {
     flex: 0 0 auto;
-    background: #ff7f2a;
+    background: #E30613;
     color: #fff;
     border: none;
     border-radius: 20px;
@@ -849,7 +855,7 @@ footer {
     white-space: nowrap;
 }
 .category-scroll-btn.active, .category-scroll-btn:focus {
-    background: #c75b0a;
+    background: #E30613;
     color: #fff;
 }
 @media (max-width: 600px) {
@@ -877,13 +883,23 @@ footer {
 /* Make the category scroll bar sticky */
 .category-scroll {
     position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(255,255,255,0.95); /* or use your site background color */
+    top: 80px; /* Position below the header instead of covering it */
+    z-index: 50; /* Lower than header but higher than content */
+    background: rgba(255,255,255,0.95);
     padding: 0.5rem 0;
     margin-bottom: 1rem;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border-top: 1px solid #f0f0f0;
 }
+
+/* Ensure header stays on top */
+/* nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+} */ 
 
 @media (max-width: 600px) {
     .menu-section {

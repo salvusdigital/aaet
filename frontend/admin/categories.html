@@ -32,51 +32,87 @@
 
         <main class="main-content">
             <header>
-                <h1>Categories Management</h1>
-                <button id="addCategoryBtn" class="primary-btn">
-                    <i class="fas fa-plus"></i> Add New Category
-                </button>
+                <div class="header-content">
+                    <div class="header-left">
+                        <h1><i class="fas fa-tags"></i> Categories Management</h1>
+                        <!-- <p id="resultsCount" class="results-count">Loading categories...</p> -->
+                    </div>
+                    <button id="addCategoryBtn" class="primary-btn">
+                        <i class="fas fa-plus"></i> Add New Category
+                    </button>
+                </div>
             </header>
 
             <!-- Categories Section -->
             <section id="categories" class="content-section">
-                <div class="filters">
-                    <input type="text" id="searchCategories" placeholder="Search categories...">
-                    <select id="statusFilter">
-                        <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
+                <div class="filters-container">
+                    <div class="filters">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchCategories" placeholder="🔍 Search categories by name or description...">
+                        </div>
+                        <select id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <!-- <div class="filter-actions">
+                        <button id="clearFilters" class="secondary-btn">
+                            <i class="fas fa-times"></i> Clear Filters
+                        </button>
+                    </div> -->
                 </div>
-                <div class="items-grid" id="categoriesGrid"></div>
+                
+                <div class="items-grid" id="categoriesGrid">
+                    <!-- Categories will be loaded here -->
+                </div>
             </section>
 
             <!-- Add/Edit Category Modal -->
             <div id="categoryModal" class="modal">
                 <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2 id="modalTitle">Add Category</h2>
+                    <div class="modal-header">
+                        <h2 id="modalTitle">Add Category</h2>
+                        <span class="close">&times;</span>
+                    </div>
                     <form id="categoryForm">
                         <div class="form-group">
-                            <label for="categoryName">Category Name</label>
-                            <input type="text" id="categoryName" name="name" required placeholder="Enter Category Name">
+                            <label for="categoryName">
+                                <i class="fas fa-tag"></i> Category Name <span class="required">*</span>
+                            </label>
+                            <input type="text" id="categoryName" name="name" required placeholder="Enter category name (e.g., Main Dishes, Beverages)">
                         </div>
                         <div class="form-group">
-                            <label for="categoryDescription">Description</label>
-                            <textarea id="categoryDescription" name="description" placeholder="Enter Category Description"></textarea>
+                            <label for="categoryDescription">
+                                <i class="fas fa-align-left"></i> Description
+                            </label>
+                            <textarea id="categoryDescription" name="description" placeholder="Describe what this category contains (optional)"></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="categoryStatus">Status</label>
+                            <label for="categoryStatus">
+                                <i class="fas fa-toggle-on"></i> Status <span class="required">*</span>
+                            </label>
                             <select id="categoryStatus" name="status" required>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                                <option value="active">✅ Active</option>
+                                <option value="inactive">❌ Inactive</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="categoryImage">Category Image</label>
+                            <label for="categoryImage">
+                                <i class="fas fa-image"></i> Category Image
+                            </label>
                             <input type="file" id="categoryImage" name="image" accept="image/*">
+                            <small><i class="fas fa-info-circle"></i> Upload an image to represent this category (optional)</small>
                         </div>
-                        <button type="submit" class="primary-btn">Save Category</button>
+                        <div class="form-actions">
+                            <button type="button" class="secondary-btn" onclick="closeCategoryModal()">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                            <button type="submit" class="primary-btn">
+                                <i class="fas fa-save"></i> Save Category
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>

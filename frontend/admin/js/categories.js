@@ -1,6 +1,7 @@
 // API Configuration
 const API_URL = 'https://aaet.onrender.com/api';
 let token = localStorage.getItem('adminToken');
+let allCategories = []; // Store all categories for filtering
 
 // DOM Elements
 const categoriesGrid = document.getElementById('categoriesGrid');
@@ -105,16 +106,8 @@ async function loadCategories() {
             }
         }));
 
-        if (categoriesWithCounts.length === 0) {
-            categoriesGrid.innerHTML = `
-                <div class="no-data-message">
-                    <p>No categories found. Click the "Add Category" button to create one.</p>
-                </div>
-            `;
-            return;
-        }
-
         console.log('Categories with counts:', categoriesWithCounts);
+        allCategories = categoriesWithCounts; // Store for filtering
         displayCategories(categoriesWithCounts);
     } catch (error) {
         console.error('Error in loadCategories:', error);
@@ -191,41 +184,83 @@ async function deleteCategory(id) {
 
 // UI Functions
 function displayCategories(categories) {
-    categoriesGrid.innerHTML = `
-        <table class="categories-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Items</th>
-                    <th style="width: 150px;"></th>
-                </tr>
-            </thead>
-            <tbody>
-                ${categories.map(category => `
-                    <tr data-category-id="${category._id}">
-                        <td>
-                            <div class="category-name">
-                                ${category.name}
+    if (categories.length === 0) {
+        categoriesGrid.innerHTML = `
+            <div class="no-data-message">
+                <i class="fas fa-tags"></i>
+                <h3>No categories found</h3>
+                <p>Click the "Add Category" button to create your first category.</p>
             </div>
-                        </td>
-                        <td class="category-description">${category.description || 'No description available'}</td>
-                        <td><span class="status-badge ${category.status || 'active'}">${category.status || 'active'}</span></td>
-                        <td class="item-count">${category.itemCount || 0}</td>
-                        <td class="action-buttons">
-                            <button onclick="editCategory('${category._id}')" class="icon-btn edit-btn" title="Edit">
-                                <i class="fas fa-edit"></i>
-                    </button>
-                            <button onclick="deleteCategory('${category._id}')" class="icon-btn delete-btn" title="Delete">
-                                <i class="fas fa-trash"></i>
-                    </button>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
+        `;
+        return;
+    }
+
+    categoriesGrid.innerHTML = `
+        <div class="categories-grid">
+            ${categories.map(category => `
+                <div class="category-card" data-category-id="${category._id}">
+                    <div class="category-header">
+                        <h3 class="category-name">${category.name}</h3>
+                        <span class="status-badge ${category.status || 'active'}">${category.status || 'active'}</span>
+                    </div>
+                    <div class="category-content">
+                        <p class="category-description">${category.description || 'No description available'}</p>
+                        <div class="category-stats">
+                            <span class="item-count">
+                                <i class="fas fa-utensils"></i>
+                                ${category.itemCount || 0} items
+                            </span>
+                            <span class="category-date">
+                                <i class="fas fa-calendar"></i>
+                                ${new Date(category.createdAt).toLocaleDateString()}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="category-actions">
+                        <button onclick="editCategory('${category._id}')" class="icon-btn edit-btn" title="Edit Category">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteCategory('${category._id}')" class="icon-btn delete-btn" title="Delete Category">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
     `;
+}
+
+// Search and Filter Functions
+function filterCategories() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const statusFilterValue = statusFilter.value;
+
+    let filteredCategories = allCategories.filter(category => {
+        const matchesSearch = category.name.toLowerCase().includes(searchTerm) ||
+                            (category.description && category.description.toLowerCase().includes(searchTerm));
+        
+        const matchesStatus = !statusFilterValue || category.status === statusFilterValue;
+        
+        return matchesSearch && matchesStatus;
+    });
+
+    displayCategories(filteredCategories);
+    
+    // Update results count
+    updateResultsCount(filteredCategories.length);
+}
+
+function clearFilters() {
+    searchInput.value = '';
+    statusFilter.value = '';
+    filterCategories();
+}
+
+function updateResultsCount(count) {
+    const resultsCount = document.getElementById('resultsCount');
+    if (resultsCount) {
+        resultsCount.textContent = `${count} category${count !== 1 ? 'ies' : ''} found`;
+    }
 }
 
 function showCategoryModal(category = null) {
@@ -293,18 +328,24 @@ function logout() {
 function showError(message) {
     const notification = document.createElement('div');
     notification.className = 'notification error';
-    notification.textContent = message;
+    notification.innerHTML = `
+        <i class="fas fa-exclamation-circle"></i>
+        <span>${message}</span>
+    `;
     document.body.appendChild(notification);
 
     setTimeout(() => {
         notification.remove();
-    }, 3000);
+    }, 5000);
 }
 
 function showSuccess(message) {
     const notification = document.createElement('div');
     notification.className = 'notification success';
-    notification.textContent = message;
+    notification.innerHTML = `
+        <i class="fas fa-check-circle"></i>
+        <span>${message}</span>
+    `;
     document.body.appendChild(notification);
 
     setTimeout(() => {
@@ -316,21 +357,14 @@ function showSuccess(message) {
 window.editCategory = async function (id) {
     try {
         console.log('Editing category with ID:', id);
-        const categoryRow = document.querySelector(`[data-category-id="${id}"]`);
-        if (!categoryRow) {
-            throw new Error('Category not found in DOM');
+        const category = allCategories.find(cat => cat._id === id);
+        
+        if (!category) {
+            throw new Error('Category not found');
         }
 
-        console.log('Found category row:', categoryRow);
-        const categoryData = {
-            _id: id,
-            name: categoryRow.querySelector('.category-name').textContent.trim(),
-            description: categoryRow.querySelector('.category-description').textContent.trim(),
-            status: categoryRow.querySelector('.status-badge').textContent.trim()
-        };
-
-        console.log('Extracted category data:', categoryData);
-        showCategoryModal(categoryData);
+        console.log('Found category:', category);
+        showCategoryModal(category);
     } catch (error) {
         console.error('Error editing category:', error);
         showError('Failed to load category data. Please try again.');
@@ -348,31 +382,15 @@ addCategoryBtn.addEventListener('click', () => showCategoryModal());
 closeModal.addEventListener('click', closeCategoryModal);
 logoutBtn.addEventListener('click', logout);
 
-searchInput.addEventListener('input', (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-    const categories = document.querySelectorAll('.item-card');
+// Search and filter event listeners
+searchInput.addEventListener('input', filterCategories);
+statusFilter.addEventListener('change', filterCategories);
 
-    categories.forEach(category => {
-        const text = category.textContent.toLowerCase();
-        category.style.display = text.includes(searchTerm) ? 'block' : 'none';
-    });
-});
-
-statusFilter.addEventListener('change', (e) => {
-    const status = e.target.value;
-    if (status) {
-        // Filter categories by status
-        const categories = document.querySelectorAll('.item-card');
-        categories.forEach(category => {
-            const categoryStatus = category.querySelector('.status-badge').textContent;
-            category.style.display = categoryStatus === status ? 'block' : 'none';
-        });
-    } else {
-        // Show all categories
-        const categories = document.querySelectorAll('.item-card');
-        categories.forEach(category => category.style.display = 'block');
-    }
-});
+// Clear filters button
+const clearFiltersBtn = document.getElementById('clearFilters');
+if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener('click', clearFilters);
+}
 
 // Close modal when clicking outside
 window.addEventListener('click', (e) => {
