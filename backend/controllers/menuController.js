@@ -68,7 +68,7 @@ const getItemById = asyncHandler(async (req, res) => {
 const getAllCategories = asyncHandler(async (req, res) => {
     // #swagger.tags = ['Menu']
     try {
-        const categories = await Category.getSortedCategories();
+        const categories = await Category.find({}).sort({ sort_order: 'asc' });
         res.json(categories);
     } catch (error) {
         res.status(500).json({ message: error.message });
