@@ -87,9 +87,9 @@ async function loadMenuItemsForCategories() {
         });
 
         if (response.ok) {
-            const items = await response.json();
-            console.log('Menu items loaded for category extraction:', items);
-            return items;
+            const menuItems = await response.json();
+            console.log('Menu items loaded for category extraction:', menuItems);
+            return menuItems;
         } else {
             console.error('Failed to load menu items for category extraction:', response.status);
             return [];
@@ -109,7 +109,7 @@ async function loadCategories() {
             return;
         }
 
-        console.log('Loading categories from API...');
+        console.log('Attempting to load categories from API...');
         const response = await fetch(`${API_URL}/admin/categories`, {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -124,25 +124,23 @@ async function loadCategories() {
                 return;
             }
             
-            console.warn('Categories API failed with status:', response.status);
-            
-            // Try to extract categories from menu items as fallback
-            console.log('Attempting to extract categories from menu items...');
-            const menuItems = await loadMenuItemsForCategories();
-            
-            if (menuItems.length > 0) {
+            // If API fails (500 error), try to extract from menu items
+            if (response.status === 500) {
+                console.log('Categories API returned 500 error, extracting from menu items...');
+                const menuItems = await loadMenuItemsForCategories();
                 const extractedCategories = extractCategoriesFromMenuItems(menuItems);
-                console.log('Extracted categories from menu items:', extractedCategories);
                 
                 if (extractedCategories.length > 0) {
+                    console.log('Successfully extracted categories from menu items:', extractedCategories);
                     allCategories = extractedCategories;
                     displayCategories(extractedCategories);
-                    showSuccess('Categories loaded from menu items (API temporarily unavailable)');
+                    showSuccess(`Loaded ${extractedCategories.length} categories from menu items (API unavailable)`);
                     return;
+                } else {
+                    throw new Error('No categories found in menu items');
                 }
             }
             
-            // If we can't extract categories, show error
             const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.message || 'Failed to load categories');
         }
@@ -181,32 +179,40 @@ async function loadCategories() {
             }
         }));
 
-
         console.log('Categories with counts:', categoriesWithCounts);
         allCategories = categoriesWithCounts; // Store for filtering
-
         displayCategories(categoriesWithCounts);
     } catch (error) {
         console.error('Error in loadCategories:', error);
         
-        // Show user-friendly error message with retry option
+        // Try to extract from menu items as final fallback
+        try {
+            console.log('Attempting final fallback: extracting categories from menu items...');
+            const menuItems = await loadMenuItemsForCategories();
+            const extractedCategories = extractCategoriesFromMenuItems(menuItems);
+            
+            if (extractedCategories.length > 0) {
+                console.log('Final fallback successful:', extractedCategories);
+                allCategories = extractedCategories;
+                displayCategories(extractedCategories);
+                showSuccess(`Loaded ${extractedCategories.length} categories from menu items`);
+                return;
+            }
+        } catch (fallbackError) {
+            console.error('Final fallback also failed:', fallbackError);
+        }
+        
+        showError('Unable to load categories. Please try again later.');
+
+        // Show user-friendly empty state
         categoriesGrid.innerHTML = `
             <div class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Unable to load categories</h3>
-                <p>${error.message || 'The categories service is temporarily unavailable.'}</p>
-                <div class="error-actions">
-                    <button onclick="loadCategories()" class="primary-btn">
-                        <i class="fas fa-sync"></i> Retry
-                    </button>
-                    <button onclick="window.location.reload()" class="secondary-btn">
-                        <i class="fas fa-redo"></i> Refresh Page
-                    </button>
-                </div>
+                <p>Unable to load categories. Please try again later.</p>
+                <button onclick="loadCategories()" class="primary-btn">
+                    <i class="fas fa-sync"></i> Retry
+                </button>
             </div>
         `;
-        
-        showError('Failed to load categories. Please try again later.');
     }
 }
 
@@ -280,7 +286,21 @@ function displayCategories(categories) {
         return;
     }
 
+    // Check if these are extracted categories (have itemCount property)
+    const isExtractedCategories = categories.some(cat => typeof cat.itemCount === 'number');
+    
+    let noticeHtml = '';
+    if (isExtractedCategories) {
+        noticeHtml = `
+            <div class="notice-banner">
+                <i class="fas fa-info-circle"></i>
+                <span>Categories loaded from menu items (API unavailable). Some features may be limited.</span>
+            </div>
+        `;
+    }
+
     categoriesGrid.innerHTML = `
+        ${noticeHtml}
         <div class="categories-grid">
             ${categories.map(category => `
                 <div class="category-card" data-category-id="${category._id}">
@@ -346,7 +366,6 @@ function updateResultsCount(count) {
     if (resultsCount) {
         resultsCount.textContent = `${count} category${count !== 1 ? 'ies' : ''} found`;
     }
-
 }
 
 function showCategoryModal(category = null) {
@@ -418,7 +437,6 @@ function showError(message) {
         <i class="fas fa-exclamation-circle"></i>
         <span>${message}</span>
     `;
-
     document.body.appendChild(notification);
 
     setTimeout(() => {
@@ -429,12 +447,10 @@ function showError(message) {
 function showSuccess(message) {
     const notification = document.createElement('div');
     notification.className = 'notification success';
-
     notification.innerHTML = `
         <i class="fas fa-check-circle"></i>
         <span>${message}</span>
     `;
-
     document.body.appendChild(notification);
 
     setTimeout(() => {
@@ -446,7 +462,6 @@ function showSuccess(message) {
 window.editCategory = async function (id) {
     try {
         console.log('Editing category with ID:', id);
-
         const category = allCategories.find(cat => cat._id === id);
         
         if (!category) {
@@ -455,7 +470,6 @@ window.editCategory = async function (id) {
 
         console.log('Found category:', category);
         showCategoryModal(category);
-
     } catch (error) {
         console.error('Error editing category:', error);
         showError('Failed to load category data. Please try again.');

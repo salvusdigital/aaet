@@ -72,13 +72,18 @@ function extractCategoriesFromMenuItems(menuItems) {
             if (!categories.has(categoryName)) {
                 categories.set(categoryName, {
                     _id: item.category_id._id || categoryName,
-                    name: categoryName
+                    name: categoryName,
+                    description: `Category for ${categoryName}`,
+                    status: 'active',
+                    createdAt: new Date().toISOString()
                 });
             }
         }
     });
     
-    return Array.from(categories.values());
+    const extractedCategories = Array.from(categories.values());
+    console.log('Extracted categories from menu items:', extractedCategories);
+    return extractedCategories;
 }
 
 async function loadMenuItems() {
@@ -106,9 +111,15 @@ async function loadMenuItems() {
             console.log('Categories not loaded, extracting from menu items...');
             const extractedCategories = extractCategoriesFromMenuItems(items);
             console.log('Extracted categories:', extractedCategories);
-            categoriesList = extractedCategories;
-            populateCategoryFilter(extractedCategories);
-            populateMenuFormCategoryDropdown(extractedCategories);
+            
+            if (extractedCategories.length > 0) {
+                categoriesList = extractedCategories;
+                populateCategoryFilter(extractedCategories);
+                populateMenuFormCategoryDropdown(extractedCategories);
+                console.log('Successfully populated category dropdowns with extracted categories');
+            } else {
+                console.warn('No categories found in menu items');
+            }
         }
     } catch (error) {
         showError(error.message);
@@ -134,8 +145,17 @@ async function loadCategories() {
             populateMenuFormCategoryDropdown(categories);
         } else {
             console.error('Failed to load categories. Status:', response.status);
+            
+            // If API fails (500 error), try to extract from menu items
+            if (response.status === 500) {
+                console.log('Categories API returned 500 error, will extract from menu items...');
+                // The fallback will be handled in loadMenuItems
+                return;
+            }
+            
             const errorData = await response.json().catch(() => ({}));
             console.error('Error data:', errorData);
+            showError('Failed to load categories. Please refresh the page.');
         }
     } catch (error) {
         console.error('Failed to load categories:', error);
