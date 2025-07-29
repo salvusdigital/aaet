@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AA Entertainment Hotel - Settings</title>
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Admin Dashboard -->
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="logo">
+                <img src="../logo.png" alt="AA Entertainment Hotel">
+            </div>
+            <ul class="nav-links">
+                <li data-section="menu-items">
+                    <i class="fas fa-utensils"></i> Menu Items
+                </li>
+                <li data-section="categories">
+                    <i class="fas fa-tags"></i> Categories
+                </li>
+                <li class="active" data-section="settings">
+                    <i class="fas fa-cog"></i> Settings
+                </li>
+                <li id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </li>
+            </ul>
+        </nav>
+
+        
+
+
+        <main class="main-content">
+            <header>
+                <h1>Manage Account</h1>
+            </header>
+
+            <!-- Settings Section -->
+            <section id="settings" class="content-section">
+                <div class="settings-grid">
+                    <!-- Admin Account -->
+                    <div class="settings-card">
+                        <h3><i class="fas fa-user-shield"></i> Update Account</h3>
+                        <form id="adminAccountForm">
+                            <div class="form-group">
+                                <label for="adminUsername">Username</label>
+                                <input type="text" id="adminUsername" name="adminUsername" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="currentPassword">Current Password</label>
+                                <input type="password" id="currentPassword" name="currentPassword">
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">New Password</label>
+                                <input type="password" id="newPassword" name="newPassword">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm New Password</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword">
+                            </div>
+                            <button type="submit" class="primary-btn">Change Password</button>
+                        </form>
+                    </div>
+             </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/settings.js"></script>
+</body>
+</html> 
