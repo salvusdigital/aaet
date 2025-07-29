@@ -6,7 +6,7 @@
     --highlight-color: #CCCCCC;
     --modal-bg: rgba(0, 0, 0, 0.5);
     --container-padding: 1rem;
-    --section-spacing: 4rem;
+    --section-spacing: 2rem;
     --item-spacing: 2rem;
 }
 
@@ -141,7 +141,7 @@ nav {
     background-size: cover;
     background-position: center;
     position: relative;
-    margin-top: 60px; /* Match the navigation height exactly */
+    margin-top: 30px; /* Match the navigation height exactly */
 }
 
 .hero-overlay {
@@ -883,7 +883,7 @@ footer {
 /* Make the category scroll bar sticky */
 .category-scroll {
     position: sticky;
-    top: 80px; /* Position below the header instead of covering it */
+    top: 60px; /* Position below the header instead of covering it */
     z-index: 50; /* Lower than header but higher than content */
     background: rgba(255,255,255,0.95);
     padding: 0.5rem 0;

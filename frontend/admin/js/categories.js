@@ -49,6 +49,57 @@ function navigateToSection(section) {
     }
 }
 
+// Extract categories from menu items as fallback
+function extractCategoriesFromMenuItems(menuItems) {
+    if (!Array.isArray(menuItems)) return [];
+    
+    const categories = new Map();
+    
+    menuItems.forEach(item => {
+        if (item.category_id && item.category_id.name) {
+            const categoryName = item.category_id.name;
+            if (!categories.has(categoryName)) {
+                categories.set(categoryName, {
+                    _id: item.category_id._id || categoryName,
+                    name: categoryName,
+                    description: `Category for ${categoryName}`,
+                    status: 'active',
+                    createdAt: new Date().toISOString(),
+                    itemCount: 1
+                });
+            } else {
+                // Increment item count for existing category
+                categories.get(categoryName).itemCount++;
+            }
+        }
+    });
+    
+    return Array.from(categories.values());
+}
+
+// Load menu items to extract categories
+async function loadMenuItemsForCategories() {
+    try {
+        const response = await fetch(`${API_URL}/admin/menu`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            const items = await response.json();
+            console.log('Menu items loaded for category extraction:', items);
+            return items;
+        } else {
+            console.error('Failed to load menu items for category extraction:', response.status);
+            return [];
+        }
+    } catch (error) {
+        console.error('Error loading menu items for category extraction:', error);
+        return [];
+    }
+}
+
 // API Calls
 async function loadCategories() {
     try {
@@ -58,22 +109,46 @@ async function loadCategories() {
             return;
         }
 
+        console.log('Loading categories from API...');
         const response = await fetch(`${API_URL}/admin/categories`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
 
+        console.log('Categories API response status:', response.status);
+
         if (!response.ok) {
             if (response.status === 401) {
                 logout();
                 return;
             }
-            const errorData = await response.json();
+            
+            console.warn('Categories API failed with status:', response.status);
+            
+            // Try to extract categories from menu items as fallback
+            console.log('Attempting to extract categories from menu items...');
+            const menuItems = await loadMenuItemsForCategories();
+            
+            if (menuItems.length > 0) {
+                const extractedCategories = extractCategoriesFromMenuItems(menuItems);
+                console.log('Extracted categories from menu items:', extractedCategories);
+                
+                if (extractedCategories.length > 0) {
+                    allCategories = extractedCategories;
+                    displayCategories(extractedCategories);
+                    showSuccess('Categories loaded from menu items (API temporarily unavailable)');
+                    return;
+                }
+            }
+            
+            // If we can't extract categories, show error
+            const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.message || 'Failed to load categories');
         }
 
         const categories = await response.json();
+        console.log('Categories loaded from API:', categories);
 
         // Fetch menu items count for each category
         const categoriesWithCounts = await Promise.all(categories.map(async (category) => {
@@ -111,17 +186,25 @@ async function loadCategories() {
         displayCategories(categoriesWithCounts);
     } catch (error) {
         console.error('Error in loadCategories:', error);
-        showError(error.message || 'Failed to load categories. Please try refreshing the page.');
-
-        // Show user-friendly empty state
+        
+        // Show user-friendly error message with retry option
         categoriesGrid.innerHTML = `
             <div class="error-message">
-                <p>Unable to load categories. Please try again later.</p>
-                <button onclick="loadCategories()" class="primary-btn">
-                    <i class="fas fa-sync"></i> Retry
-                </button>
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Unable to load categories</h3>
+                <p>${error.message || 'The categories service is temporarily unavailable.'}</p>
+                <div class="error-actions">
+                    <button onclick="loadCategories()" class="primary-btn">
+                        <i class="fas fa-sync"></i> Retry
+                    </button>
+                    <button onclick="window.location.reload()" class="secondary-btn">
+                        <i class="fas fa-redo"></i> Refresh Page
+                    </button>
+                </div>
             </div>
         `;
+        
+        showError('Failed to load categories. Please try again later.');
     }
 }
 

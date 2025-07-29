@@ -60,6 +60,27 @@ function navigateToSection(section) {
 }
 
 // API Calls
+// Extract categories from menu items as fallback
+function extractCategoriesFromMenuItems(menuItems) {
+    if (!Array.isArray(menuItems)) return [];
+    
+    const categories = new Map();
+    
+    menuItems.forEach(item => {
+        if (item.category_id && item.category_id.name) {
+            const categoryName = item.category_id.name;
+            if (!categories.has(categoryName)) {
+                categories.set(categoryName, {
+                    _id: item.category_id._id || categoryName,
+                    name: categoryName
+                });
+            }
+        }
+    });
+    
+    return Array.from(categories.values());
+}
+
 async function loadMenuItems() {
     try {
         const response = await fetch(`${API_URL}/admin/menu`, {
@@ -79,6 +100,16 @@ async function loadMenuItems() {
         const items = await response.json();
         console.log('Menu items received:', items); // Log the data
         displayMenuItems(items);
+        
+        // If categories failed to load, extract from menu items
+        if (!Array.isArray(categoriesList) || categoriesList.length === 0) {
+            console.log('Categories not loaded, extracting from menu items...');
+            const extractedCategories = extractCategoriesFromMenuItems(items);
+            console.log('Extracted categories:', extractedCategories);
+            categoriesList = extractedCategories;
+            populateCategoryFilter(extractedCategories);
+            populateMenuFormCategoryDropdown(extractedCategories);
+        }
     } catch (error) {
         showError(error.message);
     }
@@ -86,20 +117,30 @@ async function loadMenuItems() {
 
 async function loadCategories() {
     try {
+        console.log('Loading categories...');
         const response = await fetch(`${API_URL}/admin/categories`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
 
+        console.log('Categories response status:', response.status);
+        
         if (response.ok) {
             const categories = await response.json();
+            console.log('Categories loaded:', categories);
             categoriesList = categories;
             populateCategoryFilter(categories);
             populateMenuFormCategoryDropdown(categories);
+        } else {
+            console.error('Failed to load categories. Status:', response.status);
+            const errorData = await response.json().catch(() => ({}));
+            console.error('Error data:', errorData);
         }
     } catch (error) {
         console.error('Failed to load categories:', error);
+        // Show error to user
+        showError('Failed to load categories. Please refresh the page.');
     }
 }
 
@@ -229,10 +270,24 @@ function displayMenuItems(items) {
 }
 
 function populateCategoryFilter(categories) {
+    console.log('Populating category filter with:', categories);
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (!categoryFilter) {
+        console.error('Category filter element not found!');
+        return;
+    }
+    
     categoryFilter.innerHTML = '<option value="">All Categories</option>';
-    categories.forEach(category => {
-        categoryFilter.innerHTML += `<option value="${category.name}">${category.name}</option>`;
-    });
+    
+    if (Array.isArray(categories) && categories.length > 0) {
+        categories.forEach(category => {
+            console.log('Adding category option:', category.name);
+            categoryFilter.innerHTML += `<option value="${category.name}">${category.name}</option>`;
+        });
+        console.log('Category filter populated with', categories.length, 'categories');
+    } else {
+        console.warn('No categories to populate or categories is not an array');
+    }
 }
 
 // Update showItemModal function
@@ -407,8 +462,8 @@ searchInput.addEventListener('input', (e) => {
     const items = document.querySelectorAll('.item-card');
 
     items.forEach(item => {
-        const text = item.textContent.toLowerCase();
-        item.style.display = text.includes(searchTerm) ? 'block' : 'none';
+        const itemName = item.querySelector('h3').textContent.toLowerCase();
+        item.style.display = itemName.includes(searchTerm) ? 'block' : 'none';
     });
 });
 

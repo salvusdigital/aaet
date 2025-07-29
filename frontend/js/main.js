@@ -14,22 +14,99 @@ function formatPriceWithCommas(price) {
 // Service type handling
 let currentService = null; // Always start with null to show modal
 let allCategories = []; // Store all categories
-let currentFilter = 'all'; // Current filter: 'all', 'food', 'drinks'
+let currentFilter = 'food'; // Default to food filter
 
 // Fetch categories from API
 async function fetchCategories() {
     try {
         const response = await fetch('https://aaet.onrender.com/api/menu/categories');
-        const categories = await response.json();
-        console.log('Categories fetched:', categories);
-        allCategories = categories;
-        renderCategoryNavbar(categories);
+        const data = await response.json();
+        console.log('Categories fetched:', data);
+        
+        // Check if data is an array (success) or has error message
+        if (Array.isArray(data)) {
+            allCategories = data;
+            renderCategoryNavbar(data);
+        } else {
+            console.warn('Categories API returned error:', data.message || 'Unknown error');
+            // Set empty array to prevent errors
+            allCategories = [];
+            // Create basic navigation without categories
+            renderBasicNavbar();
+        }
     } catch (error) {
         console.error('Error fetching categories:', error);
+        // Set empty array to prevent errors
+        allCategories = [];
+        // Create basic navigation without categories
+        renderBasicNavbar();
     }
 }
 
-// Render category navbar buttons
+// Extract categories from menu data
+function extractCategoriesFromMenu(menuData) {
+    if (!Array.isArray(menuData)) return [];
+    
+    const categories = new Map();
+    
+    menuData.forEach(item => {
+        if (item.category_id && item.category_id.name) {
+            const categoryName = item.category_id.name;
+            if (!categories.has(categoryName)) {
+                categories.set(categoryName, {
+                    name: categoryName,
+                    group: determineGroupFromCategory(categoryName)
+                });
+            }
+        }
+    });
+    
+    return Array.from(categories.values());
+}
+
+// Determine group based on category name
+function determineGroupFromCategory(categoryName) {
+    const name = categoryName.toLowerCase();
+    
+    // Food categories
+    if (/starter|pepper soup|nigerian dish|grill|continental|sandwich|burger|pizza|chinese|indian|pasta|dessert|nigerian meal|snack|kids|extra/.test(name)) {
+        return 'FOOD';
+    }
+    
+    // Drinks categories
+    if (/non alcoholic|coffee|wine|beer|spirit|champagne|cocktail|mocktail/.test(name)) {
+        return 'DRINKS';
+    }
+    
+    // Default to FOOD if unsure
+    return 'FOOD';
+}
+
+// Render basic navbar when categories are not available
+function renderBasicNavbar() {
+    const navLinks = document.querySelector('.nav-links');
+    if (!navLinks) return;
+
+    // Clear existing links
+    navLinks.innerHTML = '';
+
+    // Create basic FOOD and DRINKS buttons
+    const groups = ['FOOD', 'DRINKS'];
+    
+    groups.forEach(group => {
+        const groupBtn = document.createElement('a');
+        groupBtn.href = '#';
+        groupBtn.textContent = group;
+        groupBtn.className = group === 'FOOD' ? 'active' : '';
+        groupBtn.onclick = (e) => {
+            e.preventDefault();
+            setActiveFilter(group.toLowerCase());
+        };
+        navLinks.appendChild(groupBtn);
+    });
+}
+
+// Render category navbar buttons based on groups
 function renderCategoryNavbar(categories) {
     const navLinks = document.querySelector('.nav-links');
     if (!navLinks) return;
@@ -37,36 +114,30 @@ function renderCategoryNavbar(categories) {
     // Clear existing links
     navLinks.innerHTML = '';
 
-    // Add "All" button
-    const allBtn = document.createElement('a');
-    allBtn.href = '#';
-    allBtn.textContent = 'ALL';
-    allBtn.className = 'active';
-    allBtn.onclick = (e) => {
-        e.preventDefault();
-        setActiveFilter('all');
-    };
-    navLinks.appendChild(allBtn);
+    // Get unique groups from categories
+    const groups = [...new Set(categories.map(cat => cat.group))];
+    
+    // Sort groups: FOOD first, then DRINKS, then others
+    groups.sort((a, b) => {
+        if (a === 'FOOD') return -1;
+        if (b === 'FOOD') return 1;
+        if (a === 'DRINKS') return -1;
+        if (b === 'DRINKS') return 1;
+        return a.localeCompare(b);
+    });
 
-    // Add "Food" button
-    const foodBtn = document.createElement('a');
-    foodBtn.href = '#';
-    foodBtn.textContent = 'FOOD';
-    foodBtn.onclick = (e) => {
-        e.preventDefault();
-        setActiveFilter('food');
-    };
-    navLinks.appendChild(foodBtn);
-
-    // Add "Drinks" button
-    const drinksBtn = document.createElement('a');
-    drinksBtn.href = '#';
-    drinksBtn.textContent = 'DRINKS';
-    drinksBtn.onclick = (e) => {
-        e.preventDefault();
-        setActiveFilter('drinks');
-    };
-    navLinks.appendChild(drinksBtn);
+    // Create buttons for each group
+    groups.forEach(group => {
+        const groupBtn = document.createElement('a');
+        groupBtn.href = '#';
+        groupBtn.textContent = group;
+        groupBtn.className = group === 'FOOD' ? 'active' : ''; // Set FOOD as default active
+        groupBtn.onclick = (e) => {
+            e.preventDefault();
+            setActiveFilter(group.toLowerCase());
+        };
+        navLinks.appendChild(groupBtn);
+    });
 }
 
 // Set active filter and re-render menu
@@ -87,20 +158,33 @@ function setActiveFilter(filter) {
     renderMenuByCategory(menuDataRaw);
 }
 
-// Filter menu items based on current filter
+// Filter menu items based on current filter and category groups
 function filterMenuItems(items) {
     if (currentFilter === 'all') return items;
     
+    // If no categories available, use basic filtering
+    if (!Array.isArray(allCategories) || allCategories.length === 0) {
+        return items.filter(item => {
+            const categoryName = item.category_id && item.category_id.name ? item.category_id.name.toLowerCase() : '';
+            
+            if (currentFilter === 'food') {
+                return /starter|pepper soup|nigerian dish|grill|continental|sandwich|burger|pizza|chinese|indian|pasta|dessert|nigerian meal|snack|kids|extra/.test(categoryName);
+            } else if (currentFilter === 'drinks') {
+                return /non alcoholic|coffee|wine|beer|spirit|champagne|cocktail|mocktail/.test(categoryName);
+            }
+            
+            return true;
+        });
+    }
+    
     return items.filter(item => {
-        const categoryName = item.category_id && item.category_id.name ? item.category_id.name.toLowerCase() : '';
+        const categoryName = item.category_id && item.category_id.name ? item.category_id.name : '';
         
-        if (currentFilter === 'food') {
-            return /soup|rice|main|dish|pepper|food|entree|grill|platter|special/.test(categoryName);
-        } else if (currentFilter === 'drinks') {
-            return /drink|juice|cocktail|beverage|smoothie|wine|beer/.test(categoryName);
-        }
+        // Find the category in allCategories to get its group
+        const category = allCategories.find(cat => cat.name === categoryName);
+        if (!category) return false;
         
-        return true;
+        return category.group.toLowerCase() === currentFilter;
     });
 }
 
@@ -285,6 +369,15 @@ function fetchMenuData() {
         .then(data => {
             console.log('Raw menu data received:', data);
             menuDataRaw = data;
+            
+            // If categories API failed, extract categories from menu data
+            if (!Array.isArray(allCategories) || allCategories.length === 0) {
+                const extractedCategories = extractCategoriesFromMenu(data);
+                console.log('Extracted categories from menu data:', extractedCategories);
+                allCategories = extractedCategories;
+                renderCategoryNavbar(extractedCategories);
+            }
+            
             renderMenuByCategory(menuDataRaw);
             hideLoadingState();
         })
