@@ -5,8 +5,104 @@ let menuData = {
     drinks: []
 };
 
+// Format price with commas
+function formatPriceWithCommas(price) {
+    if (price === null || price === undefined || price === '') return '';
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
 // Service type handling
 let currentService = null; // Always start with null to show modal
+let allCategories = []; // Store all categories
+let currentFilter = 'all'; // Current filter: 'all', 'food', 'drinks'
+
+// Fetch categories from API
+async function fetchCategories() {
+    try {
+        const response = await fetch('https://aaet.onrender.com/api/menu/categories');
+        const categories = await response.json();
+        console.log('Categories fetched:', categories);
+        allCategories = categories;
+        renderCategoryNavbar(categories);
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+    }
+}
+
+// Render category navbar buttons
+function renderCategoryNavbar(categories) {
+    const navLinks = document.querySelector('.nav-links');
+    if (!navLinks) return;
+
+    // Clear existing links
+    navLinks.innerHTML = '';
+
+    // Add "All" button
+    const allBtn = document.createElement('a');
+    allBtn.href = '#';
+    allBtn.textContent = 'ALL';
+    allBtn.className = 'active';
+    allBtn.onclick = (e) => {
+        e.preventDefault();
+        setActiveFilter('all');
+    };
+    navLinks.appendChild(allBtn);
+
+    // Add "Food" button
+    const foodBtn = document.createElement('a');
+    foodBtn.href = '#';
+    foodBtn.textContent = 'FOOD';
+    foodBtn.onclick = (e) => {
+        e.preventDefault();
+        setActiveFilter('food');
+    };
+    navLinks.appendChild(foodBtn);
+
+    // Add "Drinks" button
+    const drinksBtn = document.createElement('a');
+    drinksBtn.href = '#';
+    drinksBtn.textContent = 'DRINKS';
+    drinksBtn.onclick = (e) => {
+        e.preventDefault();
+        setActiveFilter('drinks');
+    };
+    navLinks.appendChild(drinksBtn);
+}
+
+// Set active filter and re-render menu
+function setActiveFilter(filter) {
+    currentFilter = filter;
+    
+    // Update active state in navbar
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    const activeLink = document.querySelector(`.nav-links a[onclick*="${filter}"]`);
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
+    
+    // Re-render menu with filter
+    renderMenuByCategory(menuDataRaw);
+}
+
+// Filter menu items based on current filter
+function filterMenuItems(items) {
+    if (currentFilter === 'all') return items;
+    
+    return items.filter(item => {
+        const categoryName = item.category_id && item.category_id.name ? item.category_id.name.toLowerCase() : '';
+        
+        if (currentFilter === 'food') {
+            return /soup|rice|main|dish|pepper|food|entree|grill|platter|special/.test(categoryName);
+        } else if (currentFilter === 'drinks') {
+            return /drink|juice|cocktail|beverage|smoothie|wine|beer/.test(categoryName);
+        }
+        
+        return true;
+    });
+}
 
 // Group menu items by category name
 function groupMenuByCategory(items) {
@@ -80,9 +176,9 @@ function renderMenu() {
                             <div class="menu-item-header">
                                 <h3>${item.name}</h3>
                                 <span class="price">
-                                    ₦${currentService === 'room'
+                                    ₦${formatPriceWithCommas(currentService === 'room'
                                         ? (item.price_room || item.price_restaurant || '')
-                                        : (item.price_restaurant || item.price_room || '')}
+                                        : (item.price_restaurant || item.price_room || ''))}
                                 </span>
                             </div>
                             <p>${item.description || ''}</p>
@@ -100,6 +196,8 @@ function renderMenu() {
 
 function renderCategoryScroll(categories) {
     const scrollDiv = document.querySelector('.category-scroll');
+    if (!scrollDiv) return;
+    
     scrollDiv.innerHTML = '';
     categories.forEach(cat => {
         const btn = document.createElement('button');
@@ -123,9 +221,12 @@ function renderMenuByCategory(menuDataRaw) {
     main.innerHTML = '';
     if (!Array.isArray(menuDataRaw) || !menuDataRaw.length) return;
 
+    // Filter items based on current filter
+    const filteredItems = filterMenuItems(menuDataRaw);
+
     // Group items by category name
     const grouped = {};
-    menuDataRaw.forEach(item => {
+    filteredItems.forEach(item => {
         const category = item.category_id && item.category_id.name ? item.category_id.name : 'Uncategorized';
         if (!grouped[category]) grouped[category] = [];
         grouped[category].push(item);
@@ -146,7 +247,7 @@ function renderMenuByCategory(menuDataRaw) {
                     <div class="menu-item">
                         <span class="item-name">${item.name}</span>
                         <span class="dots"></span>
-                        <span class="item-price">₦${currentService === 'room' ? (item.price_room || item.price_restaurant || '') : (item.price_restaurant || item.price_room || '')}</span>
+                        <span class="item-price">₦${formatPriceWithCommas(currentService === 'room' ? (item.price_room || item.price_restaurant || '') : (item.price_restaurant || item.price_room || ''))}</span>
                     </div>
                 `).join('')}
             </div>
@@ -220,8 +321,6 @@ function showErrorState() {
     });
 }
 
-
-
 // Service selection handler
 function selectService(type) {
     currentService = type;
@@ -243,7 +342,7 @@ function createMenuItemHTML(item) {
         <div class="menu-item">
             <div class="menu-item-header">
                 <h3>${item.name}</h3>
-                <span class="price">₦${price.toLocaleString()}</span>
+                <span class="price">₦${formatPriceWithCommas(price)}</span>
             </div>
             <p>${item.description}</p>
             ${tagsHTML ? `<div class="menu-item-tags">${tagsHTML}</div>` : ''}
@@ -299,6 +398,8 @@ function getQueryParam(name) {
 // Initial setup
 document.addEventListener('DOMContentLoaded', function() {
     fetchAndLogMenuData();
+    // Fetch categories first
+    fetchCategories();
     // Fetch menu data when page loads
     fetchMenuData();
     
@@ -333,8 +434,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
-
-
 
 // Navigation active state
 const navLinks = document.querySelectorAll('.nav-links a');
