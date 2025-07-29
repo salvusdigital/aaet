@@ -22,13 +22,13 @@ async function fetchCategories() {
         const response = await fetch('https://aaet.onrender.com/api/menu/categories');
         const data = await response.json();
         console.log('Categories fetched:', data);
-        
+
         // Check if data is an array (success) or has error message
         if (Array.isArray(data)) {
             allCategories = data;
             renderCategoryNavbar(data);
         } else {
-            console.warn('Categories API returned error:', data.message || 'Unknown error');
+            // console.warn('Categories API returned error:', data.message || 'Unknown error');
             // Set empty array to prevent errors
             allCategories = [];
             // Create basic navigation without categories
@@ -46,9 +46,9 @@ async function fetchCategories() {
 // Extract categories from menu data
 function extractCategoriesFromMenu(menuData) {
     if (!Array.isArray(menuData)) return [];
-    
+
     const categories = new Map();
-    
+
     menuData.forEach(item => {
         if (item.category_id && item.category_id.name) {
             const categoryName = item.category_id.name;
@@ -60,24 +60,24 @@ function extractCategoriesFromMenu(menuData) {
             }
         }
     });
-    
+
     return Array.from(categories.values());
 }
 
 // Determine group based on category name
 function determineGroupFromCategory(categoryName) {
     const name = categoryName.toLowerCase();
-    
+
     // Food categories
     if (/starter|pepper soup|nigerian dish|grill|continental|sandwich|burger|pizza|chinese|indian|pasta|dessert|nigerian meal|snack|kids|extra/.test(name)) {
         return 'FOOD';
     }
-    
+
     // Drinks categories
     if (/non alcoholic|coffee|wine|beer|spirit|champagne|cocktail|mocktail/.test(name)) {
         return 'DRINKS';
     }
-    
+
     // Default to FOOD if unsure
     return 'FOOD';
 }
@@ -92,7 +92,7 @@ function renderBasicNavbar() {
 
     // Create basic FOOD and DRINKS buttons
     const groups = ['FOOD', 'DRINKS'];
-    
+
     groups.forEach(group => {
         const groupBtn = document.createElement('a');
         groupBtn.href = '#';
@@ -116,7 +116,7 @@ function renderCategoryNavbar(categories) {
 
     // Get unique groups from categories
     const groups = [...new Set(categories.map(cat => cat.group))];
-    
+
     // Sort groups: FOOD first, then DRINKS, then others
     groups.sort((a, b) => {
         if (a === 'FOOD') return -1;
@@ -143,17 +143,17 @@ function renderCategoryNavbar(categories) {
 // Set active filter and re-render menu
 function setActiveFilter(filter) {
     currentFilter = filter;
-    
+
     // Update active state in navbar
     document.querySelectorAll('.nav-links a').forEach(link => {
         link.classList.remove('active');
     });
-    
+
     const activeLink = document.querySelector(`.nav-links a[onclick*="${filter}"]`);
     if (activeLink) {
         activeLink.classList.add('active');
     }
-    
+
     // Re-render menu with filter
     renderMenuByCategory(menuDataRaw);
 }
@@ -161,29 +161,29 @@ function setActiveFilter(filter) {
 // Filter menu items based on current filter and category groups
 function filterMenuItems(items) {
     if (currentFilter === 'all') return items;
-    
+
     // If no categories available, use basic filtering
     if (!Array.isArray(allCategories) || allCategories.length === 0) {
         return items.filter(item => {
             const categoryName = item.category_id && item.category_id.name ? item.category_id.name.toLowerCase() : '';
-            
+
             if (currentFilter === 'food') {
                 return /starter|pepper soup|nigerian dish|grill|continental|sandwich|burger|pizza|chinese|indian|pasta|dessert|nigerian meal|snack|kids|extra/.test(categoryName);
             } else if (currentFilter === 'drinks') {
                 return /non alcoholic|coffee|wine|beer|spirit|champagne|cocktail|mocktail/.test(categoryName);
             }
-            
+
             return true;
         });
     }
-    
+
     return items.filter(item => {
         const categoryName = item.category_id && item.category_id.name ? item.category_id.name : '';
-        
+
         // Find the category in allCategories to get its group
         const category = allCategories.find(cat => cat.name === categoryName);
         if (!category) return false;
-        
+
         return category.group.toLowerCase() === currentFilter;
     });
 }
@@ -260,9 +260,9 @@ function renderMenu() {
                             <div class="menu-item-header">
                                 <h3>${item.name}</h3>
                                 <span class="price">
-                                    ₦${formatPriceWithCommas(currentService === 'room'
-                                        ? (item.price_room || item.price_restaurant || '')
-                                        : (item.price_restaurant || item.price_room || ''))}
+                                    ₦ ${formatPriceWithCommas(currentService === 'room'
+            ? (item.price_room || item.price_restaurant || '')
+            : (item.price_restaurant || item.price_room || ''))}
                                 </span>
                             </div>
                             <p>${item.description || ''}</p>
@@ -281,7 +281,7 @@ function renderMenu() {
 function renderCategoryScroll(categories) {
     const scrollDiv = document.querySelector('.category-scroll');
     if (!scrollDiv) return;
-    
+
     scrollDiv.innerHTML = '';
     categories.forEach(cat => {
         const btn = document.createElement('button');
@@ -331,7 +331,7 @@ function renderMenuByCategory(menuDataRaw) {
                     <div class="menu-item">
                         <span class="item-name">${item.name}</span>
                         <span class="dots"></span>
-                        <span class="item-price">₦${formatPriceWithCommas(currentService === 'room' ? (item.price_room || item.price_restaurant || '') : (item.price_restaurant || item.price_room || ''))}</span>
+                        <span class="item-price">₦ ${formatPriceWithCommas(currentService === 'room' ? (item.price_room || item.price_restaurant || '') : (item.price_restaurant || item.price_room || ''))}</span>
                     </div>
                 `).join('')}
             </div>
@@ -340,7 +340,7 @@ function renderMenuByCategory(menuDataRaw) {
     });
 
     // Highlight active category as user scrolls
-    window.addEventListener('scroll', function() {
+    window.addEventListener('scroll', function () {
         let activeCat = null;
         categories.forEach(cat => {
             const section = document.getElementById('cat-' + cat.replace(/\s+/g, '-').toLowerCase());
@@ -367,17 +367,17 @@ function fetchMenuData() {
     fetch('https://aaet.onrender.com/api/menu')
         .then(res => res.json())
         .then(data => {
-            console.log('Raw menu data received:', data);
+            // console.log('Raw menu data received:', data);
             menuDataRaw = data;
-            
+
             // If categories API failed, extract categories from menu data
             if (!Array.isArray(allCategories) || allCategories.length === 0) {
                 const extractedCategories = extractCategoriesFromMenu(data);
-                console.log('Extracted categories from menu data:', extractedCategories);
+                // console.log('Extracted categories from menu data:', extractedCategories);
                 allCategories = extractedCategories;
                 renderCategoryNavbar(extractedCategories);
             }
-            
+
             renderMenuByCategory(menuDataRaw);
             hideLoadingState();
         })
@@ -423,19 +423,19 @@ function selectService(type) {
 
 // Format price with currency
 function formatPrice(price) {
-    return `₦${price.toLocaleString()}`;
+    return `₦ ${price.toLocaleString()}`;
 }
 
 // Create menu item HTML with list-style layout (Cristiano style)
 function createMenuItemHTML(item) {
     const price = currentService === 'room' ? item.price.room : item.price.restaurant;
     const tagsHTML = item.tags ? item.tags.map(tag => `<span class="menu-item-tag">${tag}</span>`).join('') : '';
-    
+
     return `
         <div class="menu-item">
             <div class="menu-item-header">
                 <h3>${item.name}</h3>
-                <span class="price">₦${formatPriceWithCommas(price)}</span>
+                <span class="price">₦ ${formatPriceWithCommas(price)}</span>
             </div>
             <p>${item.description}</p>
             ${tagsHTML ? `<div class="menu-item-tags">${tagsHTML}</div>` : ''}
@@ -448,12 +448,12 @@ function showItemDetails(itemId) {
     // Find the item
     const allItems = [...menuData.specials, ...menuData.foods, ...menuData.drinks];
     const item = allItems.find(item => item._id === itemId);
-    
+
     if (item) {
         // For now, just log the item details
         // This can be expanded to show a modal with more details
-        console.log('Item details:', item);
-        
+        // console.log('Item details:', item);
+
         // You can add a modal here to show more details
         // showItemModal(item);
     }
@@ -464,7 +464,7 @@ async function fetchAndLogMenuData() {
     try {
         const response = await fetch('https://aaet.onrender.com/api/menu');
         const data = await response.json();
-        console.log('Menu data from /api/menu:', data);
+        // console.log('Menu data from /api/menu:', data);
     } catch (error) {
         console.error('Error fetching /api/menu:', error);
     }
@@ -472,7 +472,7 @@ async function fetchAndLogMenuData() {
 
 // Wrap async event listeners to catch errors
 function safeAsyncListener(fn) {
-    return function(event) {
+    return function (event) {
         Promise.resolve(fn(event)).catch(err => {
             console.error('Async event listener error:', err);
         });
@@ -489,13 +489,13 @@ function getQueryParam(name) {
 }
 
 // Initial setup
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     fetchAndLogMenuData();
     // Fetch categories first
     fetchCategories();
     // Fetch menu data when page loads
     fetchMenuData();
-    
+
     // Add loading state for section banner images
     const sectionBanners = document.querySelectorAll('.section-banner');
     sectionBanners.forEach(banner => {
@@ -503,10 +503,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (backgroundImage) {
             const url = backgroundImage.replace(/url\(['"]?(.*?)['"]?\)/i, '$1');
             const img = new Image();
-            img.onload = function() {
+            img.onload = function () {
                 banner.style.opacity = '1';
             };
-            img.onerror = function() {
+            img.onerror = function () {
                 // Fallback background if image fails to load
                 banner.style.backgroundImage = 'linear-gradient(135deg, var(--accent-color), #c70512)';
             };
