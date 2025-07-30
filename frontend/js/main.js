@@ -15,31 +15,52 @@ function formatPriceWithCommas(price) {
 let currentService = null; // Always start with null to show modal
 let allCategories = []; // Store all categories
 let currentFilter = 'food'; // Default to food filter
+let menuDataRaw = []; // Store menu data globally
 
-// Fetch categories from API
-async function fetchCategories() {
+// Fetch and render menu with categories
+async function fetchAndRenderMenu() {
+    showLoadingState();
+    
     try {
-        const response = await fetch('https://aaet.onrender.com/api/menu/categories');
-        const data = await response.json();
-        console.log('Categories fetched:', data);
+        // Fetch both menu items and categories in parallel
+        const [menuResponse, categoriesResponse] = await Promise.all([
+            fetch('https://aaet.onrender.com/api/menu'),
+            fetch('https://aaet.onrender.com/api/menu/categories')
+        ]);
+        
+        const [menuData, categoriesData] = await Promise.all([
+            menuResponse.json(),
+            categoriesResponse.json()
+        ]);
 
-        // Check if data is an array (success) or has error message
-        if (Array.isArray(data)) {
-            allCategories = data;
-            renderCategoryNavbar(data);
+        // Store menu data globally
+        menuDataRaw = menuData;
+
+        // Process categories
+        if (Array.isArray(categoriesData)) {
+            console.log('Categories fetched:', categoriesData);
+            
+            // Sort categories by sort_order if available, otherwise maintain original order
+            allCategories = [...categoriesData].sort((a, b) => {
+                const orderA = a.sort_order !== undefined ? a.sort_order : 9999;
+                const orderB = b.sort_order !== undefined ? b.sort_order : 9999;
+                return orderA - orderB;
+            });
+            
+            renderCategoryNavbar(allCategories);
         } else {
-            // console.warn('Categories API returned error:', data.message || 'Unknown error');
-            // Set empty array to prevent errors
-            allCategories = [];
-            // Create basic navigation without categories
+            console.warn('Categories API returned unexpected format, extracting from menu data');
+            allCategories = extractCategoriesFromMenu(menuDataRaw);
             renderBasicNavbar();
         }
+
+        // Initial render with all items
+        renderMenuByCategory(menuDataRaw);
+        hideLoadingState();
     } catch (error) {
-        console.error('Error fetching categories:', error);
-        // Set empty array to prevent errors
-        allCategories = [];
-        // Create basic navigation without categories
-        renderBasicNavbar();
+        console.error('Error fetching menu data:', error);
+        hideLoadingState();
+        showError('Failed to load menu. Please try again later.');
     }
 }
 
@@ -143,19 +164,54 @@ function renderCategoryNavbar(categories) {
 // Set active filter and re-render menu
 function setActiveFilter(filter) {
     currentFilter = filter;
-
-    // Update active state in navbar
-    document.querySelectorAll('.nav-links a').forEach(link => {
-        link.classList.remove('active');
+    
+    // Update active state in navigation
+    document.querySelectorAll('.nav-links a, .category-scroll-btn').forEach(btn => {
+        btn.classList.remove('active');
     });
-
-    const activeLink = document.querySelector(`.nav-links a[onclick*="${filter}"]`);
-    if (activeLink) {
-        activeLink.classList.add('active');
+    
+    // If it's a group filter (food/drinks)
+    if (['food', 'drinks'].includes(filter)) {
+        // Find and activate the group button
+        const groupBtn = Array.from(document.querySelectorAll('.nav-links a'))
+            .find(btn => btn.textContent.toLowerCase() === filter);
+        if (groupBtn) groupBtn.classList.add('active');
+        
+        // Filter categories by group
+        const filteredCategories = allCategories.filter(cat => 
+            cat.group && cat.group.toLowerCase() === filter
+        );
+        
+        if (menuDataRaw && menuDataRaw.length > 0) {
+            // Filter menu items by the selected group's categories
+            const categoryNames = filteredCategories.map(cat => cat.name);
+            const filteredItems = menuDataRaw.filter(item => {
+                const category = item.category_id?.name || 'Uncategorized';
+                return categoryNames.includes(category);
+            });
+            
+            renderMenuByCategory(filteredItems);
+        }
+    } else {
+        // Handle category filter
+        const btn = document.querySelector(`.category-scroll-btn[data-category="${filter}"]`);
+        if (btn) btn.classList.add('active');
+        
+        if (menuDataRaw && menuDataRaw.length > 0) {
+            const filteredItems = menuDataRaw.filter(item => {
+                const category = item.category_id?.name || 'Uncategorized';
+                return category.toLowerCase() === filter.toLowerCase();
+            });
+            
+            renderMenuByCategory(filteredItems);
+            
+            // Scroll to the category
+            const section = document.getElementById('cat-' + filter.replace(/\s+/g, '-'));
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
     }
-
-    // Re-render menu with filter
-    renderMenuByCategory(menuDataRaw);
 }
 
 // Filter menu items based on current filter and category groups
@@ -308,19 +364,39 @@ function renderMenuByCategory(menuDataRaw) {
     // Filter items based on current filter
     const filteredItems = filterMenuItems(menuDataRaw);
 
-    // Group items by category name
-    const grouped = {};
-    filteredItems.forEach(item => {
-        const category = item.category_id && item.category_id.name ? item.category_id.name : 'Uncategorized';
-        if (!grouped[category]) grouped[category] = [];
-        grouped[category].push(item);
+    // Create a map of category names to their sort_order
+    const categoryOrderMap = {};
+    allCategories.forEach(cat => {
+        categoryOrderMap[cat.name] = cat.sort_order !== undefined ? cat.sort_order : 9999;
     });
 
-    // Render category scroll bar
-    const categories = Object.keys(grouped);
+    // Group items by category
+    const categories = [];
+    const itemsByCategory = {};
+    
+    // First pass: collect categories in order of sort_order
+    filteredItems.forEach(item => {
+        const category = item.category_id?.name || 'Uncategorized';
+        if (!itemsByCategory[category]) {
+            itemsByCategory[category] = [];
+            categories.push(category);
+        }
+        itemsByCategory[category].push(item);
+    });
+
+    // Sort categories by their sort_order
+    categories.sort((a, b) => {
+        const orderA = categoryOrderMap[a] !== undefined ? categoryOrderMap[a] : 9999;
+        const orderB = categoryOrderMap[b] !== undefined ? categoryOrderMap[b] : 9999;
+        return orderA - orderB;
+    });
+
+    // Render category scroll with the sorted order
     renderCategoryScroll(categories);
 
-    Object.entries(grouped).forEach(([category, items]) => {
+    // Render menu sections in the sorted order
+    categories.forEach(category => {
+        const items = itemsByCategory[category];
         const section = document.createElement('section');
         section.className = 'menu-section';
         section.id = 'cat-' + category.replace(/\s+/g, '-').toLowerCase();
@@ -329,7 +405,10 @@ function renderMenuByCategory(menuDataRaw) {
             <div class="menu-list">
                 ${items.map(item => `
                     <div class="menu-item">
-                        <span class="item-name">${item.name}</span>
+                        <div class="item-details">
+                            <span class="item-name">${item.name}</span>
+                            ${item.description ? `<p class="item-description">${item.description}</p>` : ''}
+                        </div>
                         <span class="dots"></span>
                         <span class="item-price">₦ ${formatPriceWithCommas(currentService === 'room' ? (item.price_room || item.price_restaurant || '') : (item.price_restaurant || item.price_room || ''))}</span>
                     </div>
@@ -342,18 +421,38 @@ function renderMenuByCategory(menuDataRaw) {
     // Highlight active category as user scrolls
     window.addEventListener('scroll', function () {
         let activeCat = null;
+        const scrollPosition = window.scrollY + 150; // Add offset for fixed header
+        
+        // Find which category is currently in view
         categories.forEach(cat => {
             const section = document.getElementById('cat-' + cat.replace(/\s+/g, '-').toLowerCase());
             if (section) {
                 const rect = section.getBoundingClientRect();
-                if (rect.top <= 120 && rect.bottom > 120) {
+                if (rect.top <= 150 && rect.bottom > 150) {
                     activeCat = cat;
                 }
             }
         });
+
+        // Update active state in the category scroll
         document.querySelectorAll('.category-scroll-btn').forEach(btn => {
             if (btn.getAttribute('data-category') === activeCat) {
                 btn.classList.add('active');
+                // Scroll the category scroll container to make the active button visible
+                const scrollContainer = btn.closest('.category-scroll');
+                if (scrollContainer) {
+                    const containerRect = scrollContainer.getBoundingClientRect();
+                    const btnRect = btn.getBoundingClientRect();
+                    
+                    // Check if button is outside the visible area
+                    if (btnRect.left < containerRect.left) {
+                        // Scroll left
+                        scrollContainer.scrollLeft -= (containerRect.left - btnRect.left) - 10;
+                    } else if (btnRect.right > containerRect.right) {
+                        // Scroll right
+                        scrollContainer.scrollLeft += (btnRect.right - containerRect.right) + 10;
+                    }
+                }
             } else {
                 btn.classList.remove('active');
             }
@@ -361,31 +460,68 @@ function renderMenuByCategory(menuDataRaw) {
     });
 }
 
-// Replace old renderMenu call with new one after fetching data
-function fetchMenuData() {
-    showLoadingState();
-    fetch('https://aaet.onrender.com/api/menu')
-        .then(res => res.json())
-        .then(data => {
-            // console.log('Raw menu data received:', data);
-            menuDataRaw = data;
-
-            // If categories API failed, extract categories from menu data
-            if (!Array.isArray(allCategories) || allCategories.length === 0) {
-                const extractedCategories = extractCategoriesFromMenu(data);
-                // console.log('Extracted categories from menu data:', extractedCategories);
-                allCategories = extractedCategories;
-                renderCategoryNavbar(extractedCategories);
-            }
-
-            renderMenuByCategory(menuDataRaw);
-            hideLoadingState();
-        })
-        .catch(err => {
-            showErrorState('Failed to load menu.');
-            hideLoadingState();
-        });
+// Fetch menu data from /api/menu and log the response
+async function fetchAndLogMenuData() {
+    try {
+        const response = await fetch('https://aaet.onrender.com/api/menu');
+        const data = await response.json();
+        // console.log('Menu data from /api/menu:', data);
+    } catch (error) {
+        console.error('Error fetching /api/menu:', error);
+    }
 }
+
+// Wrap async event listeners to catch errors
+function safeAsyncListener(fn) {
+    return function (event) {
+        Promise.resolve(fn(event)).catch(err => {
+            console.error('Async event listener error:', err);
+        });
+    };
+}
+
+// Example usage for async listeners (if any):
+// document.querySelector('selector').addEventListener('event', safeAsyncListener(async (e) => { ... }));
+
+// Helper: Get query parameter from URL
+function getQueryParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
+// Initial setup
+document.addEventListener('DOMContentLoaded', function () {
+    fetchAndRenderMenu();
+    
+    // Rest of your existing DOMContentLoaded code...
+    const serviceParam = getQueryParam('service');
+    if (serviceParam === 'room' || serviceParam === 'restaurant') {
+        selectService(serviceParam);
+    }
+});
+
+// Navigation active state
+const navLinks = document.querySelectorAll('.nav-links a');
+navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        navLinks.forEach(l => l.classList.remove('active'));
+        e.target.classList.add('active');
+    });
+});
+
+// Smooth scrolling for navigation links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
 
 // Show loading state
 function showLoadingState() {
@@ -459,94 +595,39 @@ function showItemDetails(itemId) {
     }
 }
 
-// Fetch menu data from /api/menu and log the response
-async function fetchAndLogMenuData() {
-    try {
-        const response = await fetch('https://aaet.onrender.com/api/menu');
-        const data = await response.json();
-        // console.log('Menu data from /api/menu:', data);
-    } catch (error) {
-        console.error('Error fetching /api/menu:', error);
+// Service Modal Functions
+function showServiceModal() {
+    const modal = document.getElementById('serviceModal');
+    if (modal) {
+        modal.style.display = 'flex';
     }
 }
 
-// Wrap async event listeners to catch errors
-function safeAsyncListener(fn) {
-    return function (event) {
-        Promise.resolve(fn(event)).catch(err => {
-            console.error('Async event listener error:', err);
-        });
-    };
+function hideServiceModal() {
+    const modal = document.getElementById('serviceModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
-// Example usage for async listeners (if any):
-// document.querySelector('selector').addEventListener('event', safeAsyncListener(async (e) => { ... }));
-
-// Helper: Get query parameter from URL
-function getQueryParam(name) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(name);
-}
-
-// Initial setup
-document.addEventListener('DOMContentLoaded', function () {
-    fetchAndLogMenuData();
-    // Fetch categories first
-    fetchCategories();
-    // Fetch menu data when page loads
-    fetchMenuData();
-
-    // Add loading state for section banner images
-    const sectionBanners = document.querySelectorAll('.section-banner');
-    sectionBanners.forEach(banner => {
-        const backgroundImage = banner.style.backgroundImage;
-        if (backgroundImage) {
-            const url = backgroundImage.replace(/url\(['"]?(.*?)['"]?\)/i, '$1');
-            const img = new Image();
-            img.onload = function () {
-                banner.style.opacity = '1';
-            };
-            img.onerror = function () {
-                // Fallback background if image fails to load
-                banner.style.backgroundImage = 'linear-gradient(135deg, var(--accent-color), #c70512)';
-            };
-            img.src = url;
-        }
-    });
-
-    // Check for service param in URL
-    const serviceParam = getQueryParam('service');
-    if (serviceParam === 'room' || serviceParam === 'restaurant') {
-        currentService = serviceParam;
-        document.getElementById('serviceModal').style.display = 'none';
+function selectService(serviceType) {
+    currentService = serviceType;
+    hideServiceModal();
+    // You might want to save the selection to localStorage
+    localStorage.setItem('selectedService', serviceType);
+    // Refresh the menu if needed
+    if (menuDataRaw.length > 0) {
         renderMenuByCategory(menuDataRaw);
+    }
+}
+
+// Add this to your initialization code (e.g., at the end of fetchAndRenderMenu or in a DOMContentLoaded event)
+document.addEventListener('DOMContentLoaded', function () {
+    // Show modal if no service is selected
+    const savedService = localStorage.getItem('selectedService');
+    if (!savedService) {
+        showServiceModal();
     } else {
-        // Show modal if service type not selected
-        if (!currentService) {
-            document.getElementById('serviceModal').style.display = 'block';
-        }
+        currentService = savedService;
     }
 });
-
-// Navigation active state
-const navLinks = document.querySelectorAll('.nav-links a');
-navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        navLinks.forEach(l => l.classList.remove('active'));
-        e.target.classList.add('active');
-    });
-});
-
-// Smooth scrolling for navigation links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-    });
-}); 
