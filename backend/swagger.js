@@ -5,8 +5,8 @@ const doc = {
         title: 'Jayéọba API',
         description: 'Jayéọba API'
     },
-    host: ['localhost:8000'],
-    // host: ['aaet.onrender.com'],
+    // host: ['localhost:8000'],
+    host: ['aaet.onrender.com'],
     schemes: ['http', 'https']
 };
 
