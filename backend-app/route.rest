@@ -1,0 +1,178 @@
+# GET http://localhost:8000/test-email
+
+
+
+
+
+### Get all menu
+GET http://localhost:8000/api/menu  
+Accept: application/json
+Content-Type: application/json
+
+
+### Get all menu by category
+GET http://localhost:8000/api/menu/category/2
+Accept: application/json
+Content-Type: application/json
+
+### Get all categories
+GET http://localhost:8000/api/menu/categories
+Accept: application/json
+Content-Type: application/json
+
+### Get single menu by id
+GET http://localhost:8000/api/menu/13
+Accept: application/json
+Content-Type: application/json
+
+
+
+
+
+### Register
+POST http://localhost:8000/api/admin/register
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "email": "admin@example.com",
+    "password": "admin123",
+    "username": "admin",
+    "password_confirmation": "admin123"
+}
+
+### Login
+POST http://localhost:8000/api/admin/login
+Accept: application/json
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin123"
+}
+
+### Get user
+GET http://localhost:8000/api/admin/user
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzU0MTAxMDk3LCJleHAiOjE3NTQxMDQ2OTcsIm5iZiI6MTc1NDEwMTA5NywianRpIjoiM3Jta3pRYTJaeTZtaDRYVCIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3Iiwicm9sZSI6ImFkbWluIn0.KXJ3zhaHE57tQbHmXxzc3kNqKjWlYoTBjjulGfdqL1A
+
+
+### Logout
+POST http://localhost:8000/api/admin/logout
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzU0MDQxMjAyLCJleHAiOjE3NTQwNDQ4MDIsIm5iZiI6MTc1NDA0MTIwMiwianRpIjoiWEk5WFM1V2JNRUxNUkVFbCIsInN1YiI6IjIiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3Iiwicm9sZSI6bnVsbH0.49JykidwHZiI-9JYazYynrgCgWkey_DJUgoxcKX6J2E
+
+
+### Reset password
+POST http://localhost:8000/api/admin/reset-password
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzU0MDQxMjAyLCJleHAiOjE3NTQwNDQ4MDIsIm5iZiI6MTc1NDA0MTIwMiwianRpIjoiWEk5WFM1V2JNRUxNUkVFbCIsInN1YiI6IjIiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3Iiwicm9sZSI6bnVsbH0.49JykidwHZiI-9JYazYynrgCgWkey_DJUgoxcKX6J2E
+
+{
+    "username": "admin",
+    "password": "password123",
+    "password_confirmation": "password123"
+}
+
+### Get all categories
+GET http://localhost:8000/api/admin/categories
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzU0MDQxMjAyLCJleHAiOjE3NTQwNDQ4MDIsIm5iZiI6MTc1NDA0MTIwMiwianRpIjoiWEk5WFM1V2JNRUxNUkVFbCIsInN1YiI6IjIiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3Iiwicm9sZSI6bnVsbH0.49JykidwHZiI-9JYazYynrgCgWkey_DJUgoxcKX6J2E
+
+
+### Get single category by id
+GET http://localhost:8000/api/admin/categories/5
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzU0MDQxMjAyLCJleHAiOjE3NTQwNDQ4MDIsIm5iZiI6MTc1NDA0MTIwMiwianRpIjoiWEk5WFM1V2JNRUxNUkVFbCIsInN1YiI6IjIiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3Iiwicm9sZSI6bnVsbH0.49JykidwHZiI-9JYazYynrgCgWkey_DJUgoxcKX6J2E
+
+### Create category
+POST http://localhost:8000/api/admin/categories
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzU0MDQxMjAyLCJleHAiOjE3NTQwNDQ4MDIsIm5iZiI6MTc1NDA0MTIwMiwianRpIjoiWEk5WFM1V2JNRUxNUkVFbCIsInN1YiI6IjIiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3Iiwicm9sZSI6bnVsbH0.49JykidwHZiI-9JYazYynrgCgWkey_DJUgoxcKX6J2E
+
+{
+    "name": "Category 1",
+    "group": "FOOD"
+}
+
+### Update category
+PUT http://localhost:8000/api/admin/categories/27
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzU0MDQxMjAyLCJleHAiOjE3NTQwNDQ4MDIsIm5iZiI6MTc1NDA0MTIwMiwianRpIjoiWEk5WFM1V2JNRUxNUkVFbCIsInN1YiI6IjIiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3Iiwicm9sZSI6bnVsbH0.49JykidwHZiI-9JYazYynrgCgWkey_DJUgoxcKX6J2E
+
+{
+    "name": "Category 1 Updated",
+    "sort_order": 1,
+    "group": "FOOD"
+}
+
+### Delete category
+DELETE http://localhost:8000/api/admin/categories/27
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzU0MDQxMjAyLCJleHAiOjE3NTQwNDQ4MDIsIm5iZiI6MTc1NDA0MTIwMiwianRpIjoiWEk5WFM1V2JNRUxNUkVFbCIsInN1YiI6IjIiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3Iiwicm9sZSI6bnVsbH0.49JykidwHZiI-9JYazYynrgCgWkey_DJUgoxcKX6J2E
+
+
+### Menu Management
+
+### Get all menu
+GET http://localhost:8000/api/admin/menu
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzU0MDQxMjAyLCJleHAiOjE3NTQwNDQ4MDIsIm5iZiI6MTc1NDA0MTIwMiwianRpIjoiWEk5WFM1V2JNRUxNUkVFbCIsInN1YiI6IjIiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3Iiwicm9sZSI6bnVsbH0.49JykidwHZiI-9JYazYynrgCgWkey_DJUgoxcKX6J2E
+
+
+### Get single menu by id
+GET http://localhost:8000/api/admin/menu/14
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzU0MDQxMjAyLCJleHAiOjE3NTQwNDQ4MDIsIm5iZiI6MTc1NDA0MTIwMiwianRpIjoiWEk5WFM1V2JNRUxNUkVFbCIsInN1YiI6IjIiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3Iiwicm9sZSI6bnVsbH0.49JykidwHZiI-9JYazYynrgCgWkey_DJUgoxcKX6J2E
+
+
+### Create Menu
+POST http://localhost:8000/api/admin/menu
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzU0MDQxMjAyLCJleHAiOjE3NTQwNDQ4MDIsIm5iZiI6MTc1NDA0MTIwMiwianRpIjoiWEk5WFM1V2JNRUxNUkVFbCIsInN1YiI6IjIiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3Iiwicm9sZSI6bnVsbH0.49JykidwHZiI-9JYazYynrgCgWkey_DJUgoxcKX6J2E
+
+{
+    "name": "Menu 1",
+    "description": "Description 1",
+    "category_id": 1,
+    "price_room": 100,
+    "price_restaurant": 150,
+    "available": true,
+    "image_url": "https://example.com/image.jpg",
+    "tags": ""
+}
+
+### Update Menu
+PUT http://localhost:8000/api/admin/menu/235
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzU0MDQxMjAyLCJleHAiOjE3NTQwNDQ4MDIsIm5iZiI6MTc1NDA0MTIwMiwianRpIjoiWEk5WFM1V2JNRUxNUkVFbCIsInN1YiI6IjIiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3Iiwicm9sZSI6bnVsbH0.49JykidwHZiI-9JYazYynrgCgWkey_DJUgoxcKX6J2E
+
+{
+    "name": "Menu 1 Updated",
+    "description": "Description 1",
+    "category_id": 1,
+    "price_room": 100,
+    "price_restaurant": 150,
+    "available": true,
+    "image_url": "https://example.com/image.jpg",
+    "tags": ""
+}
+
+### Delete Menu
+DELETE http://localhost:8000/api/admin/menu/235
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAvYXBpL2FkbWluL2xvZ2luIiwiaWF0IjoxNzU0MDQxMjAyLCJleHAiOjE3NTQwNDQ4MDIsIm5iZiI6MTc1NDA0MTIwMiwianRpIjoiWEk5WFM1V2JNRUxNUkVFbCIsInN1YiI6IjIiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3Iiwicm9sZSI6bnVsbH0.49JykidwHZiI-9JYazYynrgCgWkey_DJUgoxcKX6J2E
