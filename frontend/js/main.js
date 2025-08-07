@@ -1,70 +1,121 @@
-// Global menu data variable
-let menuData = {
-    specials: [],
-    foods: [],
-    drinks: []
+/**
+ * Restaurant Menu Application
+ * 
+ * This application manages a restaurant menu with categories, filtering, and service selection.
+ * The code is organized into clear sections for easy understanding and maintenance.
+ */
+
+// ============================================================================
+// GLOBAL STATE MANAGEMENT
+// ============================================================================
+
+/**
+ * Application state - all global variables in one place for easy management
+ */
+const AppState = {
+    // Menu data
+    menuData: {
+        specials: [],
+        foods: [],
+        drinks: []
+    },
+    rawMenuData: [], // Raw data from API
+
+    // Service and filtering
+    currentService: null, // 'room' or 'restaurant'
+    currentFilter: 'food', // Current active filter
+
+    // Categories
+    allCategories: [], // Categories from API
+    categoryGroups: ['FOOD', 'DRINKS'] // Available category groups
 };
 
-// Format price with commas
-function formatPriceWithCommas(price) {
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Format price with commas for better readability
+ * @param {number|string} price - The price to format
+ * @returns {string} Formatted price string
+ */
+function formatPrice(price) {
     if (price === null || price === undefined || price === '') return '';
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-// Service type handling
-let currentService = null; // Always start with null to show modal
-let allCategories = []; // Store all categories
-let currentFilter = 'food'; // Default to food filter
-let menuDataRaw = []; // Store menu data globally
-
-// Fetch and render menu with categories
-async function fetchAndRenderMenu() {
-    showLoadingState();
-    
-    try {
-        // Fetch both menu items and categories in parallel
-        const [menuResponse, categoriesResponse] = await Promise.all([
-            fetch('https://aaet.onrender.com/api/menu'),
-            fetch('https://aaet.onrender.com/api/menu/categories')
-        ]);
-        
-        const [menuData, categoriesData] = await Promise.all([
-            menuResponse.json(),
-            categoriesResponse.json()
-        ]);
-
-        // Store menu data globally
-        menuDataRaw = menuData;
-
-        // Process categories
-        if (Array.isArray(categoriesData)) {
-            console.log('Categories fetched:', categoriesData);
-            
-            // Sort categories by sort_order if available, otherwise maintain original order
-            allCategories = [...categoriesData].sort((a, b) => {
-                const orderA = a.sort_order !== undefined ? a.sort_order : 9999;
-                const orderB = b.sort_order !== undefined ? b.sort_order : 9999;
-                return orderA - orderB;
-            });
-            
-            renderCategoryNavbar(allCategories);
-        } else {
-            console.warn('Categories API returned unexpected format, extracting from menu data');
-            allCategories = extractCategoriesFromMenu(menuDataRaw);
-            renderBasicNavbar();
-        }
-
-        // Initial render with all items
-        renderMenuByCategory(menuDataRaw);
-        hideLoadingState();
-    } catch (error) {
-        console.error('Error fetching menu data:', error);
-        hideLoadingState();
-        showError('Failed to load menu. Please try again later.');
+/**
+ * Get the appropriate price based on current service type
+ * @param {Object} item - Menu item with price_room and price_restaurant
+ * @returns {string} Formatted price string
+ */
+function getItemPrice(item) {
+    // Debug: Log the item structure to understand the price format
+    if (!item.price_room && !item.price_restaurant) {
+        console.warn('Menu item missing price data:', item);
     }
+
+    const price = AppState.currentService === 'room'
+        ? (item.price_room || item.price_restaurant || '')
+        : (item.price_restaurant || item.price_room || '');
+
+    return `₦${formatPrice(price)}`;
 }
 
-// Extract categories from menu data
+/**
+ * Get query parameter from URL
+ * @param {string} name - Parameter name
+ * @returns {string|null} Parameter value
+ */
+function getQueryParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
+/**
+ * Create a safe event listener that catches errors
+ * @param {Function} fn - Function to wrap
+ * @returns {Function} Safe event listener
+ */
+function createSafeEventListener(fn) {
+    return function (event) {
+        Promise.resolve(fn(event)).catch(err => {
+            console.error('Event listener error:', err);
+        });
+    };
+}
+
+// ============================================================================
+// CATEGORY MANAGEMENT
+// ============================================================================
+
+/**
+ * Category classification patterns
+ */
+const CategoryPatterns = {
+    FOOD: /starter|pepper soup|nigerian dish|grill|continental|sandwich|burger|pizza|chinese|indian|pasta|dessert|nigerian meal|snack|kids|extra/,
+    DRINKS: /non alcoholic|coffee|wine|beer|spirit|champagne|cocktail|mocktail/
+};
+
+/**
+ * Determine which group a category belongs to
+ * @param {string} categoryName - Name of the category
+ * @returns {string} Group name ('FOOD' or 'DRINKS')
+ */
+function classifyCategory(categoryName) {
+    const name = categoryName.toLowerCase();
+
+    if (CategoryPatterns.FOOD.test(name)) return 'FOOD';
+    if (CategoryPatterns.DRINKS.test(name)) return 'DRINKS';
+
+    return 'FOOD'; // Default to FOOD if unsure
+}
+
+/**
+ * Extract categories from menu data when API categories are not available
+ * @param {Array} menuData - Raw menu data
+ * @returns {Array} Array of category objects
+ */
 function extractCategoriesFromMenu(menuData) {
     if (!Array.isArray(menuData)) return [];
 
@@ -76,7 +127,7 @@ function extractCategoriesFromMenu(menuData) {
             if (!categories.has(categoryName)) {
                 categories.set(categoryName, {
                     name: categoryName,
-                    group: determineGroupFromCategory(categoryName)
+                    group: classifyCategory(categoryName)
                 });
             }
         }
@@ -85,60 +136,206 @@ function extractCategoriesFromMenu(menuData) {
     return Array.from(categories.values());
 }
 
-// Determine group based on category name
-function determineGroupFromCategory(categoryName) {
-    const name = categoryName.toLowerCase();
-
-    // Food categories
-    if (/starter|pepper soup|nigerian dish|grill|continental|sandwich|burger|pizza|chinese|indian|pasta|dessert|nigerian meal|snack|kids|extra/.test(name)) {
-        return 'FOOD';
+/**
+ * Get category name for a menu item
+ * @param {Object} item - Menu item
+ * @returns {string} Category name
+ */
+function getItemCategoryName(item) {
+    // Try to find category by ID first (API categories)
+    if (Array.isArray(AppState.allCategories) && AppState.allCategories.length > 0) {
+        const category = AppState.allCategories.find(cat => cat.id === item.category_id);
+        if (category) return category.name;
     }
 
-    // Drinks categories
-    if (/non alcoholic|coffee|wine|beer|spirit|champagne|cocktail|mocktail/.test(name)) {
-        return 'DRINKS';
+    // Fallback to old format
+    if (item.category_id && item.category_id.name) {
+        return item.category_id.name;
     }
 
-    // Default to FOOD if unsure
-    return 'FOOD';
+    return 'Uncategorized';
 }
 
-// Render basic navbar when categories are not available
+// ============================================================================
+// API DATA FETCHING
+// ============================================================================
+
+/**
+ * Fetch categories from the API
+ */
+async function fetchCategories() {
+    try {
+        const response = await fetch('https://menu.aaentertainment.ng/api/menu/categories');
+        const data = await response.json();
+        console.log('Categories fetched:', data);
+
+        if (Array.isArray(data)) {
+            AppState.allCategories = data;
+            renderCategoryNavbar(data);
+            AppState.currentFilter = 'food';
+        } else {
+            console.warn('Categories API returned error:', data.message || 'Unknown error');
+            AppState.allCategories = [];
+            renderBasicNavbar();
+        }
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        AppState.allCategories = [];
+        renderBasicNavbar();
+    }
+}
+
+/**
+ * Fetch menu data from the API
+ */
+async function fetchMenuData() {
+    showLoadingState();
+
+    try {
+        const response = await fetch('https://menu.aaentertainment.ng/api/menu');
+        const data = await response.json();
+        console.log('Raw menu data received:', data);
+
+        // Debug: Log the first few items to understand the data structure
+        if (Array.isArray(data) && data.length > 0) {
+            console.log('Sample menu item structure:', data[0]);
+            console.log('Item tags type:', typeof data[0].tags, 'Value:', data[0].tags);
+        }
+
+        AppState.rawMenuData = data;
+
+        // If categories API failed, extract categories from menu data
+        if (!Array.isArray(AppState.allCategories) || AppState.allCategories.length === 0) {
+            const extractedCategories = extractCategoriesFromMenu(data);
+            console.log('Extracted categories from menu data:', extractedCategories);
+            AppState.allCategories = extractedCategories;
+            renderCategoryNavbar(extractedCategories);
+            AppState.currentFilter = 'food';
+
+            const foodCategories = extractedCategories.filter(cat => cat.group === 'FOOD');
+            renderCategoryScroll(foodCategories.map(cat => cat.name));
+        }
+
+        renderMenuByCategory();
+        hideLoadingState();
+    } catch (error) {
+        console.error('Error fetching menu data:', error);
+        showErrorState('Failed to load menu.');
+        hideLoadingState();
+    }
+}
+
+// ============================================================================
+// MENU FILTERING
+// ============================================================================
+
+/**
+ * Filter menu items based on current filter and category groups
+ * @param {Array} items - Menu items to filter
+ * @returns {Array} Filtered menu items
+ */
+function filterMenuItems(items) {
+    if (AppState.currentFilter === 'all') return items;
+
+    // If no categories available, use basic filtering
+    if (!Array.isArray(AppState.allCategories) || AppState.allCategories.length === 0) {
+        return items.filter(item => {
+            const categoryName = getItemCategoryName(item).toLowerCase();
+
+            if (AppState.currentFilter === 'food') {
+                return CategoryPatterns.FOOD.test(categoryName);
+            } else if (AppState.currentFilter === 'drinks') {
+                return CategoryPatterns.DRINKS.test(categoryName);
+            }
+
+            return true;
+        });
+    }
+
+    // Use category groups for filtering
+    return items.filter(item => {
+        const categoryName = getItemCategoryName(item);
+        const category = AppState.allCategories.find(cat => cat.name === categoryName);
+
+        if (!category) return false;
+        return category.group.toLowerCase() === AppState.currentFilter;
+    });
+}
+
+/**
+ * Group menu items by category name
+ * @param {Array} items - Menu items to group
+ * @returns {Object} Grouped items by category
+ */
+function groupMenuByCategory(items) {
+    const grouped = {};
+
+    items.forEach(item => {
+        const categoryName = getItemCategoryName(item);
+        if (!grouped[categoryName]) grouped[categoryName] = [];
+        grouped[categoryName].push(item);
+    });
+
+    return grouped;
+}
+
+// ============================================================================
+// NAVIGATION RENDERING
+// ============================================================================
+
+/**
+ * Create a navigation button element
+ * @param {string} text - Button text
+ * @param {string} group - Group identifier
+ * @param {boolean} isActive - Whether button should be active
+ * @param {Function} onClick - Click handler
+ * @returns {HTMLElement} Button element
+ */
+function createNavButton(text, group, isActive, onClick) {
+    const button = document.createElement('a');
+    button.href = '#';
+    button.textContent = text;
+    button.className = isActive ? 'active' : '';
+    button.setAttribute('data-group', group);
+    button.onclick = (e) => {
+        e.preventDefault();
+        onClick();
+    };
+    return button;
+}
+
+/**
+ * Render basic navbar when categories are not available
+ */
 function renderBasicNavbar() {
     const navLinks = document.querySelector('.nav-links');
     if (!navLinks) return;
 
-    // Clear existing links
     navLinks.innerHTML = '';
 
-    // Create basic FOOD and DRINKS buttons
-    const groups = ['FOOD', 'DRINKS'];
-
-    groups.forEach(group => {
-        const groupBtn = document.createElement('a');
-        groupBtn.href = '#';
-        groupBtn.textContent = group;
-        groupBtn.className = group === 'FOOD' ? 'active' : '';
-        groupBtn.onclick = (e) => {
-            e.preventDefault();
-            setActiveFilter(group.toLowerCase());
-        };
-        navLinks.appendChild(groupBtn);
+    AppState.categoryGroups.forEach(group => {
+        const button = createNavButton(
+            group,
+            group,
+            group === 'FOOD',
+            () => setActiveFilter(group.toLowerCase())
+        );
+        navLinks.appendChild(button);
     });
 }
 
-// Render category navbar buttons based on groups
+/**
+ * Render category navbar with groups
+ * @param {Array} categories - Categories to render
+ */
 function renderCategoryNavbar(categories) {
     const navLinks = document.querySelector('.nav-links');
     if (!navLinks) return;
 
-    // Clear existing links
     navLinks.innerHTML = '';
 
-    // Get unique groups from categories
+    // Get unique groups and sort them
     const groups = [...new Set(categories.map(cat => cat.group))];
-
-    // Sort groups: FOOD first, then DRINKS, then others
     groups.sort((a, b) => {
         if (a === 'FOOD') return -1;
         if (b === 'FOOD') return 1;
@@ -147,383 +344,259 @@ function renderCategoryNavbar(categories) {
         return a.localeCompare(b);
     });
 
-    // Create buttons for each group
     groups.forEach(group => {
-        const groupBtn = document.createElement('a');
-        groupBtn.href = '#';
-        groupBtn.textContent = group;
-        groupBtn.className = group === 'FOOD' ? 'active' : ''; // Set FOOD as default active
-        groupBtn.onclick = (e) => {
-            e.preventDefault();
-            setActiveFilter(group.toLowerCase());
-        };
-        navLinks.appendChild(groupBtn);
-    });
-}
-
-// Set active filter and re-render menu
-function setActiveFilter(filter) {
-    currentFilter = filter;
-    
-    // Update active state in navigation
-    document.querySelectorAll('.nav-links a, .category-scroll-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // If it's a group filter (food/drinks)
-    if (['food', 'drinks'].includes(filter)) {
-        // Find and activate the group button
-        const groupBtn = Array.from(document.querySelectorAll('.nav-links a'))
-            .find(btn => btn.textContent.toLowerCase() === filter);
-        if (groupBtn) groupBtn.classList.add('active');
-        
-        // Filter categories by group
-        const filteredCategories = allCategories.filter(cat => 
-            cat.group && cat.group.toLowerCase() === filter
+        const button = createNavButton(
+            group,
+            group,
+            group === 'FOOD',
+            () => filterCategoriesByGroup(group)
         );
-        
-        if (menuDataRaw && menuDataRaw.length > 0) {
-            // Filter menu items by the selected group's categories
-            const categoryNames = filteredCategories.map(cat => cat.name);
-            const filteredItems = menuDataRaw.filter(item => {
-                const category = item.category_id?.name || 'Uncategorized';
-                return categoryNames.includes(category);
-            });
-            
-            renderMenuByCategory(filteredItems);
-        }
-    } else {
-        // Handle category filter
-        const btn = document.querySelector(`.category-scroll-btn[data-category="${filter}"]`);
-        if (btn) btn.classList.add('active');
-        
-        if (menuDataRaw && menuDataRaw.length > 0) {
-            const filteredItems = menuDataRaw.filter(item => {
-                const category = item.category_id?.name || 'Uncategorized';
-                return category.toLowerCase() === filter.toLowerCase();
-            });
-            
-            renderMenuByCategory(filteredItems);
-            
-            // Scroll to the category
-            const section = document.getElementById('cat-' + filter.replace(/\s+/g, '-'));
-            if (section) {
-                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
+        navLinks.appendChild(button);
+    });
+}
+
+/**
+ * Update active state in navigation
+ * @param {string} activeGroup - Group that should be active
+ */
+function updateNavbarActiveState(activeGroup) {
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.classList.remove('active');
+    });
+
+    const activeLink = document.querySelector(`.nav-links a[data-group="${activeGroup}"]`);
+    if (activeLink) {
+        activeLink.classList.add('active');
     }
 }
 
-// Filter menu items based on current filter and category groups
-function filterMenuItems(items) {
-    if (currentFilter === 'all') return items;
-
-    // If no categories available, use basic filtering
-    if (!Array.isArray(allCategories) || allCategories.length === 0) {
-        return items.filter(item => {
-            const categoryName = item.category_id && item.category_id.name ? item.category_id.name.toLowerCase() : '';
-
-            if (currentFilter === 'food') {
-                return /starter|pepper soup|nigerian dish|grill|continental|sandwich|burger|pizza|chinese|indian|pasta|dessert|nigerian meal|snack|kids|extra/.test(categoryName);
-            } else if (currentFilter === 'drinks') {
-                return /non alcoholic|coffee|wine|beer|spirit|champagne|cocktail|mocktail/.test(categoryName);
-            }
-
-            return true;
-        });
-    }
-
-    return items.filter(item => {
-        const categoryName = item.category_id && item.category_id.name ? item.category_id.name : '';
-
-        // Find the category in allCategories to get its group
-        const category = allCategories.find(cat => cat.name === categoryName);
-        if (!category) return false;
-
-        return category.group.toLowerCase() === currentFilter;
-    });
+/**
+ * Filter categories by group
+ * @param {string} group - Group to filter by
+ */
+function filterCategoriesByGroup(group) {
+    updateNavbarActiveState(group);
+    AppState.currentFilter = group.toLowerCase();
+    renderMenuByCategory();
 }
 
-// Group menu items by category name
-function groupMenuByCategory(items) {
-    const grouped = {};
-    items.forEach(item => {
-        const category = item.category_id && item.category_id.name ? item.category_id.name : 'Uncategorized';
-        if (!grouped[category]) grouped[category] = [];
-        grouped[category].push(item);
-    });
-    return grouped;
+/**
+ * Set active filter
+ * @param {string} filter - Filter to set as active
+ */
+function setActiveFilter(filter) {
+    AppState.currentFilter = filter;
+    updateNavbarActiveState(filter.toUpperCase());
+    renderMenuByCategory();
 }
 
-// Remove static sections for Chef Special, Main Dishes, and Beverages if present
-function removeStaticMenuSections() {
-    ['specials', 'foods', 'drinks'].forEach(id => {
-        const section = document.getElementById(id);
-        if (section) section.remove();
-    });
-}
+// ============================================================================
+// MENU RENDERING
+// ============================================================================
 
-// Helper: Map category name to main section
-function getMainSection(categoryName) {
-    const name = categoryName.toLowerCase();
-    if (/snack|grill|platter|special/.test(name)) return 'specials';
-    if (/soup|rice|main|dish|pepper|food|entree/.test(name)) return 'foods';
-    if (/drink|juice|cocktail|beverage|smoothie|wine|beer/.test(name)) return 'drinks';
-    return 'others';
-}
-
-// Render menu sections grouped by main section
-function renderMenu() {
-    removeStaticMenuSections();
-    const menuGridContainer = document.querySelector('main') || document.body;
-    // Remove old dynamic sections
-    document.querySelectorAll('.dynamic-menu-section').forEach(el => el.remove());
-
-    // Group items by main section and then by category
-    const grouped = { specials: {}, foods: {}, drinks: {}, others: {} };
-    menuDataRaw.forEach(item => {
-        const category = item.category_id && item.category_id.name ? item.category_id.name : 'Uncategorized';
-        const mainSection = getMainSection(category);
-        if (!grouped[mainSection][category]) grouped[mainSection][category] = [];
-        grouped[mainSection][category].push(item);
-    });
-
-    // Section display order and African food banner images
-    const sectionOrder = [
-        { id: 'specials', label: "Chef's Specials", banner: 'https://img.freepik.com/free-photo/jollof-rice-with-grilled-chicken-plantains_23-2148715455.jpg' },
-        { id: 'foods', label: 'Main Dishes', banner: 'https://img.freepik.com/free-photo/spicy-pepper-soup_23-2148715469.jpg' },
-        { id: 'drinks', label: 'Beverages', banner: 'https://img.freepik.com/free-photo/chapman-cocktail_23-2148715484.jpg' }
-    ];
-
-    sectionOrder.forEach(({ id, label, banner }) => {
-        const categories = grouped[id];
-        const allItems = Object.values(categories).flat();
-        if (!allItems.length) return;
-        // Create anchor for navbar
-        const anchor = document.createElement('a');
-        anchor.id = id;
-        menuGridContainer.insertBefore(anchor, menuGridContainer.firstChild);
-        // Create section
-        const section = document.createElement('section');
-        section.className = 'section dynamic-menu-section';
-        section.innerHTML = `
-            <div class="section-banner" style="background-image: url('${banner}');"><h2>${label}</h2></div>
-            ${Object.entries(categories).map(([cat, items]) => `
-                <h3 style="margin-top:2rem;">${cat}</h3>
-                <div class="menu-grid">
-                    ${items.map(item => `
-                        <div class="menu-item">
-                            <div class="menu-item-header">
-                                <h3>${item.name}</h3>
-                                <span class="price">
-                                    ₦ ${formatPriceWithCommas(currentService === 'room'
-            ? (item.price_room || item.price_restaurant || '')
-            : (item.price_restaurant || item.price_room || ''))}
-                                </span>
-                            </div>
-                            <p>${item.description || ''}</p>
-                            ${item.tags && item.tags.length ? `<div class="menu-item-tags">${item.tags.map(tag => `<span class='menu-item-tag'>${tag}</span>`).join('')}</div>` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            `).join('')}
-        `;
-        // Insert before footer
-        const footer = document.querySelector('footer');
-        menuGridContainer.insertBefore(section, footer);
-    });
-}
-
+/**
+ * Create category scroll buttons
+ * @param {Array} categories - Categories to create buttons for
+ */
 function renderCategoryScroll(categories) {
     const scrollDiv = document.querySelector('.category-scroll');
     if (!scrollDiv) return;
 
     scrollDiv.innerHTML = '';
-    categories.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = 'category-scroll-btn';
-        btn.textContent = cat.toUpperCase();
-        btn.setAttribute('data-category', cat);
-        btn.onclick = () => {
-            const section = document.getElementById('cat-' + cat.replace(/\s+/g, '-').toLowerCase());
+
+    categories.forEach(category => {
+        const button = document.createElement('button');
+        button.className = 'category-scroll-btn';
+        button.textContent = category.toUpperCase();
+        button.setAttribute('data-category', category);
+        button.onclick = () => {
+            const sectionId = 'cat-' + category.replace(/[\s\/\(\)]/g, '-').toLowerCase();
+            const section = document.getElementById(sectionId);
             if (section) {
                 section.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         };
-        scrollDiv.appendChild(btn);
+        scrollDiv.appendChild(button);
     });
+
+    console.log(`Rendered ${categories.length} category buttons:`, categories);
 }
 
-// Remove old grouping and static section logic
+/**
+ * Create a menu item HTML element
+ * @param {Object} item - Menu item data
+ * @returns {string} HTML string for menu item
+ */
+function createMenuItemHTML(item) {
+    // Debug: Log the item structure to understand the data format
+    if (!item.name) {
+        console.warn('Menu item missing name:', item);
+    }
 
-function renderMenuByCategory(menuDataRaw) {
-    const main = document.getElementById('menu-main');
-    main.innerHTML = '';
-    if (!Array.isArray(menuDataRaw) || !menuDataRaw.length) return;
+    const price = getItemPrice(item);
 
-    // Filter items based on current filter
-    const filteredItems = filterMenuItems(menuDataRaw);
+    // Safely handle tags - ensure it's an array before calling map
+    let tagsHTML = '';
+    if (item.tags && Array.isArray(item.tags) && item.tags.length > 0) {
+        tagsHTML = `<div class="menu-item-tags">${item.tags.map(tag => `<span class='menu-item-tag'>${tag}</span>`).join('')}</div>`;
+    }
 
-    // Create a map of category names to their sort_order
-    const categoryOrderMap = {};
-    allCategories.forEach(cat => {
-        categoryOrderMap[cat.name] = cat.sort_order !== undefined ? cat.sort_order : 9999;
-    });
+    return `
+        <div class="menu-item">
+            <span class="item-name">${item.name || 'Unnamed Item'}</span>
+            <span class="dots"></span>
+            <span class="item-price">${price}</span>
+        </div>
+    `;
+}
 
-    // Group items by category
-    const categories = [];
-    const itemsByCategory = {};
-    
-    // First pass: collect categories in order of sort_order
-    filteredItems.forEach(item => {
-        const category = item.category_id?.name || 'Uncategorized';
-        if (!itemsByCategory[category]) {
-            itemsByCategory[category] = [];
-            categories.push(category);
-        }
-        itemsByCategory[category].push(item);
-    });
+/**
+ * Create a menu section HTML element
+ * @param {string} category - Category name
+ * @param {Array} items - Menu items in this category
+ * @returns {string} HTML string for menu section
+ */
+function createMenuSectionHTML(category, items) {
+    const sectionId = 'cat-' + category.replace(/[\s\/\(\)]/g, '-').toLowerCase();
 
-    // Sort categories by their sort_order
-    categories.sort((a, b) => {
-        const orderA = categoryOrderMap[a] !== undefined ? categoryOrderMap[a] : 9999;
-        const orderB = categoryOrderMap[b] !== undefined ? categoryOrderMap[b] : 9999;
-        return orderA - orderB;
-    });
-
-    // Render category scroll with the sorted order
-    renderCategoryScroll(categories);
-
-    // Render menu sections in the sorted order
-    categories.forEach(category => {
-        const items = itemsByCategory[category];
-        const section = document.createElement('section');
-        section.className = 'menu-section';
-        section.id = 'cat-' + category.replace(/\s+/g, '-').toLowerCase();
-        section.innerHTML = `
+    return `
+        <section class="menu-section" id="${sectionId}">
             <h2 class="category-header">${category.toUpperCase()}</h2>
             <div class="menu-list">
-                ${items.map(item => `
-                    <div class="menu-item">
-                        <div class="item-details">
-                            <span class="item-name">${item.name}</span>
-                            ${item.description ? `<p class="item-description">${item.description}</p>` : ''}
-                        </div>
-                        <span class="dots"></span>
-                        <span class="item-price">₦ ${formatPriceWithCommas(currentService === 'room' ? (item.price_room || item.price_restaurant || '') : (item.price_restaurant || item.price_room || ''))}</span>
-                    </div>
-                `).join('')}
+                ${items.map(item => createMenuItemHTML(item)).join('')}
             </div>
-        `;
-        main.appendChild(section);
+        </section>
+    `;
+}
+
+/**
+ * Render menu by category
+ */
+function renderMenuByCategory() {
+    const main = document.getElementById('menu-main');
+    if (!main) return;
+
+    main.innerHTML = '';
+
+    if (!Array.isArray(AppState.rawMenuData) || !AppState.rawMenuData.length) return;
+
+    // Filter and group items
+    const filteredItems = filterMenuItems(AppState.rawMenuData);
+    const grouped = groupMenuByCategory(filteredItems);
+
+    // Update category scroll
+    const categoryNames = Object.keys(grouped);
+    renderCategoryScroll(categoryNames);
+
+    // Render each category section
+    Object.entries(grouped).forEach(([category, items]) => {
+        const sectionHTML = createMenuSectionHTML(category, items);
+        main.insertAdjacentHTML('beforeend', sectionHTML);
+
+        // Debug: Verify section was created
+        const sectionId = 'cat-' + category.replace(/[\s\/\(\)]/g, '-').toLowerCase();
+        const section = document.getElementById(sectionId);
+        if (section) {
+            console.log(`Section created successfully: ${sectionId}`);
+        } else {
+            console.error(`Failed to create section: ${sectionId}`);
+        }
     });
 
-    // Highlight active category as user scrolls
-    window.addEventListener('scroll', function () {
-        let activeCat = null;
-        const scrollPosition = window.scrollY + 150; // Add offset for fixed header
-        
-        // Find which category is currently in view
-        categories.forEach(cat => {
-            const section = document.getElementById('cat-' + cat.replace(/\s+/g, '-').toLowerCase());
+    // Set up scroll highlighting
+    setupScrollHighlighting(grouped);
+}
+
+/**
+ * Set up scroll highlighting for categories
+ * @param {Object} grouped - Grouped menu items
+ */
+function setupScrollHighlighting(grouped) {
+    // Remove existing listener to prevent duplicates
+    window.removeEventListener('scroll', handleScrollHighlight);
+    window.addEventListener('scroll', handleScrollHighlight);
+
+    function handleScrollHighlight() {
+        let activeCategory = null;
+        const categoryNames = Object.keys(grouped);
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const triggerPoint = scrollTop + windowHeight * 0.3; // 30% from top
+
+        console.log('Scroll position:', scrollTop, 'Trigger point:', triggerPoint);
+
+        // Find the section that's currently in view
+        for (let i = 0; i < categoryNames.length; i++) {
+            const category = categoryNames[i];
+            const sectionId = 'cat-' + category.replace(/[\s\/\(\)]/g, '-').toLowerCase();
+            const section = document.getElementById(sectionId);
+
             if (section) {
                 const rect = section.getBoundingClientRect();
-                if (rect.top <= 150 && rect.bottom > 150) {
-                    activeCat = cat;
-                }
-            }
-        });
+                const sectionTop = rect.top + scrollTop;
+                const sectionBottom = sectionTop + rect.height;
 
-        // Update active state in the category scroll
-        document.querySelectorAll('.category-scroll-btn').forEach(btn => {
-            if (btn.getAttribute('data-category') === activeCat) {
+                console.log(`Section ${category}:`, {
+                    sectionTop,
+                    sectionBottom,
+                    triggerPoint,
+                    isInView: sectionTop <= triggerPoint && sectionBottom >= triggerPoint
+                });
+
+                // Check if this section is currently in view
+                if (sectionTop <= triggerPoint && sectionBottom >= triggerPoint) {
+                    activeCategory = category;
+                    console.log(`Active category found: ${category}`);
+                    break; // Use the first section that's in view
+                }
+            } else {
+                console.warn(`Section not found for category: ${category} (ID: ${sectionId})`);
+            }
+        }
+
+        // Update active state of category buttons
+        const categoryButtons = document.querySelectorAll('.category-scroll-btn');
+        console.log('Found category buttons:', categoryButtons.length);
+
+        categoryButtons.forEach(btn => {
+            const btnCategory = btn.getAttribute('data-category');
+            const wasActive = btn.classList.contains('active');
+
+            if (btnCategory === activeCategory) {
                 btn.classList.add('active');
-                // Scroll the category scroll container to make the active button visible
-                const scrollContainer = btn.closest('.category-scroll');
-                if (scrollContainer) {
-                    const containerRect = scrollContainer.getBoundingClientRect();
-                    const btnRect = btn.getBoundingClientRect();
-                    
-                    // Check if button is outside the visible area
-                    if (btnRect.left < containerRect.left) {
-                        // Scroll left
-                        scrollContainer.scrollLeft -= (containerRect.left - btnRect.left) - 10;
-                    } else if (btnRect.right > containerRect.right) {
-                        // Scroll right
-                        scrollContainer.scrollLeft += (btnRect.right - containerRect.right) + 10;
-                    }
+                // Temporary visual test - add a background color
+                btn.style.backgroundColor = '#ff0000';
+                if (!wasActive) {
+                    console.log('Activating button for category:', btnCategory);
                 }
             } else {
                 btn.classList.remove('active');
+                // Remove temporary background
+                btn.style.backgroundColor = '';
+                if (wasActive) {
+                    console.log('Deactivating button for category:', btnCategory);
+                }
             }
         });
-    });
-}
 
-// Fetch menu data from /api/menu and log the response
-async function fetchAndLogMenuData() {
-    try {
-        const response = await fetch('https://aaet.onrender.com/api/menu');
-        const data = await response.json();
-        // console.log('Menu data from /api/menu:', data);
-    } catch (error) {
-        console.error('Error fetching /api/menu:', error);
-    }
-}
-
-// Wrap async event listeners to catch errors
-function safeAsyncListener(fn) {
-    return function (event) {
-        Promise.resolve(fn(event)).catch(err => {
-            console.error('Async event listener error:', err);
-        });
-    };
-}
-
-// Example usage for async listeners (if any):
-// document.querySelector('selector').addEventListener('event', safeAsyncListener(async (e) => { ... }));
-
-// Helper: Get query parameter from URL
-function getQueryParam(name) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(name);
-}
-
-// Initial setup
-document.addEventListener('DOMContentLoaded', function () {
-    fetchAndRenderMenu();
-    
-    // Rest of your existing DOMContentLoaded code...
-    const serviceParam = getQueryParam('service');
-    if (serviceParam === 'room' || serviceParam === 'restaurant') {
-        selectService(serviceParam);
-    }
-});
-
-// Navigation active state
-const navLinks = document.querySelectorAll('.nav-links a');
-navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        navLinks.forEach(l => l.classList.remove('active'));
-        e.target.classList.add('active');
-    });
-});
-
-// Smooth scrolling for navigation links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
+        if (activeCategory) {
+            console.log('Final active category:', activeCategory);
+        } else {
+            console.log('No active category found');
         }
-    });
-});
+    }
 
-// Show loading state
+    // Call once on setup to set initial active state
+    setTimeout(handleScrollHighlight, 100); // Small delay to ensure DOM is ready
+}
+
+// ============================================================================
+// UI STATE MANAGEMENT
+// ============================================================================
+
+/**
+ * Show loading state
+ */
 function showLoadingState() {
     const sections = ['#specials', '#foods', '#drinks'];
     sections.forEach(selector => {
@@ -534,44 +607,242 @@ function showLoadingState() {
     });
 }
 
-// Hide loading state
+/**
+ * Hide loading state
+ */
 function hideLoadingState() {
     // Loading state will be replaced when renderMenu() is called
 }
 
-// Show error state
-function showErrorState() {
+/**
+ * Show error state
+ */
+function showErrorState(message = 'Unable to load menu items. Please try again later.') {
     const sections = ['#specials', '#foods', '#drinks'];
     sections.forEach(selector => {
         const grid = document.querySelector(`${selector} .menu-grid`);
         if (grid) {
-            grid.innerHTML = '<div class="error">Unable to load menu items. Please try again later.</div>';
+            grid.innerHTML = `<div class="error">${message}</div>`;
         }
     });
 }
 
-// Service selection handler
-function selectService(type) {
-    currentService = type;
+// ============================================================================
+// SERVICE SELECTION
+// ============================================================================
+
+/**
+ * Handle service selection (room service vs restaurant)
+ * @param {string} type - Service type ('room' or 'restaurant')
+ * @param {boolean} updateURL - Whether to update the URL (default: true)
+ */
+function selectService(type, updateURL = true) {
+    AppState.currentService = type;
     document.getElementById('serviceModal').style.display = 'none';
-    renderMenuByCategory(menuDataRaw);
+
+    // Update URL if requested
+    if (updateURL) {
+        updateURLWithService(type);
+    }
+
+    renderMenuByCategory();
+    console.log(`Service selected: ${type}`);
 }
 
-// Format price with currency
-function formatPrice(price) {
-    return `₦ ${price.toLocaleString()}`;
+/**
+ * Update URL with service parameter
+ * @param {string} serviceType - Service type to add to URL
+ */
+function updateURLWithService(serviceType) {
+    const url = new URL(window.location);
+    url.searchParams.set('service', serviceType);
+    window.history.replaceState({}, '', url);
 }
 
-// Create menu item HTML with list-style layout (Cristiano style)
-function createMenuItemHTML(item) {
-    const price = currentService === 'room' ? item.price.room : item.price.restaurant;
+/**
+ * Set service type programmatically (for external use)
+ * @param {string} type - Service type ('room' or 'restaurant')
+ */
+function setServiceType(type) {
+    if (type === 'room' || type === 'restaurant') {
+        selectService(type, true);
+    } else {
+        console.error('Invalid service type. Use "room" or "restaurant"');
+    }
+}
+
+/**
+ * Get current service type
+ * @returns {string|null} Current service type or null if not set
+ */
+function getCurrentServiceType() {
+    return AppState.currentService;
+}
+
+/**
+ * Check if service type is set
+ * @returns {boolean} True if service type is set
+ */
+function isServiceTypeSet() {
+    return AppState.currentService !== null;
+}
+
+/**
+ * Clear service type and show modal
+ */
+function clearServiceType() {
+    AppState.currentService = null;
+    document.getElementById('serviceModal').style.display = 'block';
+
+    // Remove service parameter from URL
+    const url = new URL(window.location);
+    url.searchParams.delete('service');
+    window.history.replaceState({}, '', url);
+
+    console.log('Service type cleared');
+}
+
+// ============================================================================
+// EVENT HANDLERS
+// ============================================================================
+
+/**
+ * Initialize navigation event handlers
+ */
+function initializeNavigation() {
+    // Navigation active state
+    const navLinks = document.querySelectorAll('.nav-links a');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            navLinks.forEach(l => l.classList.remove('active'));
+            e.target.classList.add('active');
+        });
+    });
+
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+}
+
+/**
+ * Initialize banner image loading
+ */
+function initializeBannerImages() {
+    const sectionBanners = document.querySelectorAll('.section-banner');
+    sectionBanners.forEach(banner => {
+        const backgroundImage = banner.style.backgroundImage;
+        if (backgroundImage) {
+            const url = backgroundImage.replace(/url\(['"]?(.*?)['"]?\)/i, '$1');
+            const img = new Image();
+
+            img.onload = function () {
+                banner.style.opacity = '1';
+            };
+
+            img.onerror = function () {
+                // Fallback background if image fails to load
+                banner.style.backgroundImage = 'linear-gradient(135deg, var(--accent-color), #c70512)';
+            };
+
+            img.src = url;
+        }
+    });
+}
+
+/**
+ * Initialize service selection from URL parameters
+ */
+function initializeServiceSelection() {
+    const serviceParam = getQueryParam('service');
+    const filterParam = getQueryParam('filter');
+
+    // Set service type from URL parameter
+    if (serviceParam === 'room' || serviceParam === 'restaurant') {
+        AppState.currentService = serviceParam;
+        document.getElementById('serviceModal').style.display = 'none';
+        console.log(`Service type set from URL: ${serviceParam}`);
+    } else {
+        // Show modal if service type not selected
+        if (!AppState.currentService) {
+            document.getElementById('serviceModal').style.display = 'block';
+        }
+    }
+
+    // Set filter from URL parameter
+    if (filterParam && ['food', 'drinks', 'all'].includes(filterParam)) {
+        AppState.currentFilter = filterParam;
+        console.log(`Filter set from URL: ${filterParam}`);
+    }
+
+    // Re-render menu if service was set from URL
+    if (serviceParam === 'room' || serviceParam === 'restaurant') {
+        renderMenuByCategory();
+    }
+}
+
+// ============================================================================
+// APPLICATION INITIALIZATION
+// ============================================================================
+
+/**
+ * Initialize the application when DOM is loaded
+ */
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('Initializing restaurant menu application...');
+
+    // Initialize UI components
+    initializeNavigation();
+    initializeBannerImages();
+    initializeServiceSelection();
+
+    // Fetch data
+    fetchCategories();
+    fetchMenuData();
+});
+
+// ============================================================================
+// LEGACY FUNCTIONS (for backward compatibility)
+// ============================================================================
+
+// These functions are kept for backward compatibility but should be avoided in new code
+
+/**
+ * @deprecated Use formatPrice() instead
+ */
+function formatPriceWithCommas(price) {
+    return formatPrice(price);
+}
+
+/**
+ * @deprecated Use getItemPrice() instead
+ */
+function formatPriceLegacy(price) {
+    return `₦${price.toLocaleString()}`;
+}
+
+/**
+ * @deprecated Use the main createMenuItemHTML() function instead
+ * This function is kept for backward compatibility but uses the old data structure
+ */
+function createLegacyMenuItemHTML(item) {
+    const price = AppState.currentService === 'room' ? item.price.room : item.price.restaurant;
     const tagsHTML = item.tags ? item.tags.map(tag => `<span class="menu-item-tag">${tag}</span>`).join('') : '';
 
     return `
         <div class="menu-item">
             <div class="menu-item-header">
                 <h3>${item.name}</h3>
-                <span class="price">₦ ${formatPriceWithCommas(price)}</span>
+                <span class="price">₦${formatPriceLegacy(price)}</span>
             </div>
             <p>${item.description}</p>
             ${tagsHTML ? `<div class="menu-item-tags">${tagsHTML}</div>` : ''}
@@ -579,55 +850,14 @@ function createMenuItemHTML(item) {
     `;
 }
 
-// Show item details (can be expanded later for modal or detailed view)
+/**
+ * @deprecated Use showItemDetails() instead
+ */
 function showItemDetails(itemId) {
-    // Find the item
-    const allItems = [...menuData.specials, ...menuData.foods, ...menuData.drinks];
+    const allItems = [...AppState.menuData.specials, ...AppState.menuData.foods, ...AppState.menuData.drinks];
     const item = allItems.find(item => item._id === itemId);
 
     if (item) {
-        // For now, just log the item details
-        // This can be expanded to show a modal with more details
-        // console.log('Item details:', item);
-
-        // You can add a modal here to show more details
-        // showItemModal(item);
+        console.log('Item details:', item);
     }
-}
-
-// Service Modal Functions
-function showServiceModal() {
-    const modal = document.getElementById('serviceModal');
-    if (modal) {
-        modal.style.display = 'flex';
-    }
-}
-
-function hideServiceModal() {
-    const modal = document.getElementById('serviceModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-function selectService(serviceType) {
-    currentService = serviceType;
-    hideServiceModal();
-    // You might want to save the selection to localStorage
-    localStorage.setItem('selectedService', serviceType);
-    // Refresh the menu if needed
-    if (menuDataRaw.length > 0) {
-        renderMenuByCategory(menuDataRaw);
-    }
-}
-
-// Add this to your initialization code (e.g., at the end of fetchAndRenderMenu or in a DOMContentLoaded event)
-document.addEventListener('DOMContentLoaded', function () {
-    // Show modal if no service is selected
-    const savedService = localStorage.getItem('selectedService');
-    if (!savedService) {
-        showServiceModal();
-    } else {
-        currentService = savedService;
-    }
-});
+} 

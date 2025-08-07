@@ -3,22 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AA Entertainment Hotel - Categories Management</title>
-    <link rel="stylesheet" href="../css/admin.css">
+    <title>AAENT Hotel - Categories Management</title>
+    <link rel="stylesheet" href="./css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Category-specific styles */
+        .category-image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 1rem;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .sortable-ghost {
+            opacity: 0.5;
+            background: #f8f9fa;
+        }
+        
+        .sortable-drag {
+            opacity: 1;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .sortable-chosen {
+            cursor: move;
+        }
+    </style>
 </head>
 <body>
-    <!-- Admin Dashboard -->
+    <!-- Admin Dashboard -->    
     <div class="dashboard-container">
         <nav class="sidebar">
             <div class="logo">
-                <img src="../logo.png" alt="AA Entertainment Hotel">
+                <img src="../logo.png" alt="AAENT Hotel">
             </div>
             <ul class="nav-links">
-                <li data-section="menu-items">
+                <li class="active" data-section="menu-items">
                     <i class="fas fa-utensils"></i> Menu Items
                 </li>
-                <li class="active" data-section="categories">
+                <li data-section="categories">
                     <i class="fas fa-tags"></i> Categories
                 </li>
                 <li data-section="settings">
@@ -35,7 +60,7 @@
                 <div class="header-content">
                     <div class="header-left">
                         <h1><i class="fas fa-tags"></i> Categories Management</h1>
-                        <!-- <p id="resultsCount" class="results-count">Loading categories...</p> -->
+
                     </div>
                     <button id="addCategoryBtn" class="primary-btn">
                         <i class="fas fa-plus"></i> Add New Category
@@ -49,7 +74,7 @@
                     <div class="filters">
                         <div class="search-box">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="searchCategories" placeholder="🔍 Search categories by name or description...">
+                            <input type="text" id="searchCategories" placeholder="Search categories by name or description...">
                         </div>
                         <select id="statusFilter">
                             <option value="">All Status</option>
@@ -57,11 +82,7 @@
                             <option value="inactive">Inactive</option>
                         </select>
                     </div>
-                    <!-- <div class="filter-actions">
-                        <button id="clearFilters" class="secondary-btn">
-                            <i class="fas fa-times"></i> Clear Filters
-                        </button>
-                    </div> -->
+
                 </div>
                 
                 <div class="items-grid" id="categoriesGrid">
@@ -72,47 +93,40 @@
             <!-- Add/Edit Category Modal -->
             <div id="categoryModal" class="modal">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 id="modalTitle">Add Category</h2>
-                        <span class="close">&times;</span>
-                    </div>
+                    <span class="close">&times;</span>
+                    <h2 id="modalTitle">Add Category</h2>
                     <form id="categoryForm">
                         <div class="form-group">
-                            <label for="categoryName">
-                                <i class="fas fa-tag"></i> Category Name <span class="required">*</span>
-                            </label>
-                            <input type="text" id="categoryName" name="name" required placeholder="Enter category name (e.g., Main Dishes, Beverages)">
+                            <label for="categoryName">Name <span class="required">*</span></label>
+                            <input type="text" id="categoryName" name="name" required placeholder="Enter category name">
                         </div>
                         <div class="form-group">
-                            <label for="categoryDescription">
-                                <i class="fas fa-align-left"></i> Description
-                            </label>
-                            <textarea id="categoryDescription" name="description" placeholder="Describe what this category contains (optional)"></textarea>
+                            <label for="categoryDescription">Description</label>
+                            <textarea id="categoryDescription" name="description" placeholder="Enter category description (optional)"></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="categoryStatus">
-                                <i class="fas fa-toggle-on"></i> Status <span class="required">*</span>
-                            </label>
+                            <label for="categoryStatus">Status</label>
                             <select id="categoryStatus" name="status" required>
-                                <option value="active">✅ Active</option>
-                                <option value="inactive">❌ Inactive</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="categoryImage">
-                                <i class="fas fa-image"></i> Category Image
-                            </label>
+                            <label for="categoryGroup">Group</label>
+                            <select id="categoryGroup" name="group" required>
+                                <option value="food">Food</option>
+                                <option value="drinks">Drinks</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="categorySortOrder">Sort Order</label>
+                            <input type="number" id="categorySortOrder" name="sort_order" value="0" min="0" placeholder="Enter sort order">
+                        </div>
+                        <div class="form-group">
+                            <label for="categoryImage">Image <small>(Optional)</small></label>
                             <input type="file" id="categoryImage" name="image" accept="image/*">
-                            <small><i class="fas fa-info-circle"></i> Upload an image to represent this category (optional)</small>
                         </div>
-                        <div class="form-actions">
-                            <button type="button" class="secondary-btn" onclick="closeCategoryModal()">
-                                <i class="fas fa-times"></i> Cancel
-                            </button>
-                            <button type="submit" class="primary-btn">
-                                <i class="fas fa-save"></i> Save Category
-                            </button>
-                        </div>
+                        <button type="submit" class="primary-btn">Save Category</button>
                     </form>
                 </div>
             </div>

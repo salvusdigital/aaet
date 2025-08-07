@@ -1,341 +1,201 @@
-// API Configuration
-const API_URL = 'https://aaet.onrender.com/api';
-let token = localStorage.getItem('adminToken');
+/**
+ * Settings Management
+ * 
+ * This file handles all settings-related functionality for the admin dashboard.
+ * Uses shared utilities from utils/shared.js to avoid code duplication.
+ * 
+ * @author Your Name
+ * @version 2.0
+ */
 
-// DOM Elements
-const logoutBtn = document.getElementById('logoutBtn');
-const navLinks = document.querySelectorAll('.nav-links li');
-const hotelInfoForm = document.getElementById('hotelInfoForm');
-const systemSettingsForm = document.getElementById('systemSettingsForm');
-const adminAccountForm = document.getElementById('adminAccountForm');
-const backupBtn = document.getElementById('backupBtn');
-const restoreBtn = document.getElementById('restoreBtn');
-const restoreFile = document.getElementById('restoreFile');
+// ============================================================================
+// DOM ELEMENTS CACHE
+// ============================================================================
 
-// Check Authentication
-function checkAuth() {
-    if (!token) {
-        window.location.href = 'login.html';
-        return;
+class DOMCache {
+    constructor() {
+        this.elements = {};
+        this.initializeElements();
     }
-    loadSettings();
-    loadAdminInfo();
+
+    /**
+     * Initialize all DOM element references
+     */
+    initializeElements() {
+        const elementIds = [
+            'logoutBtn', 'adminAccountForm', 'username', 'email'
+        ];
+
+        elementIds.forEach(id => {
+            this.elements[id] = document.getElementById(id);
+        });
+
+        // Cache other commonly used elements
+        this.elements.navLinks = document.querySelectorAll('.nav-links li');
+    }
+
+    /**
+     * Get a cached DOM element
+     * @param {string} id - Element ID
+     * @returns {HTMLElement|null} The DOM element
+     */
+    get(id) {
+        return this.elements[id];
+    }
 }
 
-// Navigation
-function setupNavigation() {
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            const section = e.currentTarget.dataset.section;
-            if (section) {
-                navigateToSection(section);
+const dom = new DOMCache();
+
+// ============================================================================
+// ADMIN ACCOUNT MANAGEMENT
+// ============================================================================
+
+class AdminAccountManager {
+    /**
+     * Load admin information from API
+     */
+    static async loadAdminInfo() {
+        try {
+            const admin = await window.AdminUtils.api.get('/admin/user');
+
+            // Populate form fields
+            if (dom.get('username')) {
+                dom.get('username').value = admin.username || '';
             }
-        });
-    });
-}
-
-function navigateToSection(section) {
-    switch (section) {
-        case 'menu-items':
-            window.location.href = 'dashboard.html';
-            break;
-        case 'categories':
-            window.location.href = 'categories.html';
-            break;
-        case 'settings':
-            // Already on settings page
-            break;
-    }
-}
-
-// API Calls
-async function loadSettings() {
-    try {
-        const response = await fetch(`${API_URL}/admin/settings`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
+            if (dom.get('email')) {
+                dom.get('email').value = admin.email || '';
             }
-        });
 
-        if (response.ok) {
-            const settings = await response.json();
-            populateSettings(settings);
+            // Admin info loaded successfully
+
+        } catch (error) {
+            console.error('[AdminAccountManager] Failed to load admin info:', error);
+            window.AdminUtils.NotificationManager.showError('Failed to load admin information. Please try again.');
         }
-    } catch (error) {
-        console.error('Failed to load settings:', error);
     }
-}
 
-async function loadAdminInfo() {
-    try {
-        const response = await fetch(`${API_URL}/admin/profile`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
+    /**
+     * Change admin password
+     * @param {FormData} formData - Form data containing password information
+     */
+    static async changePassword(formData) {
+        try {
+            const data = window.AdminUtils.FormUtils.getFormData(dom.get('adminAccountForm'));
+
+            // Validate required fields
+            const validation = window.AdminUtils.FormUtils.validateRequired(formData, [
+                'password', 'password_confirmation'
+            ]);
+
+            if (!validation.isValid) {
+                window.AdminUtils.NotificationManager.showError(validation.errors[0]);
+                return;
             }
-        });
 
-        if (response.ok) {
-            const admin = await response.json();
-            document.getElementById('adminUsername').value = admin.username;
-        }
-    } catch (error) {
-        console.error('Failed to load admin info:', error);
-    }
-}
-
-async function saveHotelInfo(formData) {
-    try {
-        const response = await fetch(`${API_URL}/admin/settings/hotel`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(Object.fromEntries(formData))
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to save hotel information');
-        }
-
-        showSuccess('Hotel information saved successfully!');
-    } catch (error) {
-        showError(error.message);
-    }
-}
-
-async function saveSystemSettings(formData) {
-    try {
-        const response = await fetch(`${API_URL}/admin/settings/system`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(Object.fromEntries(formData))
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to save system settings');
-        }
-
-        showSuccess('System settings saved successfully!');
-    } catch (error) {
-        showError(error.message);
-    }
-}
-
-async function changePassword(formData) {
-    try {
-        const data = Object.fromEntries(formData);
-
-        if (data.newPassword !== data.confirmPassword) {
-            throw new Error('New passwords do not match');
-        }
-
-        const response = await fetch(`${API_URL}/admin/change-password`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                currentPassword: data.currentPassword,
-                newPassword: data.newPassword
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to change password');
-        }
-
-        showSuccess('Password changed successfully!');
-        adminAccountForm.reset();
-    } catch (error) {
-        showError(error.message);
-    }
-}
-
-async function createBackup() {
-    try {
-        const response = await fetch(`${API_URL}/admin/backup`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
+            // Validate password confirmation
+            if (data.password !== data.password_confirmation) {
+                window.AdminUtils.NotificationManager.showError('New passwords do not match');
+                return;
             }
-        });
 
-        if (!response.ok) {
-            throw new Error('Failed to create backup');
-        }
+            // Make API request
+            await window.AdminUtils.api.post('/admin/reset-password', {
+                username: data.username,
+                password: data.password,
+                password_confirmation: data.password_confirmation
+            });
 
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `backup-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+            window.AdminUtils.NotificationManager.showSuccess('Password changed successfully!');
 
-        showSuccess('Backup created successfully!');
-        updateBackupInfo();
-    } catch (error) {
-        showError(error.message);
-    }
-}
-
-async function restoreBackup(file) {
-    try {
-        const formData = new FormData();
-        formData.append('backup', file);
-
-        const response = await fetch(`${API_URL}/admin/restore`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            body: formData
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to restore backup');
-        }
-
-        showSuccess('Backup restored successfully!');
-    } catch (error) {
-        showError(error.message);
-    }
-}
-
-// UI Functions
-function populateSettings(settings) {
-    // Populate hotel information
-    if (settings.hotel) {
-        document.getElementById('hotelName').value = settings.hotel.name || '';
-        document.getElementById('hotelAddress').value = settings.hotel.address || '';
-        document.getElementById('hotelPhone').value = settings.hotel.phone || '';
-        document.getElementById('hotelEmail').value = settings.hotel.email || '';
-    }
-
-    // Populate system settings
-    if (settings.system) {
-        document.getElementById('currency').value = settings.system.currency || 'USD';
-        document.getElementById('timezone').value = settings.system.timezone || 'UTC';
-        document.getElementById('language').value = settings.system.language || 'en';
-        document.getElementById('maintenanceMode').checked = settings.system.maintenanceMode || false;
-    }
-}
-
-function updateBackupInfo() {
-    // This would typically fetch backup info from the server
-    document.getElementById('lastBackup').textContent = new Date().toLocaleString();
-    document.getElementById('backupSize').textContent = '2.5 MB'; // Example size
-}
-
-function logout() {
-    localStorage.removeItem('adminToken');
-    token = null;
-    window.location.href = 'login.html';
-}
-
-function showError(message) {
-    const notification = document.createElement('div');
-    notification.className = 'notification error';
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background-color: #dc3545;
-        color: white;
-        padding: 1rem;
-        border-radius: 4px;
-        z-index: 1000;
-        animation: slideIn 0.3s ease;
-    `;
-
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
-function showSuccess(message) {
-    const notification = document.createElement('div');
-    notification.className = 'notification success';
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background-color: #28a745;
-        color: white;
-        padding: 1rem;
-        border-radius: 4px;
-        z-index: 1000;
-        animation: slideIn 0.3s ease;
-    `;
-
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
-// Event Listeners
-if (hotelInfoForm) {
-    hotelInfoForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        saveHotelInfo(formData);
-    });
-}
-
-if (systemSettingsForm) {
-    systemSettingsForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        saveSystemSettings(formData);
-    });
-}
-
-if (adminAccountForm) {
-    adminAccountForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        changePassword(formData);
-    });
-}
-
-if (backupBtn) {
-    backupBtn.addEventListener('click', createBackup);
-}
-
-if (restoreBtn && restoreFile) {
-    restoreBtn.addEventListener('click', () => {
-        restoreFile.click();
-    });
-
-    restoreFile.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            if (confirm('Are you sure you want to restore from this backup? This will overwrite current data.')) {
-                restoreBackup(file);
+            // Reset form
+            if (dom.get('adminAccountForm')) {
+                window.AdminUtils.FormUtils.resetForm(dom.get('adminAccountForm'));
             }
-            e.target.value = ''; // Reset file input
+
+        } catch (error) {
+            console.error('[AdminAccountManager] Password change error:', error);
+            window.AdminUtils.NotificationManager.showError(error.message || 'Failed to change password. Please try again.');
         }
-    });
+    }
 }
 
-if (logoutBtn) {
-    logoutBtn.addEventListener('click', logout);
+// ============================================================================
+// EVENT LISTENERS
+// ============================================================================
+
+class EventManager {
+    /**
+     * Initialize all event listeners
+     */
+    static initialize() {
+        // Admin account form submission
+        if (dom.get('adminAccountForm')) {
+            dom.get('adminAccountForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                AdminAccountManager.changePassword(formData);
+            });
+        }
+    }
 }
 
-// Initialize
-checkAuth();
-setupNavigation();
-updateBackupInfo(); 
+// ============================================================================
+// PAGE INITIALIZATION
+// ============================================================================
+
+class SettingsInitializer {
+    /**
+     * Initialize the settings page
+     */
+    static async initialize() {
+        try {
+            // Start page initialization
+
+            // Initialize page with shared utilities
+            const utils = window.AdminUtils.InitUtils.initializePage({
+                requiredElements: [
+                    'logoutBtn', 'adminAccountForm', 'username', 'email'
+                ],
+                onAuthSuccess: async ({ auth, api, elements }) => {
+                    // Store API reference globally for this page
+                    window.AdminUtils.api = api;
+
+                    // Load admin information
+                    // Load admin information
+                    await AdminAccountManager.loadAdminInfo();
+
+                    // Setup event listeners
+                    EventManager.initialize();
+
+                    // Page initialization complete
+                },
+                onAuthFail: () => {
+                    // Authentication failed
+                }
+            });
+
+            if (!utils) {
+                // Authentication failed, redirecting...
+            }
+
+        } catch (error) {
+            console.error('[SettingsInitializer] Initialization error:', error);
+            window.AdminUtils.NotificationManager.showError('Failed to initialize settings page. Please refresh the page.');
+        }
+    }
+}
+
+// ============================================================================
+// STARTUP
+// ============================================================================
+
+// Initialize the settings page when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    SettingsInitializer.initialize();
+});
+
+// If the document is already loaded, initialize immediately
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    console.log('🔐 [Main] Document already loaded, initializing...');
+    SettingsInitializer.initialize();
+} 

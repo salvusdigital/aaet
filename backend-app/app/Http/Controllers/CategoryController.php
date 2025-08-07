@@ -40,7 +40,9 @@ class CategoryController extends Controller
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
                 'group' => 'required|string|in:FOOD,DRINKS', // Ensure group is one of these values
-                'sort_order' => 'nullable|integer' // Make sort_order optional
+                'sort_order' => 'nullable|integer', // Make sort_order optional
+                'image_url' => 'nullable|string',
+                'group' => 'required|string|in:FOOD,DRINKS',
             ]);
 
             // If sort_order is not provided, calculate it (get max + 1 for the group)
@@ -94,7 +96,9 @@ class CategoryController extends Controller
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
                 'group' => 'required|string|in:FOOD,DRINKS', // Ensure group is one of these values
-                'sort_order' => 'nullable|integer' // Make sort_order optional
+                'sort_order' => 'nullable|integer', // Make sort_order optional
+                'image_url' => 'nullable|string',
+                'group' => 'required|string|in:FOOD,DRINKS',
             ]);
 
             $category = Category::find($id);
@@ -106,6 +110,7 @@ class CategoryController extends Controller
                 'name' => $validatedData['name'],
                 'sort_order' => $validatedData['sort_order'],
                 'group' => $validatedData['group'],
+                'image_url' => $validatedData['image_url'],
             ]);
             if (!$updated) {
                 throw new \Exception('Failed to update category');

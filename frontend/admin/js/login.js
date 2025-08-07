@@ -1,5 +1,6 @@
 // API Configuration
-const API_URL = 'https://aaet.onrender.com/api';
+// const API_URL = 'https://aaet.onrender.com/api';
+const API_URL = 'https://menu.aaentertainment.ng/api';
 
 // DOM Elements
 const loginForm = document.getElementById('login-form');
@@ -38,6 +39,7 @@ async function login(username, password) {
         }
 
         const data = await response.json();
+        console.log(data);
         localStorage.setItem('adminToken', data.token);
         // Redirect to dashboard
         window.location.href = 'dashboard.html';

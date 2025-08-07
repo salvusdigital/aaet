@@ -1,6 +1,10 @@
 // API Configuration
-const API_URL = 'https://aaet.onrender.com/api';
+const API_URL = 'https://menu.aaentertainment.ng/api';
 let token = localStorage.getItem('adminToken');
+
+// Global variables
+let allMenuItems = [];
+let categoriesList = [];
 
 // DOM Elements
 const itemsGrid = document.getElementById('menuItemsGrid');
@@ -12,8 +16,6 @@ const logoutBtn = document.getElementById('logoutBtn');
 const searchInput = document.getElementById('searchItems');
 const categoryFilter = document.getElementById('categoryFilter');
 const navLinks = document.querySelectorAll('.nav-links li');
-
-let categoriesList = [];
 
 // Add currency formatter
 const currencyFormatter = new Intl.NumberFormat('en-NG', {
@@ -27,10 +29,9 @@ const currencyFormatter = new Intl.NumberFormat('en-NG', {
 function checkAuth() {
     if (!token) {
         window.location.href = 'login.html';
-        return;
+        return false;
     }
-    loadMenuItems();
-    loadCategories();
+    return true;
 }
 
 // Navigation
@@ -45,52 +46,88 @@ function setupNavigation() {
     });
 }
 
+// Navigation helpers
+const NAVIGATION_PATHS = {
+    'categories': 'categories.html',
+    'settings': 'settings.html',
+    'menu-items': null // current page
+};
+
+/**
+ * Navigates to a section if it's a valid path
+ * @param {string} section - The section to navigate to
+ */
 function navigateToSection(section) {
-    switch(section) {
-        case 'categories':
-            window.location.href = 'categories.html';
-            break;
-        case 'settings':
-            window.location.href = 'settings.html';
-            break;
-        case 'menu-items':
-            // Already on menu items page
-            break;
+    const path = NAVIGATION_PATHS[section];
+    if (path) {
+        window.location.href = path;
     }
 }
 
-// API Calls
-// Extract categories from menu items as fallback
-function extractCategoriesFromMenuItems(menuItems) {
-    if (!Array.isArray(menuItems)) return [];
-    
-    const categories = new Map();
-    
-    menuItems.forEach(item => {
-        if (item.category_id && item.category_id.name) {
-            const categoryName = item.category_id.name;
-            if (!categories.has(categoryName)) {
-                categories.set(categoryName, {
-                    _id: item.category_id._id || categoryName,
-                    name: categoryName,
-                    description: `Category for ${categoryName}`,
-                    status: 'active',
-                    createdAt: new Date().toISOString()
-                });
-            }
-        }
-    });
-    
-    const extractedCategories = Array.from(categories.values());
-    console.log('Extracted categories from menu items:', extractedCategories);
-    return extractedCategories;
+// Category extraction helpers
+
+/**
+ * Creates a category object from a menu item
+ * @param {Object} item - Menu item with category information
+ * @returns {Object} Normalized category object
+ */
+function createCategoryFromItem(item) {
+    const categoryId = item.category_id;
+    const categoryName = item.category_id?.name || `Category ${categoryId}`;
+
+    return {
+        _id: categoryId,
+        name: categoryName,
+        description: item.category_id?.description || `Category for ${categoryName}`,
+        status: item.category_id?.status || 'active',
+        createdAt: item.category_id?.createdAt || new Date().toISOString(),
+        updatedAt: item.category_id?.updatedAt || new Date().toISOString(),
+        isFallback: true
+    };
 }
 
-async function loadMenuItems() {
+/**
+ * Extracts unique categories from menu items
+ * @param {Array} menuItems - Array of menu items
+ * @returns {Array} Array of unique categories
+ */
+async function extractCategoriesFromMenuItems(menuItems) {
+    if (!Array.isArray(menuItems) || menuItems.length === 0) {
+        return [];
+    }
+
     try {
+        const categories = new Map();
+
+        for (const item of menuItems) {
+            if (!item?.category_id) continue;
+
+            const category = createCategoryFromItem(item);
+            if (!categories.has(category.id)) {
+                categories.set(category.id, category);
+            }
+        }
+
+        const extractedCategories = Array.from(categories.values());
+
+        if (extractedCategories.length > 0 && categoriesList.length === 0) {
+            updateCategories(extractedCategories);
+        }
+
+        return extractedCategories;
+    } catch (error) {
+        showError('Failed to extract categories from menu items');
+        return [];
+    }
+}
+
+async function loadAllMenuItems() {
+    try {
+        const requestId = Date.now() + Math.random().toString(36).substr(2, 9);
         const response = await fetch(`${API_URL}/admin/menu`, {
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'X-Request-ID': requestId
             }
         });
 
@@ -102,108 +139,184 @@ async function loadMenuItems() {
             throw new Error('Failed to load menu items');
         }
 
-        const items = await response.json();
-        console.log('Menu items received:', items); // Log the data
-        displayMenuItems(items);
-        
-        // If categories failed to load, extract from menu items
-        if (!Array.isArray(categoriesList) || categoriesList.length === 0) {
-            console.log('Categories not loaded, extracting from menu items...');
-            const extractedCategories = extractCategoriesFromMenuItems(items);
-            console.log('Extracted categories:', extractedCategories);
-            
+        allMenuItems = await response.json();
+        displayMenuItems(allMenuItems);
+    } catch (error) {
+        showError('Failed to load menu items');
+    }
+}
+
+function filterMenuItemsByCategory(categoryId = '') {
+    if (!allMenuItems.length) return;
+
+    if (!categoryId || categoryId === '' || categoryId === 'all') {
+        // Show all items
+        displayMenuItems(allMenuItems);
+    } else {
+        const filteredItems = allMenuItems.filter(item =>
+            String(item.category_id) === String(categoryId)
+        );
+        displayMenuItems(filteredItems);
+    }
+}
+
+/**
+ * Loads categories from the API and updates the UI
+ * Falls back to extracting from menu items if the categories API fails
+ * @returns {Promise<void>}
+ */
+async function loadCategories() {
+    try {
+        const requestId = Date.now() + Math.random().toString(36).substr(2, 9);
+        const url = `${API_URL}/admin/categories`;
+
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Cache-Control': 'no-cache',
+                'X-Request-ID': requestId
+            },
+            // Ensure we don't cache the categories response
+            cache: 'no-store'
+        });
+
+        const responseStatus = response.status;
+
+        if (response.ok) {
+            const categories = await response.json();
+
+            if (!Array.isArray(categories)) {
+                throw new Error('Invalid categories data format received');
+            }
+
+            // Update global categories list and map
+            categoriesList = categories;
+
+            categoryMap.clear();
+            categories.forEach(cat => {
+                if (cat && cat.id !== undefined && cat.name) {
+                    categoryMap.set(String(cat.id), cat.name);
+                }
+            });
+
+            populateCategoryFilter(categories);
+            populateMenuFormCategoryDropdown(categories);
+
+            if (allMenuItems.length > 0) {
+                displayMenuItems(allMenuItems);
+            }
+
+            return;
+        }
+
+        // Handle specific error cases
+        if (responseStatus === 401) {
+            logout();
+            return;
+        }
+
+        // For server errors, try to extract categories from menu items
+        if (responseStatus >= 500) {
+            await extractCategoriesFromMenuItems(allMenuItems);
+            return;
+        }
+
+        // Try to extract from menu items as fallback
+        if (allMenuItems?.length > 0) {
+            await extractCategoriesFromMenuItems(allMenuItems);
+        } else {
+            showError('Failed to load categories. Please refresh the page.');
+        }
+    } catch (error) {
+        showError('Failed to load categories. Please check your connection and refresh the page.');
+
+        // As a last resort, try to extract from menu items if available
+        if (allMenuItems?.length > 0) {
+            const extractedCategories = await extractCategoriesFromMenuItems(allMenuItems);
             if (extractedCategories.length > 0) {
                 categoriesList = extractedCategories;
                 populateCategoryFilter(extractedCategories);
                 populateMenuFormCategoryDropdown(extractedCategories);
-                console.log('Successfully populated category dropdowns with extracted categories');
-            } else {
-                console.warn('No categories found in menu items');
             }
         }
-    } catch (error) {
-        showError(error.message);
-    }
-}
-
-async function loadCategories() {
-    try {
-        console.log('Loading categories...');
-        const response = await fetch(`${API_URL}/admin/categories`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        console.log('Categories response status:', response.status);
-        
-        if (response.ok) {
-            const categories = await response.json();
-            console.log('Categories loaded:', categories);
-            categoriesList = categories;
-            populateCategoryFilter(categories);
-            populateMenuFormCategoryDropdown(categories);
-        } else {
-            console.error('Failed to load categories. Status:', response.status);
-            
-            // If API fails (500 error), try to extract from menu items
-            if (response.status === 500) {
-                console.log('Categories API returned 500 error, will extract from menu items...');
-                // The fallback will be handled in loadMenuItems
-                return;
-            }
-            
-            const errorData = await response.json().catch(() => ({}));
-            console.error('Error data:', errorData);
-            showError('Failed to load categories. Please refresh the page.');
-        }
-    } catch (error) {
-        console.error('Failed to load categories:', error);
-        // Show error to user
-        showError('Failed to load categories. Please refresh the page.');
     }
 }
 
 function populateMenuFormCategoryDropdown(categories) {
     const itemCategory = document.getElementById('itemCategory');
-    if (!itemCategory) return;
+    if (!itemCategory) {
+        return;
+    }
     itemCategory.innerHTML = '<option value="">Select Category</option>';
-    categories.forEach(category => {
-        itemCategory.innerHTML += `<option value="${category._id}">${category.name}</option>`;
-    });
+
+    if (Array.isArray(categories)) {
+        categories.forEach(category => {
+            itemCategory.innerHTML += `<option value="${category.id}">${category.name}</option>`;
+        });
+    } else {}
 }
 
 async function saveMenuItem(formData) {
     try {
-        const itemId = formData.get('id');
+        // Convert FormData to a plain object for easier handling
+        const formValues = {};
+        formData.forEach((value, key) => {
+            formValues[key] = value;
+        });
+        
+        const itemId = formValues.id || '';
         const method = itemId ? 'PUT' : 'POST';
-        const url = itemId
-            ? `${API_URL}/admin/menu/${itemId}`
-            : `${API_URL}/admin/menu`;
+        const url = itemId ?
+            `${API_URL}/admin/menu/${itemId}` :
+            `${API_URL}/admin/menu`;
+            
+        // Parse tags if they exist
+        let tags = [];
+        try {
+            tags = formValues.tags ? JSON.parse(formValues.tags) : [];
+        } catch (e) {
+            throw new Error('Invalid tags format'); 
+        }
 
-        // Get selected tags
-        const selectedTags = Array.from(document.querySelectorAll('input[name="tags"]:checked'))
-            .map(checkbox => checkbox.value);
-
-        // Create the request body
+        // Create the request body matching the expected API format
         const requestData = {
-            name: formData.get('name'),
-            description: formData.get('description'),
-            price_restaurant: parseFloat(formData.get('restaurantPrice')),
-            price_room: parseFloat(formData.get('roomServicePrice')),
-            category_id: formData.get('category'),
-            tags: selectedTags
+            name: formValues.name || '',
+            description: formValues.description || '',
+            price_restaurant: parseFloat(formValues.restaurantPrice) || 0,
+            price_room: parseFloat(formValues.roomServicePrice) || 0,
+            category_id: formValues.category_id ? parseInt(formValues.category_id) : null,
+            available: true,
+            image_url: formValues.image_url || '',
+            tags: tags
         };
+        
+        
+
+        // Validate required fields with better error messages
+        const errors = [];
+        if (!requestData.name) errors.push('Name');
+        if (!requestData.price_restaurant || isNaN(requestData.price_restaurant)) errors.push('Restaurant Price');
+        if (!requestData.price_room || isNaN(requestData.price_room)) errors.push('Room Service Price');
+        if (!requestData.category_id) errors.push('Category');
+
+        if (errors.length > 0) {
+            throw new Error(`Please fill in all required fields: ${errors.join(', ')}`);
+        }
 
         // Handle image if provided
         const imageFile = formData.get('image');
         if (imageFile && imageFile.size > 0) {
             // Here you would typically upload the image first and get a URL
-            // For now, we'll skip image handling
-            console.log('Image file provided:', imageFile);
+            // For now, we'll set a placeholder
+            requestData.image_url = '/images/placeholder.jpg'; // Placeholder for now
+            
+            // In a real implementation, you would upload the file first:
+            // 1. Create a new FormData for the file
+            // 2. Upload it to your server
+            // 3. Get the URL
+            // 4. Set requestData.image_url to the returned URL
         }
-
-        console.log('Saving menu item with data:', requestData);
 
         const response = await fetch(url, {
             method,
@@ -220,13 +333,11 @@ async function saveMenuItem(formData) {
         }
 
         const savedItem = await response.json();
-        console.log('Menu item saved successfully:', savedItem);
 
         closeItemModal();
-        loadMenuItems();
+        await loadAllMenuItems();
         showSuccess('Menu item saved successfully!');
     } catch (error) {
-        console.error('Error saving menu item:', error);
         showError(error.message || 'Failed to save menu item');
     }
 }
@@ -246,7 +357,7 @@ async function deleteMenuItem(id) {
             throw new Error('Failed to delete menu item');
         }
 
-        loadMenuItems();
+        await loadAllMenuItems();
         showSuccess('Menu item deleted successfully!');
     } catch (error) {
         showError(error.message);
@@ -254,19 +365,70 @@ async function deleteMenuItem(id) {
 }
 
 // UI Functions
-function displayMenuItems(items) {
+async function displayMenuItems(items) {
     const menuItemsGrid = document.getElementById('menuItemsGrid');
+
+    // If we don't have categories yet, load them first
+    if (categoryMap.size === 0 && categoriesList.length === 0) {
+        try {
+            await loadCategories();
+        } catch (error) {
+            showError(error.message);
+        }
+    }
+
+    // Clear existing items
     menuItemsGrid.innerHTML = items.map(item => {
+        /**
+         *{
+             "id": 232,
+             "name": "Screw Driver",
+             "description": "",
+             "category_id": 24,
+             "price_room": "6050.00",
+             "price_restaurant": "6050.00",
+             "available": true,
+             "image_url": null,
+             "tags": "[]",
+             "created_at": "2025-08-06T11:23:31.000000Z",
+             "updated_at": "2025-08-06T11:23:31.000000Z"
+         }
+         */
         const restaurantPrice = currencyFormatter.format(item.price_restaurant || 0);
         const roomServicePrice = currencyFormatter.format(item.price_room || 0);
-        const categoryName = item.category_id ? item.category_id.name : 'Uncategorized';
-        const tags = item.tags || [];
+        const categoryId = item.category_id;
+        const categoryName = categoryMap.get(String(categoryId)) || 'Unknown Category';
+
+        // Parse the tags - handle both JSON and comma-separated strings
+        let tags = [];
+        if (item.tags) {
+            try {
+                // First try to parse as JSON
+                if (item.tags.startsWith('[') && item.tags.endsWith(']')) {
+                    tags = JSON.parse(item.tags);
+                } else if (typeof item.tags === 'string' && item.tags.includes(',')) {
+                    // Handle comma-separated string
+                    tags = item.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+                } else if (Array.isArray(item.tags)) {
+                    // Already an array
+                    tags = item.tags;
+                } else if (typeof item.tags === 'string' && item.tags.length > 0) {
+                    // Single tag as string
+                    tags = [item.tags.trim()];
+                }
+            } catch (e) {
+                // Fallback: try to split by comma
+                if (typeof item.tags === 'string') {
+                    tags = item.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+                }
+            }
+        } else {}
 
         return `
-        <div class="item-card" data-item-id="${item._id}" data-category-id="${item.category_id?._id || item.category_id}">
+        <div class="item-card" data-item-id="${item.id}" data-category-id="${String(categoryId)}">
             <div class="item-card-content">
                 <h3>${item.name}</h3>
-                <p>${item.description || ''}</p>
+                ${item.description ? `<p class="item-description">${item.description}</p>` : ''}
                 <div class="price-info">
                     <span><strong>Restaurant:</strong> ${restaurantPrice}</span>
                     <span><strong>Room Service:</strong> ${roomServicePrice}</span>
@@ -280,41 +442,56 @@ function displayMenuItems(items) {
                 </div>
                 ` : ''}
                 <div class="item-actions">
-                    <button onclick="editItem('${item._id}')" class="primary-btn">Edit</button>
-                    <button onclick="deleteMenuItem('${item._id}')" class="danger-btn">Delete</button>
+                    <button onclick="editItem('${item.id}')" class="primary-btn">Edit</button>
+                    <button onclick="deleteMenuItem('${item.id}')" class="danger-btn">Delete</button>
                 </div>
             </div>
-        </div>
-        `;
+        </div>`;
     }).join('');
 }
 
 function populateCategoryFilter(categories) {
-    console.log('Populating category filter with:', categories);
-    const categoryFilter = document.getElementById('categoryFilter');
-    if (!categoryFilter) {
-        console.error('Category filter element not found!');
-        return;
-    }
-    
-    categoryFilter.innerHTML = '<option value="">All Categories</option>';
-    
-    if (Array.isArray(categories) && categories.length > 0) {
+    const filter = document.getElementById('categoryFilter');
+    if (!filter) return;
+
+    // Store current selection
+    const currentValue = filter.value;
+
+    // Clear existing options except the first one
+    filter.innerHTML = '<option value="">All Categories</option>';
+
+    // Add categories to the filter
+    if (Array.isArray(categories)) {
         categories.forEach(category => {
-            console.log('Adding category option:', category.name);
-            categoryFilter.innerHTML += `<option value="${category.name}">${category.name}</option>`;
+            if (category && category.id && category.name) {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                filter.appendChild(option);
+            }
         });
-        console.log('Category filter populated with', categories.length, 'categories');
-    } else {
-        console.warn('No categories to populate or categories is not an array');
+    }
+
+    // Restore selection if it still exists
+    if (currentValue) {
+        filter.value = currentValue;
     }
 }
 
 // Update showItemModal function
-function showItemModal(item = null) {
-    console.log('Opening modal with item data:', item);
+async function showItemModal(item = null) {
     const modalTitle = document.getElementById('modalTitle');
     modalTitle.textContent = item ? 'Edit Menu Item' : 'Add Menu Item';
+
+    // Ensure categories are loaded before showing modal
+    if (categoriesList.length === 0) {
+        try {
+            await loadCategories();
+        } catch (error) {
+            showError('Failed to load categories. Please try again.');
+            return;
+        }
+    }
 
     // Get form elements
     const nameInput = document.getElementById('itemName');
@@ -324,14 +501,18 @@ function showItemModal(item = null) {
     const categorySelect = document.getElementById('itemCategory');
     const tagInputs = document.querySelectorAll('input[name="tags"]');
 
+    // Populate category dropdown
+    populateMenuFormCategoryDropdown(categoriesList);
+
+
     if (item) {
-        console.log('Populating form with item:', item);
         // Populate form with item data
         nameInput.value = item.name || '';
         descriptionInput.value = item.description || '';
         restaurantPriceInput.value = item.price_restaurant || '';
         roomServicePriceInput.value = item.price_room || '';
         categorySelect.value = item.category_id || '';
+
 
         // Handle tags
         tagInputs.forEach(input => {
@@ -347,10 +528,11 @@ function showItemModal(item = null) {
             idInput.name = 'id';
             itemForm.appendChild(idInput);
         }
-        idInput.value = item._id;
+        idInput.value = item.id;
     } else {
-        console.log('Resetting form for new item');
         itemForm.reset();
+
+
         // Remove item ID if exists
         const idInput = document.getElementById('itemId');
         if (idInput) {
@@ -398,9 +580,9 @@ function showError(message) {
         z-index: 1000;
         animation: slideIn 0.3s ease;
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
@@ -422,9 +604,9 @@ function showSuccess(message) {
         z-index: 1000;
         animation: slideIn 0.3s ease;
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
         notification.remove();
     }, 3000);
@@ -433,7 +615,6 @@ function showSuccess(message) {
 // Update editItem function
 window.editItem = async function (id) {
     try {
-        console.log('Editing item with ID:', id);
 
         // Find the item in the existing items list
         const itemCard = document.querySelector(`[data-item-id="${id}"]`);
@@ -443,31 +624,51 @@ window.editItem = async function (id) {
 
         // Get the item data from the data attributes
         const item = {
-            _id: id,
+            id: id,
             name: itemCard.querySelector('h3').textContent,
-            description: itemCard.querySelector('p').textContent,
+            description: itemCard.querySelector('.item-description') ? itemCard.querySelector('.item-description').textContent : '',
             price_restaurant: parseFloat(itemCard.querySelector('.price-info span:first-child').textContent.match(/₦([\d,]+)/)[1].replace(/,/g, '')),
             price_room: parseFloat(itemCard.querySelector('.price-info span:last-child').textContent.match(/₦([\d,]+)/)[1].replace(/,/g, '')),
             category_id: itemCard.getAttribute('data-category-id'),
             tags: Array.from(itemCard.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase())
         };
 
-        console.log('Found item data:', item);
-        showItemModal(item);
+        await showItemModal(item);
     } catch (error) {
-        console.error('Error editing item:', error);
         showError('Failed to load menu item. Please try again.');
     }
 };
 
 // Event Listeners
-itemForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    saveMenuItem(formData);
-});
+const form = document.getElementById('itemForm');
+if (!form) {
+    throw new Error('Could not find form with id "itemForm"');
+} else {
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        try {
+            
+            // Create FormData from the form
+            const formData = new FormData(form);
+            
+            // Get selected tags
+            const selectedTags = Array.from(document.querySelectorAll('input[name="tags"]:checked'))
+                .map(checkbox => checkbox.value);
+            
+            // Add tags to form data
+            if (selectedTags.length > 0) {
+                formData.set('tags', JSON.stringify(selectedTags));
+            }
+            
+            await saveMenuItem(formData);
+        } catch (error) {
+            showError('Failed to process form. Please try again.');
+        }
+    });
+}
 
-addItemBtn.addEventListener('click', () => showItemModal());
+addItemBtn.addEventListener('click', async () => await showItemModal());
 document.querySelector('#itemModal .close').addEventListener('click', closeItemModal);
 window.addEventListener('click', (e) => {
     const modal = document.getElementById('itemModal');
@@ -487,22 +688,40 @@ searchInput.addEventListener('input', (e) => {
     });
 });
 
-categoryFilter.addEventListener('change', (e) => {
-    const category = e.target.value;
-    if (category) {
-        // Filter items by category
-        const items = document.querySelectorAll('.item-card');
-        items.forEach(item => {
-            const itemCategory = item.querySelector('.category-tag .tag').textContent;
-            item.style.display = itemCategory === category ? 'block' : 'none';
-        });
-    } else {
-        // Show all items
-        const items = document.querySelectorAll('.item-card');
-        items.forEach(item => item.style.display = 'block');
-    }
-});
+// Add event listener for category filter
+if (categoryFilter) {
+    categoryFilter.addEventListener('change', (e) => {
+        const categoryId = e.target.value;
+        filterMenuItemsByCategory(categoryId);
+    });
+}
 
-// Initialize
-checkAuth();
-setupNavigation(); 
+// Category ID to name mapping
+const categoryMap = new Map();
+
+// Initialize the dashboard
+async function initializeDashboard() {
+    try {
+        // Load categories first
+        if (categoriesList.length === 0) {
+            await loadCategories();
+        }
+
+        // Update the category map with existing categories
+        categoriesList.forEach(cat => {
+            categoryMap.set(String(cat.id), cat.name);
+        });
+
+        // Then load menu items
+        await loadAllMenuItems();
+
+    } catch (error) {
+        showError('Failed to initialize dashboard. Please refresh the page.');
+    }
+}
+
+// Initialize the dashboard
+if (checkAuth()) {
+    setupNavigation();
+    initializeDashboard().then(() => {});
+}

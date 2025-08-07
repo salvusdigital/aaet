@@ -89,14 +89,14 @@ class MenuController extends Controller
         try {
                 $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
-                'description' => 'required|string',
+                'description' => 'nullable|string',
                 'category_id' => 'required|exists:categories,id',
                 'price_room' => 'required|numeric',
                 'price_restaurant' => 'required|numeric',
-                'available' => 'required|boolean',
-                'image_url' => 'required|string',
+                'available' => 'nullable|boolean',
+                'image_url' => 'nullable|string',
                 'tags' => 'nullable|array',
-                'tags.*' => 'string',
+                'tags.*' => 'nullable|string',
             ]);
 
             $menu = Menu::create($validatedData);
@@ -125,14 +125,14 @@ class MenuController extends Controller
         try {
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
-                'description' => 'required|string',
+                'description' => 'nullable|string',
                 'category_id' => 'required|exists:categories,id',
                 'price_room' => 'required|numeric',
                 'price_restaurant' => 'required|numeric',
-                'available' => 'required|boolean',
-                'image_url' => 'required|string',
+                'available' => 'nullable|boolean',
+                'image_url' => 'nullable|string',
                 'tags' => 'nullable|array',
-                'tags.*' => 'string',
+                'tags.*' => 'nullable|string',
             ]);
 
             $menu = Menu::find($id);

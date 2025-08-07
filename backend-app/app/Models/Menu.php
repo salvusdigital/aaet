@@ -18,6 +18,13 @@ class Menu extends Model
         'tags'
     ];
 
+    protected $casts = [
+        'tags' => 'array',
+        'available' => 'boolean',
+        'price_room' => 'decimal:2',
+        'price_restaurant' => 'decimal:2'
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class);

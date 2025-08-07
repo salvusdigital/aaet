@@ -3,16 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AA Entertainment Hotel - Admin Dashboard</title>
-    <link rel="stylesheet" href="../css/admin.css">
+    <title>AAENT Hotel - Admin Dashboard</title>
+    <link rel="stylesheet" href="./css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .item-description {
+            font-size: 0.9em;
+            color: #666;
+            margin: 0.5em 0;
+            line-height: 1.4;
+        }
+    </style>
 </head>
 <body>
     <!-- Admin Dashboard -->
     <div class="dashboard-container">
         <nav class="sidebar">
             <div class="logo">
-                <img src="../logo.png" alt="AA Entertainment Hotel">
+                <img src="../logo.png" alt="AAENT Hotel">
             </div>
             <ul class="nav-links">
                 <li class="active" data-section="menu-items">
@@ -29,13 +37,21 @@
                 </li>
             </ul>
         </nav>
-
+        
         <main class="main-content">
             <header>
-                <h1>Menu Management</h1>
-                <button id="addItemBtn" class="primary-btn">
-                    <i class="fas fa-plus"></i> Add New Item
-                </button>
+                <div class="header-content">
+                    <div class="header-left">
+                        
+                        <button class="menu-toggle" aria-label="Toggle menu">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h1><i class="fas fa-utensils"></i> Menu Management</h1>
+                    </div>
+                    <button id="addItemBtn" class="primary-btn">
+                        <i class="fas fa-plus"></i> Add New Item
+                    </button>
+                </div>
             </header>
 
             <!-- Menu Items Section -->
@@ -60,8 +76,8 @@
                             <input type="text" id="itemName" name="name" required placeholder="Enter Item Name">
                         </div>
                         <div class="form-group">
-                            <label for="itemDescription">Description</label>
-                            <textarea id="itemDescription" name="description" placeholder="Enter Item Description"></textarea>
+                            <label for="itemDescription">Description <small>(Optional)</small></label>
+                            <textarea id="itemDescription" name="description" placeholder="Enter Item Description (Optional)"></textarea>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
@@ -75,12 +91,12 @@
                         </div>
                         <div class="form-group">
                             <label for="itemCategory">Category</label>
-                            <select id="itemCategory" name="category" required>
-                                <option value="">Select Category</option>
+                            <select id="itemCategory" name="category_id" required>
+                                <option value="category_id">Select Category</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="itemImage">Image</label>
+                            <label for="itemImage">Image <small>(Optional)</small></label>
                             <input type="file" id="itemImage" name="image" accept="image/*">
                         </div>
                         <!-- <div class="form-group">
@@ -99,6 +115,8 @@
         </main>
     </div>
 
+    <script src="js/utils/shared.js"></script>
     <script src="js/dashboard.js"></script>
+    <script src="js/menu.js"></script>
 </body>
 </html> 

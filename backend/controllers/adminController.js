@@ -182,7 +182,7 @@ const getMenuItems = async (req, res) => {
 const getCategories = async (req, res) => {
     // #swagger.tags = ['Admin']
     try {
-        const categories = await Category.getSortedCategories();
+        const categories = await Category.find({}).sort('sort_order');
         res.json(categories);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching categories', error: error.message });
