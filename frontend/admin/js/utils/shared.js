@@ -655,6 +655,119 @@ class CurrencyUtils {
 }
 
 // ============================================================================
+// MENU MANAGER
+// ============================================================================
+
+class MenuManager {
+    constructor() {
+        this.menuToggle = document.querySelector('.menu-toggle');
+        this.sidebar = document.querySelector('.sidebar');
+        this.initialize();
+    }
+
+    /**
+     * Initialize the menu functionality
+     */
+    initialize() {
+        // Create menu toggle button if it doesn't exist
+        if (!this.menuToggle && this.sidebar) {
+            this.createMenuToggle();
+        }
+
+        if (this.menuToggle && this.sidebar) {
+            this.setupEventListeners();
+        }
+
+        // Close sidebar when clicking on a nav link on mobile
+        const navLinks = document.querySelectorAll('.nav-links a, .nav-links li');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => this.handleNavLinkClick());
+        });
+
+        // Handle initial state
+        this.handleResize();
+        window.addEventListener('resize', () => this.handleResize());
+    }
+
+    /**
+     * Create the menu toggle button
+     */
+    createMenuToggle() {
+        this.menuToggle = document.createElement('button');
+        this.menuToggle.className = 'menu-toggle';
+        this.menuToggle.setAttribute('aria-label', 'Toggle menu');
+        this.menuToggle.innerHTML = '☰';
+        document.body.appendChild(this.menuToggle);
+    }
+
+    /**
+     * Set up event listeners for the menu
+     */
+    setupEventListeners() {
+        this.menuToggle.addEventListener('click', (e) => this.handleMenuToggleClick(e));
+        document.addEventListener('click', (e) => this.handleDocumentClick(e));
+    }
+
+    /**
+     * Handle menu toggle click event
+     * @param {Event} e - Click event
+     */
+    handleMenuToggleClick(e) {
+        e.stopPropagation();
+        this.sidebar.classList.toggle('open');
+        this.updateMenuIcon();
+    }
+
+    /**
+     * Handle document click event to close menu when clicking outside
+     * @param {Event} e - Click event
+     */
+    handleDocumentClick(e) {
+        const isClickInside = this.sidebar.contains(e.target) || 
+                            (this.menuToggle && this.menuToggle.contains(e.target));
+        
+        if (!isClickInside && this.sidebar.classList.contains('open')) {
+            this.sidebar.classList.remove('open');
+            this.updateMenuIcon();
+        }
+    }
+
+    /**
+     * Handle nav link click on mobile
+     */
+    handleNavLinkClick() {
+        if (window.innerWidth <= 992 && this.sidebar) {
+            this.sidebar.classList.remove('open');
+            this.updateMenuIcon();
+        }
+    }
+
+    /**
+     * Update the menu icon based on sidebar state
+     */
+    updateMenuIcon() {
+        if (this.menuToggle) {
+            this.menuToggle.innerHTML = this.sidebar.classList.contains('open') ? '✕' : '☰';
+        }
+    }
+
+    /**
+     * Handle window resize events
+     */
+    handleResize() {
+        if (window.innerWidth > 992 && this.sidebar) {
+            this.sidebar.style.transform = '';
+            this.sidebar.classList.remove('open');
+            this.updateMenuIcon();
+        }
+        
+        if (this.menuToggle) {
+            this.menuToggle.style.display = window.innerWidth <= 992 ? 'block' : 'none';
+        }
+    }
+}
+
+// ============================================================================
 // INITIALIZATION UTILITIES
 // ============================================================================
 
@@ -719,8 +832,17 @@ window.AdminUtils = {
     DOMUtils,
     FormUtils,
     CurrencyUtils,
-    InitUtils
+    InitUtils,
+    MenuManager
 };
+
+// Initialize menu when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Only initialize menu on admin pages that have a sidebar
+    if (document.querySelector('.sidebar')) {
+        new MenuManager();
+    }
+});
 
 // Export for module systems (if needed)
 if (typeof module !== 'undefined' && module.exports) {
@@ -733,6 +855,7 @@ if (typeof module !== 'undefined' && module.exports) {
         DOMUtils,
         FormUtils,
         CurrencyUtils,
-        InitUtils
+        InitUtils,
+        MenuManager
     };
-} 
+}

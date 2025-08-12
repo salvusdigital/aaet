@@ -69,6 +69,26 @@ body {
     margin-left: var(--sidebar-width);
     padding: 2rem;
     width: calc(100% - var(--sidebar-width));
+    transition: margin-left 0.3s ease-in-out;
+}
+
+@media (max-width: 992px) {
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .menu-toggle {
+        display: block;
+    }
 }
 
 /* Logo */
@@ -93,7 +113,8 @@ body {
     padding: 0.75rem 1rem;
     position: fixed;
     top: 15px;
-    left: 15px;
+    right: 15px;
+    left: auto;
     z-index: 1001;
     border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -179,13 +200,12 @@ header {
     background-color: var(--accent-color);
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 30px;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
     cursor: pointer;
     font-size: 1rem;
     font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -195,8 +215,8 @@ header {
 
 .primary-btn:hover {
     background-color: #c70512;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: none;
+    box-shadow: none;
 }
 
 .primary-btn i {
@@ -254,19 +274,176 @@ header {
     color: #333;
 }
 
-/* Grid Layout */
+/* Categories Grid */
 .items-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.5rem;
-    margin-top: 1.5rem;
+    margin: 1.5rem 0;
+    padding: 0.5rem;
 }
 
+/* Categories Grid Container */
+.categories-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+    width: 100%;
+}
+
+/* Category Card */
+.category-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Header */
+.category-card-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, var(--primary-color), var(--dark-gray));
+    color: white;
+}
+
+.category-card-name {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+}
+
+.category-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background-color: #4caf50;
+    color: white;
+}
+
+.category-status.inactive {
+    background-color: #f44336;
+}
+
+/* Card Body */
+.category-card-body {
+    padding: 1.25rem;
+    flex-grow: 1;
+}
+
+.category-card-description {
+    margin: 0 0 1rem;
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Card Footer */
+.category-card-footer {
+    padding: 0.75rem 1.25rem;
+    background: #f9f9f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #f0f0f0;
+}
+
+.category-card-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: #777;
+}
+
+.category-card-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.category-card-actions .btn-action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.category-card-actions .btn-edit {
+    color: #2196f3;
+}
+
+.category-card-actions .btn-delete {
+    color: #f44336;
+}
+
+.category-card-actions .btn-edit:hover {
+    background-color: rgba(33, 150, 243, 0.1);
+}
+
+.category-card-actions .btn-delete:hover {
+    background-color: rgba(244, 67, 54, 0.1);
+}
+
+.category-card-stats i {
+    margin-right: 0.25rem;
+}
+
+/* Item Card (for other item types) */
 .item-card {
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+}
+
+.item-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.item-card-content {
+    padding: 1rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .items-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .category-card, .item-card {
+        max-width: 100%;
+    }
 }
 
 .item-card img {
@@ -681,6 +858,25 @@ header {
     box-shadow: 0 6px 20px rgba(227, 6, 19, 0.4);
 }
 
+#addItemBtn {
+    background: linear-gradient(135deg, var(--accent-color), #c70512);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(227, 6, 19, 0.3);
+    flex-shrink: 0;
+}
+
+#addItemBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(227, 6, 19, 0.4);
+}
+
 /* Enhanced Filters Container */
 .filters-container {
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
@@ -887,6 +1083,34 @@ header {
     flex: 1;
     display: flex;
     flex-direction: column;
+}
+
+.category-group-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+    align-self: flex-start;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.category-group-badge[data-group="FOOD"] {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.category-group-badge[data-group="DRINKS"] {
+    background-color: #2196F3;
+    color: white;
+}
+
+.category-group-badge[data-group="UNKNOWN"] {
+    background-color: #9E9E9E;
+    color: white;
 }
 
 .category-description {

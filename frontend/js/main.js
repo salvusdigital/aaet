@@ -165,7 +165,7 @@ function getItemCategoryName(item) {
  */
 async function fetchCategories() {
     try {
-        const response = await fetch('https://menu.aaentertainment.ng/api/menu/categories');
+        const response = await fetch('http://localhost:8000/api/menu/categories');
         const data = await response.json();
         console.log('Categories fetched:', data);
 
@@ -192,7 +192,8 @@ async function fetchMenuData() {
     showLoadingState();
 
     try {
-        const response = await fetch('https://menu.aaentertainment.ng/api/menu');
+        const response = await fetch('http://localhost:8000/api/menu');
+        // const response = await fetch('https://menu.aaentertainment.ng/api/menu');
         const data = await response.json();
         console.log('Raw menu data received:', data);
 
@@ -566,24 +567,14 @@ function setupScrollHighlighting(grouped) {
                 btn.classList.add('active');
                 // Temporary visual test - add a background color
                 btn.style.backgroundColor = '#ff0000';
-                if (!wasActive) {
-                    console.log('Activating button for category:', btnCategory);
-                }
+  
             } else {
                 btn.classList.remove('active');
                 // Remove temporary background
                 btn.style.backgroundColor = '';
-                if (wasActive) {
-                    console.log('Deactivating button for category:', btnCategory);
-                }
             }
         });
 
-        if (activeCategory) {
-            console.log('Final active category:', activeCategory);
-        } else {
-            console.log('No active category found');
-        }
     }
 
     // Call once on setup to set initial active state
@@ -646,7 +637,6 @@ function selectService(type, updateURL = true) {
     }
 
     renderMenuByCategory();
-    console.log(`Service selected: ${type}`);
 }
 
 /**
@@ -666,8 +656,6 @@ function updateURLWithService(serviceType) {
 function setServiceType(type) {
     if (type === 'room' || type === 'restaurant') {
         selectService(type, true);
-    } else {
-        console.error('Invalid service type. Use "room" or "restaurant"');
     }
 }
 
@@ -699,7 +687,6 @@ function clearServiceType() {
     url.searchParams.delete('service');
     window.history.replaceState({}, '', url);
 
-    console.log('Service type cleared');
 }
 
 // ============================================================================
@@ -770,7 +757,6 @@ function initializeServiceSelection() {
     if (serviceParam === 'room' || serviceParam === 'restaurant') {
         AppState.currentService = serviceParam;
         document.getElementById('serviceModal').style.display = 'none';
-        console.log(`Service type set from URL: ${serviceParam}`);
     } else {
         // Show modal if service type not selected
         if (!AppState.currentService) {
@@ -781,7 +767,6 @@ function initializeServiceSelection() {
     // Set filter from URL parameter
     if (filterParam && ['food', 'drinks', 'all'].includes(filterParam)) {
         AppState.currentFilter = filterParam;
-        console.log(`Filter set from URL: ${filterParam}`);
     }
 
     // Re-render menu if service was set from URL
@@ -798,7 +783,6 @@ function initializeServiceSelection() {
  * Initialize the application when DOM is loaded
  */
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('Initializing restaurant menu application...');
 
     // Initialize UI components
     initializeNavigation();
@@ -849,15 +833,3 @@ function createLegacyMenuItemHTML(item) {
         </div>
     `;
 }
-
-/**
- * @deprecated Use showItemDetails() instead
- */
-function showItemDetails(itemId) {
-    const allItems = [...AppState.menuData.specials, ...AppState.menuData.foods, ...AppState.menuData.drinks];
-    const item = allItems.find(item => item._id === itemId);
-
-    if (item) {
-        console.log('Item details:', item);
-    }
-} 
