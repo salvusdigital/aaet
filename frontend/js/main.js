@@ -192,8 +192,7 @@ async function fetchMenuData() {
     showLoadingState();
 
     try {
-        const response = await fetch('http://localhost:8000/api/menu');
-        // const response = await fetch('https://menu.aaentertainment.ng/api/menu');
+        const response = await fetch('https://menu.aaentertainment.ng/api/menu');
         const data = await response.json();
         console.log('Raw menu data received:', data);
 

@@ -5,22 +5,26 @@
                 {
                     "name": "Chicken Caesar Salad",
                     "room_service_price": 11500,
-                    "restaurant_price": 11000
+                    "restaurant_price": 11000,
+                    "description": "Roasted chicken, lettuce, shaved cheese, caper gherkin, and caesar dressing"
                 },
                 {
                     "name": "Garden Salad",
                     "room_service_price": 8500,
-                    "restaurant_price": 8000
+                    "restaurant_price": 8000,
+                    "description": "Lettuce, endives, baby spinach, tomatoes, cucumber, carrots, kalamata olives, capers and extra virgin oil"
                 },
                 {
                     "name": "Greek Salad",
                     "room_service_price": 9500,
-                    "restaurant_price": 9000
+                    "restaurant_price": 9000,
+                    "description": "Lettuce, cherry tomatoes, cucumber, feta cheese, spring onion rings, fresh mint, oregano, bread stick, olive oil, apple vinegar, salt and pepper"
                 },
                 {
                     "name": "Sea Food Salad",
                     "room_service_price": 22000,
-                    "restaurant_price": 21500
+                    "restaurant_price": 21500,
+                    "description": "Prawns, calamari, fish, mixed lettuce, olives, tomatoes, cucumber, green beans, parmesan and caesar dressing served with lemon wedaes"
                 }
             ]
         },
@@ -29,37 +33,44 @@
                 {
                     "name": "Assorted Pepper Soup",
                     "room_service_price": 9500,
-                    "restaurant_price": 9000
+                    "restaurant_price": 9000,
+                    "description": "Choice of catfish, croaker fish, goat meat, chicken, shaki or cow leg"
                 },
                 {
                     "name": "Cat Fish Pepper Soup",
                     "room_service_price": 9500,
-                    "restaurant_price": 9000
+                    "restaurant_price": 9000,
+                    "description": "Choice of catfish, croaker fish, goat meat, chicken, shaki or cow leg"
                 },
                 {
                     "name": "Chicken Wings Pepper Soup",
                     "room_service_price": 9500,
-                    "restaurant_price": 9000
+                    "restaurant_price": 9000,
+                    "description": "Choice of catfish, croaker fish, goat meat, chicken, shaki or cow leg"
                 },
                 {
                     "name": "Cow Leg Pepper Soup",
                     "room_service_price": 9500,
-                    "restaurant_price": 9000
+                    "restaurant_price": 9000,
+                    "description": "Choice of catfish, croaker fish, goat meat, chicken, shaki or cow leg"
                 },
                 {
                     "name": "Croaker Fish Pepper Soup",
                     "room_service_price": 12500,
-                    "restaurant_price": 12000
+                    "restaurant_price": 12000,
+                    "description": "Choice of catfish, croaker fish, goat meat, chicken, shaki or cow leg"
                 },
                 {
                     "name": "Tilapia Pepper Soup",
                     "room_service_price": 9500,
-                    "restaurant_price": 9000
+                    "restaurant_price": 9000,
+                    "description": "Choice of catfish, croaker fish, goat meat, chicken, shaki or cow leg"
                 },
                 {
                     "name": "Goat Meat Pepper Soup",
                     "room_service_price": 12500,
-                    "restaurant_price": 12000
+                    "restaurant_price": 12000,
+                    "description": "Choice of catfish, croaker fish, goat meat, chicken, shaki or cow leg"
                 }
             ]
         },
@@ -68,27 +79,32 @@
                 {
                     "name": "Cream of Chicken Corn Soup",
                     "room_service_price": 14500,
-                    "restaurant_price": 14000
+                    "restaurant_price": 14000,
+                    "description": ""
                 },
                 {
                     "name": "Cream of Chicken Noodles Soup",
                     "room_service_price": 14500,
-                    "restaurant_price": 14000
+                    "restaurant_price": 14000,
+                    "description": "Chicken, carrots, leek, celery, onions, spring onion rings, cream and fried noodles"
                 },
                 {
                     "name": "French Onion Soup",
                     "room_service_price": 7000,
-                    "restaurant_price": 6500
+                    "restaurant_price": 6500,
+                    "description": ""
                 },
                 {
                     "name": "Mushroom Soup",
                     "room_service_price": 13500,
-                    "restaurant_price": 13000
+                    "restaurant_price": 13000,
+                    "description": ""
                 },
                 {
                     "name": "Vegetable/Minestron Soup",
                     "room_service_price": 11000,
-                    "restaurant_price": 10500
+                    "restaurant_price": 10500,
+                    "description": ""
                 }
             ]
         },
@@ -97,122 +113,146 @@
                 {
                     "name": "Assorted Snack Platter",
                     "room_service_price": 13500,
-                    "restaurant_price": 13000
+                    "restaurant_price": 13000,
+                    "description": ""
                 },
                 {
                     "name": "Asun",
                     "room_service_price": 15500,
-                    "restaurant_price": 15000
+                    "restaurant_price": 15000,
+                    "description": ""
                 },
                 {
                     "name": "BBQ Chicken Wings",
                     "room_service_price": 12000,
-                    "restaurant_price": 11500
+                    "restaurant_price": 11500,
+                    "description": "Chicken wings in coffee infused BBQ sauce"
                 },
                 {
                     "name": "BBQ Croaker Fish",
                     "room_service_price": 25500,
-                    "restaurant_price": 25000
+                    "restaurant_price": 25000,
+                    "description": ""
                 },
                 {
                     "name": "Beef Platter For 4",
                     "room_service_price": 35500,
-                    "restaurant_price": 35000
+                    "restaurant_price": 35000,
+                    "description": ""
                 },
                 {
                     "name": "Beef Platter For 2",
                     "room_service_price": 22500,
-                    "restaurant_price": 22000
+                    "restaurant_price": 22000,
+                    "description": ""
                 },
                 {
                     "name": "Beef Suya",
                     "room_service_price": 10500,
-                    "restaurant_price": 10000
+                    "restaurant_price": 10000,
+                    "description": "Lean beef skewer marinated with arewa suya spice"
                 },
                 {
                     "name": "Beef Suya SN",
                     "room_service_price": 10500,
-                    "restaurant_price": 10000
+                    "restaurant_price": 10000,
+                    "description": "Lean beef skewer marinated with arewa suya spice"
                 },
                 {
                     "name": "Buffalo Chicken Wings",
                     "room_service_price": 10500,
-                    "restaurant_price": 10000
+                    "restaurant_price": 10000,
+                    "description": ""
                 },
                 {
                     "name": "Chicken Suya",
                     "room_service_price": 8500,
-                    "restaurant_price": 8000
+                    "restaurant_price": 8000,
+                    "description": "Chicken skewer marinated with arewa suya spice"
                 },
                 {
                     "name": "Chicken Thigh Suya",
                     "room_service_price": 10000,
-                    "restaurant_price": 9500
+                    "restaurant_price": 9500,
+                    "description": ""
                 },
                 {
                     "name": "BBQ Cat Fish",
                     "room_service_price": 25500,
-                    "restaurant_price": 25000
+                    "restaurant_price": 25000,
+                    "description": ""
                 },
                 {
                     "name": "Prawn Suya SN",
                     "room_service_price": 14500,
-                    "restaurant_price": 22000
+                    "restaurant_price": 22000,
+                    "description": ""
                 },
                 {
                     "name": "Peppered Gizzard",
                     "room_service_price": 9500,
-                    "restaurant_price": 9000
+                    "restaurant_price": 9000,
+                    "description": ""
                 },
                 {
                     "name": "Peppered Snail",
                     "room_service_price": 25500,
-                    "restaurant_price": 25000
+                    "restaurant_price": 25000,
+                    "description": "Snail cooked crunchy style, coated with chili pepper sauce"
                 },
                 {
                     "name": "Spring Roll & Samosa",
                     "room_service_price": 10000,
-                    "restaurant_price": 9500
+                    "restaurant_price": 9500,
+                    "description": "Crispy fried phyllo wrapped vegetables with hot sweet sauce"
                 },
                 {
                     "name": "Seafood Platter For 2",
                     "room_service_price": 21500,
-                    "restaurant_price": 21000
+                    "restaurant_price": 21000,
+                    "description": ""
                 },
                 {
                     "name": "Seafood Platter For 4",
                     "room_service_price": 40500,
-                    "restaurant_price": 40000
+                    "restaurant_price": 40000,
+                    "description": ""
                 },
                 {
                     "name": "BBQ Tilapia Fish",
                     "room_service_price": 17500,
-                    "restaurant_price": 17000
+                    "restaurant_price": 17000,
+                    "description": ""
                 },
                 {
                     "name": "Chilli Crispy Beef",
                     "room_service_price": 12500,
-                    "restaurant_price": 12000
+                    "restaurant_price": 12000,
+                    "description": ""
                 },
                 {
                     "name": "Goat Meat Suya",
                     "room_service_price": 15500,
-                    "restaurant_price": 15000
+                    "restaurant_price": 15000,
+                    "description": ""
                 },
                 {
                     "name": "Liver Suya",
                     "room_service_price": 9500,
-                    "restaurant_price": 9000
+                    "restaurant_price": 9000,
+                    "description": ""
                 },
                 {
                     "name": "Prawn Suya",
                     "room_service_price": 22500,
-                    "restaurant_price": 22000
+                    "restaurant_price": 22000,
+                    "description": ""
                 },
                 {
                     "name": "Peppered Beef",
                     "room_service_price": null,
-                    "restaurant_price": 14000
+                    "restaurant_price": 14000,
+                    "description": ""
                 }
             ]
         },
@@ -221,77 +261,92 @@
                 {
                     "name": "Brasied Chicken",
                     "room_service_price": 13000,
-                    "restaurant_price": 12500
+                    "restaurant_price": 12500,
+                    "description": "Chicken in mild juicy sauce"
                 },
                 {
                     "name": "Chicken Cordon Bleu",
                     "room_service_price": 17000,
-                    "restaurant_price": 16500
+                    "restaurant_price": 16500,
+                    "description": "Breaded chicken breast stuffed with cheese (or ham) served with tartar & cocktail sauce"
                 },
                 {
                     "name": "Chicken Escalope",
                     "room_service_price": 12000,
-                    "restaurant_price": 11500
+                    "restaurant_price": 11500,
+                    "description": "Breaded chicken breast served with tartar and cocktail sauce"
                 },
                 {
                     "name": "Chicken Fajitas",
                     "room_service_price": 20500,
-                    "restaurant_price": 20000
+                    "restaurant_price": 20000,
+                    "description": "Strips of chicken breast seasoned and cooked with vegetables, wrapped in tortilla or taco shells"
                 },
                 {
                     "name": "Grilled Vegetables",
                     "room_service_price": 9000,
-                    "restaurant_price": 8500
+                    "restaurant_price": 8500,
+                    "description": "Grilled Zucchini, egg plant, radish, capsicum pepper, onions, mushroom and carrot"
                 },
                 {
                     "name": "Grilled Boneless Chicken",
                     "room_service_price": 11500,
-                    "restaurant_price": 11000
+                    "restaurant_price": 11000,
+                    "description": ""
                 },
                 {
                     "name": "Grilled Chicken",
                     "room_service_price": 16000,
-                    "restaurant_price": 15500
+                    "restaurant_price": 15500,
+                    "description": "Served with creamy mushroom sauce"
                 },
                 {
                     "name": "Grilled Lamb Chop",
                     "room_service_price": 28500,
-                    "restaurant_price": 28000
+                    "restaurant_price": 28000,
+                    "description": ""
                 },
                 {
                     "name": "Grilled Line Fish",
                     "room_service_price": 20000,
-                    "restaurant_price": 19500
+                    "restaurant_price": 19500,
+                    "description": "Served with lemon butter sauce"
                 },
                 {
                     "name": "Grilled Prawns",
                     "room_service_price": 24000,
-                    "restaurant_price": 23500
+                    "restaurant_price": 23500,
+                    "description": "Served with creamy lemon and coriander sauce"
                 },
                 {
                     "name": "Grilled Turkey",
                     "room_service_price": 15500,
-                    "restaurant_price": 15000
+                    "restaurant_price": 15000,
+                    "description": ""
                 },
                 {
                     "name": "Honey Chicken",
                     "room_service_price": 17500,
-                    "restaurant_price": 17000
+                    "restaurant_price": 17000,
+                    "description": ""
                 },
                 {
                     "name": "Oriental Mixed Grill",
                     "room_service_price": 23000,
-                    "restaurant_price": 22500
+                    "restaurant_price": 22500,
+                    "description": "Steak, chicken and seafood"
                 },
                 {
                     "name": "Mongolian Beef",
                     "room_service_price": 13000,
-                    "restaurant_price": 12500
+                    "restaurant_price": 12500,
+                    "description": ""
                 },
                 {
                     "name": "T-Bone 350",
                     "room_service_price": 19500,
-                    "restaurant_price": 19000
+                    "restaurant_price": 19000,
+                    "description": "350g of T-bone steak served with thyme jus"
                 }
             ]
         },
@@ -300,22 +355,26 @@
                 {
                     "name": "904 Hawaiian",
                     "room_service_price": 15500,
-                    "restaurant_price": 15000
+                    "restaurant_price": 15000,
+                    "description": "Pizza filled with chicken, diced pineapples, cheese and vegetables"
                 },
                 {
                     "name": "906 Pepperoni",
                     "room_service_price": 16500,
-                    "restaurant_price": 16000
+                    "restaurant_price": 16000,
+                    "description": "Pepperoni and mozzarella cheese"
                 },
                 {
                     "name": "Seafood Pizza",
                     "room_service_price": 25000,
-                    "restaurant_price": 24500
+                    "restaurant_price": 24500,
+                    "description": "Shrimp, calamari and fish with vegetables and mozzarella cheese"
                 },
                 {
                     "name": "Vegetarian Pizza",
                     "room_service_price": 14000,
-                    "restaurant_price": 13500
+                    "restaurant_price": 13500,
+                    "description": "Pizza topped with mozzarella cheese and sauteed vegetables"
                 }
             ]
         },
@@ -324,37 +383,44 @@
                 {
                     "name": "Chana Masala",
                     "room_service_price": 12500,
-                    "restaurant_price": 12000
+                    "restaurant_price": 12000,
+                    "description": ""
                 },
                 {
                     "name": "Chicken Curry",
                     "room_service_price": 14000,
-                    "restaurant_price": 13500
+                    "restaurant_price": 13500,
+                    "description": "Dishes prepared with freshly made curry spices including garlic, ginger, cumin, coriander, turmeric, onion and a pinch of cinnamon."
                 },
                 {
                     "name": "Fish Curry",
                     "room_service_price": 15500,
-                    "restaurant_price": 15000
+                    "restaurant_price": 15000,
+                    "description": ""
                 },
                 {
                     "name": "Lamb Curry",
                     "room_service_price": 20500,
-                    "restaurant_price": 20000
+                    "restaurant_price": 20000,
+                    "description": "Dishes prepared with freshly made curry spices including garlic, ginger, cumin, coriander, turmeric, onion and a pinch of cinnamon."
                 },
                 {
                     "name": "Sea Food Curry",
                     "room_service_price": 25500,
-                    "restaurant_price": 25000
+                    "restaurant_price": 25000,
+                    "description": "Dishes prepared with freshly made curry spices including garlic, ginger, cumin, coriander, turmeric, onion and a pinch of cinnamon."
                 },
                 {
                     "name": "Vegetable Curry",
                     "room_service_price": 10500,
-                    "restaurant_price": 10000
+                    "restaurant_price": 10000,
+                    "description": "Dishes prepared with freshly made curry spices including garlic, ginger, cumin, coriander, turmeric, onion and a pinch of cinnamon."
                 },
                 {
                     "name": "Vegetable Curry Vegan",
                     "room_service_price": 10500,
-                    "restaurant_price": 10000
+                    "restaurant_price": 10000,
+                    "description": ""
                 }
             ]
         },
@@ -363,27 +429,32 @@
                 {
                     "name": "Beef in Pepper Corn Sauce",
                     "room_service_price": 16500,
-                    "restaurant_price": 16500
+                    "restaurant_price": 16500,
+                    "description": ""
                 },
                 {
                     "name": "Chicken in Sweet Sour Sauce",
                     "room_service_price": 16500,
-                    "restaurant_price": 16000
+                    "restaurant_price": 16000,
+                    "description": "Chicken pieces and vegetables in sweet & sour sauce with basmati rice"
                 },
                 {
                     "name": "Chinese Rice and Chicken",
                     "room_service_price": 18000,
-                    "restaurant_price": 17500
+                    "restaurant_price": 17500,
+                    "description": "Rice, eggs, vegetables with chicken lap"
                 },
                 {
                     "name": "Chinese Spicy Fish",
                     "room_service_price": 20000,
-                    "restaurant_price": 19500
+                    "restaurant_price": 19500,
+                    "description": ""
                 },
                 {
                     "name": "Spicy Mixed Seafood",
                     "room_service_price": 25500,
-                    "restaurant_price": 25500
+                    "restaurant_price": 25500,
+                    "description": ""
                 }
             ]
         },
@@ -392,17 +463,19 @@
                 {
                     "name": "Chicken and Chips",
                     "room_service_price": 16500,
-                    "restaurant_price": 16000
+                    "restaurant_price": 16000,
+                    "description": "Fried or grilled chicken served with french fries or yam chips"
                 },
                 {
                     "name": "Fish and Chips",
                     "room_service_price": 18000,
-                    "restaurant_price": 17500
+                    "restaurant_price": 17500,
+                    "description": "Fried or grilled tilapia fish served with french fries or yam chips"
                 }
             ]
         },
         {
-            "Nigerian Dish": [
+            "Nigerian Dishes": [
                 {
                     "name": "Beef",
                     "description": "Choice of soup: Affang, Bitter-leaf, Edi, Efo, Ewedu, Egusi, Mixed Okro, Ogbono, Ofe-nsala",
@@ -458,27 +531,32 @@
                 {
                     "name": "Ala Bolognese Sauce",
                     "room_service_price": 15500,
-                    "restaurant_price": 15000
+                    "restaurant_price": 15000,
+                    "description": "Mincemeat"
                 },
                 {
                     "name": "Alfredo Sauce",
                     "room_service_price": 20500,
-                    "restaurant_price": 20000
+                    "restaurant_price": 20000,
+                    "description": "Chicken and mushroom"
                 },
                 {
                     "name": "Vegetarian Pasta",
                     "room_service_price": 7000,
-                    "restaurant_price": 6500
+                    "restaurant_price": 6500,
+                    "description": "Pasta cooked al dente, sauteed with oil, garlic and onion topped with gratinate permesan cheese"
                 },
                 {
                     "name": "Carbonara Sauce",
                     "room_service_price": 17500,
-                    "restaurant_price": 17000
+                    "restaurant_price": 17000,
+                    "description": ""
                 },
                 {
                     "name": "Marinara Sauce",
                     "room_service_price": 22500,
-                    "restaurant_price": 22000
+                    "restaurant_price": 22000,
+                    "description": "Seafood"
                 }
             ]
         },
@@ -487,7 +565,8 @@
                 {
                     "name": "Seafood Okro",
                     "room_service_price": 21500,
-                    "restaurant_price": 21000
+                    "restaurant_price": 21000,
+                    "description": ""
                 }
             ]
         },
@@ -496,227 +575,272 @@
                 {
                     "name": "Whole Chicken",
                     "room_service_price": 8500,
-                    "restaurant_price": 8000
+                    "restaurant_price": 8000,
+                    "description": ""
                 },
                 {
                     "name": "Snail",
                     "room_service_price": 20500,
-                    "restaurant_price": 20000
+                    "restaurant_price": 20000,
+                    "description": ""
                 },
                 {
                     "name": "Tilapia Fish",
                     "room_service_price": 7000,
-                    "restaurant_price": 6500
+                    "restaurant_price": 6500,
+                    "description": ""
                 },
                 {
                     "name": "Croaker Fish",
                     "room_service_price": 13000,
-                    "restaurant_price": 12500
+                    "restaurant_price": 12500,
+                    "description": ""
                 },
                 {
                     "name": "Assorted Meat",
                     "room_service_price": 10500,
-                    "restaurant_price": 10000
+                    "restaurant_price": 10000,
+                    "description": ""
                 },
                 {
                     "name": "Topside Beef",
                     "room_service_price": 9500,
-                    "restaurant_price": 9000
+                    "restaurant_price": 9000,
+                    "description": ""
                 },
                 {
                     "name": "Shaki",
                     "room_service_price": 9000,
-                    "restaurant_price": 8500
+                    "restaurant_price": 8500,
+                    "description": ""
                 },
                 {
                     "name": "Cowleg",
                     "room_service_price": 10500,
-                    "restaurant_price": 10000
+                    "restaurant_price": 10000,
+                    "description": "Braised cow leg with spicy aromatic traditional spices"
                 },
                 {
                     "name": "Liver/Kidney/Intestine",
                     "room_service_price": 9500,
-                    "restaurant_price": 9000
+                    "restaurant_price": 9000,
+                    "description": ""
                 },
                 {
                     "name": "Stock Fish Whole",
                     "room_service_price": 20500,
-                    "restaurant_price": 20000
+                    "restaurant_price": 20000,
+                    "description": ""
                 },
                 {
                     "name": "Catfish",
                     "room_service_price": 12500,
-                    "restaurant_price": 12000
+                    "restaurant_price": 12000,
+                    "description": ""
                 },
                 {
                     "name": "Goat Meat (With Bone)",
                     "room_service_price": 13500,
-                    "restaurant_price": 13000
+                    "restaurant_price": 13000,
+                    "description": "Boneless goat head slowly cooked with aromatic traditional spices"
                 },
                 {
                     "name": "Fillet Steak",
                     "room_service_price": 10500,
-                    "restaurant_price": 10000
+                    "restaurant_price": 10000,
+                    "description": "Served with peppercorn sauce"
                 },
                 {
                     "name": "Jollof Rice",
                     "room_service_price": 4000,
-                    "restaurant_price": 3500
+                    "restaurant_price": 3500,
+                    "description": ""
                 },
                 {
                     "name": "Pepper Beef",
                     "room_service_price": 10500,
-                    "restaurant_price": 10000
+                    "restaurant_price": 10000,
+                    "description": ""
                 },
                 {
                     "name": "Lamb Chop",
                     "room_service_price": 13500,
-                    "restaurant_price": 13000
+                    "restaurant_price": 13000,
+                    "description": ""
                 },
                 {
                     "name": "Lamb Shank",
                     "room_service_price": 10000,
-                    "restaurant_price": 9500
+                    "restaurant_price": 9500,
+                    "description": ""
                 },
                 {
                     "name": "Pepper Cowleg",
                     "room_service_price": 6500,
-                    "restaurant_price": 6000
+                    "restaurant_price": 6000,
+                    "description": ""
                 },
                 {
                     "name": "Dry Catfish",
                     "room_service_price": 12500,
-                    "restaurant_price": 12000
+                    "restaurant_price": 12000,
+                    "description": ""
                 },
                 {
                     "name": "Poundo Yam",
                     "room_service_price": 5500,
-                    "restaurant_price": 5000
+                    "restaurant_price": 5000,
+                    "description": ""
                 },
                 {
                     "name": "Amala",
                     "room_service_price": 4000,
-                    "restaurant_price": 3500
+                    "restaurant_price": 3500,
+                    "description": ""
                 },
                 {
                     "name": "Semovita",
                     "room_service_price": 4000,
-                    "restaurant_price": 3500
+                    "restaurant_price": 3500,
+                    "description": ""
                 },
                 {
                     "name": "Garri (Eba)",
                     "room_service_price": 4000,
-                    "restaurant_price": 3500
+                    "restaurant_price": 3500,
+                    "description": ""
                 },
                 {
                     "name": "Wheat",
                     "room_service_price": 4000,
-                    "restaurant_price": 3500
+                    "restaurant_price": 3500,
+                    "description": ""
                 },
                 {
                     "name": "White Rice",
                     "room_service_price": 4000,
-                    "restaurant_price": 3500
+                    "restaurant_price": 3500,
+                    "description": ""
                 },
                 {
                     "name": "Ofada Rice",
                     "room_service_price": 8000,
-                    "restaurant_price": 7500
+                    "restaurant_price": 7500,
+                    "description": ""
                 },
                 {
                     "name": "Basmati Rice",
                     "room_service_price": 6000,
-                    "restaurant_price": 5500
+                    "restaurant_price": 5500,
+                    "description": ""
                 },
                 {
                     "name": "Fried Rice",
                     "room_service_price": 4000,
-                    "restaurant_price": 3500
+                    "restaurant_price": 3500,
+                    "description": ""
                 },
                 {
                     "name": "Plantain",
                     "room_service_price": 3500,
-                    "restaurant_price": 3000
+                    "restaurant_price": 3000,
+                    "description": ""
                 },
                 {
                     "name": "Bread Roll",
                     "room_service_price": 3500,
-                    "restaurant_price": 3000
+                    "restaurant_price": 3000,
+                    "description": ""
                 },
                 {
                     "name": "Bread Basket",
                     "room_service_price": 4500,
-                    "restaurant_price": 4000
+                    "restaurant_price": 4000,
+                    "description": ""
                 },
                 {
                     "name": "Vegetable Base",
                     "room_service_price": 3500,
-                    "restaurant_price": 3000
+                    "restaurant_price": 3000,
+                    "description": ""
                 },
                 {
                     "name": "Oriental Rice",
                     "room_service_price": 15500,
-                    "restaurant_price": 15000
+                    "restaurant_price": 15000,
+                    "description": ""
                 },
                 {
                     "name": "Boiled Yam",
                     "room_service_price": 3500,
-                    "restaurant_price": 3000
+                    "restaurant_price": 3000,
+                    "description": ""
                 },
                 {
                     "name": "Mixed Okro",
                     "room_service_price": 7500,
-                    "restaurant_price": 7000
+                    "restaurant_price": 7000,
+                    "description": ""
                 },
                 {
                     "name": "Affang + Goat Meat",
                     "room_service_price": 7500,
-                    "restaurant_price": 7000
+                    "restaurant_price": 7000,
+                    "description": ""
                 },
                 {
                     "name": "Edikaikong Soup",
                     "room_service_price": 7500,
-                    "restaurant_price": 7000
+                    "restaurant_price": 7000,
+                    "description": ""
                 },
                 {
                     "name": "Affang Soup",
                     "room_service_price": 7500,
-                    "restaurant_price": 7000
+                    "restaurant_price": 7000,
+                    "description": ""
                 },
                 {
                     "name": "Egusi Soup",
                     "room_service_price": 7500,
-                    "restaurant_price": 7000
+                    "restaurant_price": 7000,
+                    "description": ""
                 },
                 {
                     "name": "White Soup",
                     "room_service_price": 7500,
-                    "restaurant_price": 7000
+                    "restaurant_price": 7000,
+                    "description": ""
                 },
                 {
                     "name": "Bitter Leaf Soup",
                     "room_service_price": 7500,
-                    "restaurant_price": 7000
+                    "restaurant_price": 7000,
+                    "description": ""
                 },
                 {
                     "name": "Ogbono Soup",
                     "room_service_price": 7500,
-                    "restaurant_price": 7000
+                    "restaurant_price": 7000,
+                    "description": ""
                 },
                 {
                     "name": "Eforiro Soup",
                     "room_service_price": 7500,
-                    "restaurant_price": 7000
+                    "restaurant_price": 7000,
+                    "description": ""
                 },
                 {
                     "name": "Chinese Fried Rice",
                     "room_service_price": 7500,
-                    "restaurant_price": 7000
+                    "restaurant_price": 7000,
+                    "description": "Rice, eggs, vegetables with chicken lap"
                 },
                 {
                     "name": "French Fries",
                     "room_service_price": 7500,
-                    "restaurant_price": 7000
+                    "restaurant_price": 7000,
+                    "description": "Served with ketchup or sweet mayo sauce"
                 }
             ]
         },
@@ -725,12 +849,14 @@
                 {
                     "name": "Chicken Nugget",
                     "room_service_price": 7500,
-                    "restaurant_price": 7000
+                    "restaurant_price": 7000,
+                    "description": "Fried breaded chicken nuggets served with french fries"
                 },
                 {
                     "name": "French Fries",
                     "room_service_price": 5000,
-                    "restaurant_price": 4500
+                    "restaurant_price": 4500,
+                    "description": "Served with ketchup or sweet mayo sauce"
                 }
             ]
         },
@@ -739,51 +865,60 @@
                 {
                     "name": "Chicken Shawarma",
                     "room_service_price": 11000,
-                    "restaurant_price": 10500
+                    "restaurant_price": 10500,
+                    "description": "Choice of mild or spicy chicken, beef or vegetables wrapped in creamy sauce served with french fries"
                 },
                 {
                     "name": "Club Sandwich",
                     "room_service_price": 11000,
-                    "restaurant_price": 10500
+                    "restaurant_price": 10500,
+                    "description": "Grilled chicken, bacon (optional), egg, cheese, onion marmalade, tomato, cucumber, lettuce, sweet mayo on toast bread"
                 },
                 {
                     "name": "Chicken Sandwich",
                     "room_service_price": 10000,
-                    "restaurant_price": 9500
+                    "restaurant_price": 9500,
+                    "description": ""
                 },
                 {
                     "name": "Beef Burger",
                     "room_service_price": 10000,
-                    "restaurant_price": 9500
+                    "restaurant_price": 9500,
+                    "description": "Chicken or beef patty with onion marmalade, bacon (optional) and cheese on sesame bun"
                 },
                 {
                     "name": "Chicken Burger",
                     "room_service_price": 10000,
-                    "restaurant_price": 9500
+                    "restaurant_price": 9500,
+                    "description": "Chicken or beef patty with onion marmalade, bacon (optional) and cheese on sesame bun"
                 },
                 {
                     "name": "9ja Shawarma",
                     "room_service_price": 9000,
-                    "restaurant_price": 8500
+                    "restaurant_price": 8500,
+                    "description": ""
                 }
             ]
         },
         {
-            "Dessert": [
+            "Pastries": [
                 {
                     "name": "Doughnut",
                     "room_service_price": 1200,
-                    "restaurant_price": 700
+                    "restaurant_price": 700,
+                    "description": ""
                 },
                 {
                     "name": "Sausage Roll",
                     "room_service_price": 1500,
-                    "restaurant_price": 1000
+                    "restaurant_price": 1000,
+                    "description": ""
                 },
                 {
                     "name": "Egg Roll",
                     "room_service_price": 1500,
-                    "restaurant_price": 1000
+                    "restaurant_price": 1000,
+                    "description": ""
                 }
             ]
         },
@@ -792,57 +927,68 @@
                 {
                     "name": "Medium-Sized Bottled Water",
                     "room_service_price": 1100,
-                    "restaurant_price": 1000
+                    "restaurant_price": 1000,
+                    "description": ""
                 },
                 {
                     "name": "Large Bottled Water",
                     "room_service_price": 1650,
-                    "restaurant_price": 1500
+                    "restaurant_price": 1500,
+                    "description": ""
                 },
                 {
                     "name": "Malta Guinness",
                     "room_service_price": 1320,
-                    "restaurant_price": 1200
+                    "restaurant_price": 1200,
+                    "description": ""
                 },
                 {
                     "name": "Amstel Malta",
                     "room_service_price": 1320,
-                    "restaurant_price": 1200
+                    "restaurant_price": 1200,
+                    "description": ""
                 },
                 {
                     "name": "All Carbonated Soft Drinks",
                     "room_service_price": 1100,
-                    "restaurant_price": 1000
+                    "restaurant_price": 1000,
+                    "description": ""
                 },
                 {
                     "name": "Red Bull",
                     "room_service_price": 4400,
-                    "restaurant_price": 4000
+                    "restaurant_price": 4000,
+                    "description": ""
                 },
                 {
                     "name": "Monster Energy",
                     "room_service_price": 3300,
-                    "restaurant_price": 3000
+                    "restaurant_price": 3000,
+                    "description": ""
                 },
                 {
                     "name": "Amber",
                     "room_service_price": 3300,
-                    "restaurant_price": 3000
+                    "restaurant_price": 3000,
+                    "description": ""
                 },
                 {
                     "name": "Freshly Squeezed Juice",
                     "room_service_price": 3850,
-                    "restaurant_price": 3500
+                    "restaurant_price": 3500,
+                    "description": ""
                 },
                 {
                     "name": "Juice Per Pack",
                     "room_service_price": 4400,
-                    "restaurant_price": 4000
+                    "restaurant_price": 4000,
+                    "description": ""
                 },
                 {
                     "name": "Power Horse",
                     "room_service_price": 4400,
-                    "restaurant_price": 4000
+                    "restaurant_price": 4000,
+                    "description": ""
                 }
             ]
         },
@@ -851,62 +997,74 @@
                 {
                     "name": "Heineken Big",
                     "room_service_price": 2750,
-                    "restaurant_price": 2750
+                    "restaurant_price": 2750,
+                    "description": ""
                 },
                 {
                     "name": "Budweiser",
                     "room_service_price": 2750,
-                    "restaurant_price": 2500
+                    "restaurant_price": 2500,
+                    "description": ""
                 },
                 {
                     "name": "Gulder",
                     "room_service_price": 2200,
-                    "restaurant_price": 2000
+                    "restaurant_price": 2000,
+                    "description": ""
                 },
                 {
                     "name": "33",
                     "room_service_price": 1650,
-                    "restaurant_price": 1500
+                    "restaurant_price": 1500,
+                    "description": ""
                 },
                 {
                     "name": "Trophy",
                     "room_service_price": 2200,
-                    "restaurant_price": 2000
+                    "restaurant_price": 2000,
+                    "description": ""
                 },
                 {
                     "name": "Star Radler",
                     "room_service_price": 1650,
-                    "restaurant_price": 1500
+                    "restaurant_price": 1500,
+                    "description": ""
                 },
                 {
                     "name": "Small Stout",
                     "room_service_price": 1650,
-                    "restaurant_price": 1500
+                    "restaurant_price": 1500,
+                    "description": ""
                 },
                 {
                     "name": "Big Stout",
                     "room_service_price": 2750,
-                    "restaurant_price": 2500
+                    "restaurant_price": 2500,
+                    "description": ""
                 },
                 {
                     "name": "Orijin (Big)",
                     "room_service_price": 2200,
-                    "restaurant_price": 2000
+                    "restaurant_price": 2000,
+                    "description": ""
                 },
                 {
                     "name": "Snapp",
                     "room_service_price": 1650,
-                    "restaurant_price": 1500
+                    "restaurant_price": 1500,
+                    "description": ""
                 },
                 {
                     "name": "Smirnoff Ice (Small)",
                     "room_service_price": 1650,
-                    "restaurant_price": 1500
+                    "restaurant_price": 1500,
+                    "description": ""
                 },
                 {
                     "name": "Smirnoff Ice (Big)",
                     "room_service_price": 2750,
-                    "restaurant_price": 2500
+                    "restaurant_price": 2500,
+                    "description": ""
                 }
             ]
         },
@@ -915,22 +1073,26 @@
                 {
                     "name": "Double Espresso",
                     "room_service_price": 1650,
-                    "restaurant_price": 1500
+                    "restaurant_price": 1500,
+                    "description": ""
                 },
                 {
                     "name": "Cappuccino",
                     "room_service_price": 1650,
-                    "restaurant_price": 2000
+                    "restaurant_price": 2000,
+                    "description": ""
                 },
                 {
                     "name": "Hot Chocolate",
                     "room_service_price": 2200,
-                    "restaurant_price": 2000
+                    "restaurant_price": 2000,
+                    "description": ""
                 },
                 {
                     "name": "Nescafe Coffee",
                     "room_service_price": 1100,
-                    "restaurant_price": 1000
+                    "restaurant_price": 1000,
+                    "description": ""
                 }
             ]
         },
@@ -939,62 +1101,74 @@
                 {
                     "name": "Carlo Rossi",
                     "room_service_price": 19800,
-                    "restaurant_price": 19800
+                    "restaurant_price": 19800,
+                    "description": ""
                 },
                 {
                     "name": "Two Oceans",
                     "room_service_price": 16500,
-                    "restaurant_price": 16500
+                    "restaurant_price": 16500,
+                    "description": ""
                 },
                 {
                     "name": "Four Cousins",
                     "room_service_price": 19800,
-                    "restaurant_price": 19800
+                    "restaurant_price": 19800,
+                    "description": ""
                 },
                 {
                     "name": "House Wine (Glass)",
                     "room_service_price": 5500,
-                    "restaurant_price": 5500
+                    "restaurant_price": 5500,
+                    "description": ""
                 },
                 {
                     "name": "M&G Sweet Red",
                     "room_service_price": 16500,
-                    "restaurant_price": 16500
+                    "restaurant_price": 16500,
+                    "description": ""
                 },
                 {
                     "name": "M&G Classic (Non-Alcoholic)",
                     "room_service_price": 13200,
-                    "restaurant_price": 13200
+                    "restaurant_price": 13200,
+                    "description": ""
                 },
                 {
                     "name": "M&G Red",
                     "room_service_price": 13200,
-                    "restaurant_price": 13200
+                    "restaurant_price": 13200,
+                    "description": ""
                 },
                 {
                     "name": "Chamdor Non Alcoholic Grape",
                     "room_service_price": 11000,
-                    "restaurant_price": 11000
+                    "restaurant_price": 11000,
+                    "description": ""
                 },
                 {
                     "name": "J & W",
                     "room_service_price": 16500,
-                    "restaurant_price": 16500
+                    "restaurant_price": 16500,
+                    "description": ""
                 },
                 {
                     "name": "Frontera",
                     "room_service_price": 19800,
-                    "restaurant_price": 19800
+                    "restaurant_price": 19800,
+                    "description": ""
                 },
                 {
                     "name": "Nederburg (Red or White)",
                     "room_service_price": 33000,
-                    "restaurant_price": 33000
+                    "restaurant_price": 33000,
+                    "description": ""
                 },
                 {
                     "name": "Escudo Rojo (Red or White)",
                     "room_service_price": 33000,
-                    "restaurant_price": 33000
+                    "restaurant_price": 33000,
+                    "description": ""
                 }
             ]
         },
@@ -1003,82 +1177,98 @@
                 {
                     "name": "Red Label",
                     "room_service_price": 2750,
-                    "restaurant_price": 2750
+                    "restaurant_price": 2750,
+                    "description": ""
                 },
                 {
                     "name": "Black Label",
                     "room_service_price": 4950,
-                    "restaurant_price": 4950
+                    "restaurant_price": 4950,
+                    "description": ""
                 },
                 {
                     "name": "Jack Daniel",
                     "room_service_price": 3850,
-                    "restaurant_price": 3850
+                    "restaurant_price": 3850,
+                    "description": ""
                 },
                 {
                     "name": "Gordon",
                     "room_service_price": 2200,
-                    "restaurant_price": 2200
+                    "restaurant_price": 2200,
+                    "description": ""
                 },
                 {
                     "name": "Bombay Sapphire",
                     "room_service_price": 3300,
-                    "restaurant_price": 3300
+                    "restaurant_price": 3300,
+                    "description": ""
                 },
                 {
                     "name": "Campari",
                     "room_service_price": 2750,
-                    "restaurant_price": 2750
+                    "restaurant_price": 2750,
+                    "description": ""
                 },
                 {
                     "name": "Hennessy VS",
                     "room_service_price": 8800,
-                    "restaurant_price": 8800
+                    "restaurant_price": 8800,
+                    "description": ""
                 },
                 {
                     "name": "Remy Martins VSOP",
                     "room_service_price": 9350,
-                    "restaurant_price": 9350
+                    "restaurant_price": 9350,
+                    "description": ""
                 },
                 {
                     "name": "Bailey's Irish Cream",
                     "room_service_price": 3300,
-                    "restaurant_price": 3300
+                    "restaurant_price": 3300,
+                    "description": ""
                 },
                 {
                     "name": "Tequila Olmeca",
                     "room_service_price": 3850,
-                    "restaurant_price": 3850
+                    "restaurant_price": 3850,
+                    "description": ""
                 },
                 {
                     "name": "Jameson",
                     "room_service_price": 3850,
-                    "restaurant_price": 3850
+                    "restaurant_price": 3850,
+                    "description": ""
                 },
                 {
                     "name": "Absolute Blue",
                     "room_service_price": 3300,
-                    "restaurant_price": 3300
+                    "restaurant_price": 3300,
+                    "description": ""
                 },
                 {
                     "name": "Sminnoff Red",
                     "room_service_price": 2200,
-                    "restaurant_price": 2200
+                    "restaurant_price": 2200,
+                    "description": ""
                 },
                 {
                     "name": "Sminnoff Blue",
                     "room_service_price": 2750,
-                    "restaurant_price": 2750
+                    "restaurant_price": 2750,
+                    "description": ""
                 },
                 {
                     "name": "Hennessy VSOP",
                     "room_service_price": 16500,
-                    "restaurant_price": 16500
+                    "restaurant_price": 16500,
+                    "description": ""
                 },
                 {
                     "name": "Jaggermeister",
                     "room_service_price": 2750,
-                    "restaurant_price": 2750
+                    "restaurant_price": 2750,
+                    "description": ""
                 }
             ]
         },
@@ -1087,22 +1277,26 @@
                 {
                     "name": "Moet Brut",
                     "room_service_price": 126000,
-                    "restaurant_price": 126000
+                    "restaurant_price": 126000,
+                    "description": ""
                 },
                 {
                     "name": "Moet Rose",
                     "room_service_price": 170500,
-                    "restaurant_price": 170500
+                    "restaurant_price": 170500,
+                    "description": ""
                 },
                 {
                     "name": "Andre Rose",
                     "room_service_price": 38500,
-                    "restaurant_price": 38500
+                    "restaurant_price": 38500,
+                    "description": ""
                 },
                 {
                     "name": "Andre Brut",
                     "room_service_price": 27500,
-                    "restaurant_price": 27500
+                    "restaurant_price": 27500,
+                    "description": ""
                 }
             ]
         },
@@ -1111,161 +1305,192 @@
                 {
                     "name": "Martini Rosso",
                     "room_service_price": 25300,
-                    "restaurant_price": 25300
+                    "restaurant_price": 25300,
+                    "description": ""
                 },
                 {
                     "name": "Gordon Gin",
                     "room_service_price": 29700,
-                    "restaurant_price": 29700
+                    "restaurant_price": 29700,
+                    "description": ""
                 },
                 {
                     "name": "Bombay Sapphire (Small)",
                     "room_service_price": 44000,
-                    "restaurant_price": 44000
+                    "restaurant_price": 44000,
+                    "description": ""
                 },
                 {
                     "name": "Famous Grouse",
                     "room_service_price": 16500,
-                    "restaurant_price": 16500
+                    "restaurant_price": 16500,
+                    "description": ""
                 },
                 {
                     "name": "Tequila Olmeca",
                     "room_service_price": 49500,
-                    "restaurant_price": 49500
+                    "restaurant_price": 49500,
+                    "description": ""
                 },
                 {
                     "name": "Campari",
                     "room_service_price": 38500,
-                    "restaurant_price": 38500
+                    "restaurant_price": 38500,
+                    "description": ""
                 },
                 {
                     "name": "Jack Daniel",
                     "room_service_price": 49500,
-                    "restaurant_price": 49500
+                    "restaurant_price": 49500,
+                    "description": ""
                 },
                 {
                     "name": "Jameson",
                     "room_service_price": 55000,
-                    "restaurant_price": 55000
+                    "restaurant_price": 55000,
+                    "description": ""
                 },
                 {
                     "name": "Jameson Black Barrel",
                     "room_service_price": 93500,
-                    "restaurant_price": 93500
+                    "restaurant_price": 93500,
+                    "description": ""
                 },
                 {
                     "name": "Hennessy VS",
                     "room_service_price": 121000,
-                    "restaurant_price": 121000
+                    "restaurant_price": 121000,
+                    "description": ""
                 },
                 {
                     "name": "Hennessy VSOP",
                     "room_service_price": 203500,
-                    "restaurant_price": 203500
+                    "restaurant_price": 203500,
+                    "description": ""
                 },
                 {
                     "name": "Remy Martins VSOP",
                     "room_service_price": 115500,
-                    "restaurant_price": 115500
+                    "restaurant_price": 115500,
+                    "description": ""
                 },
                 {
                     "name": "Ciroc",
                     "room_service_price": 55000,
-                    "restaurant_price": 55000
+                    "restaurant_price": 55000,
+                    "description": ""
                 },
                 {
                     "name": "Bailey's Irish Cream",
                     "room_service_price": 38500,
-                    "restaurant_price": 38500
+                    "restaurant_price": 38500,
+                    "description": ""
                 },
                 {
                     "name": "Triple Sec",
                     "room_service_price": 27500,
-                    "restaurant_price": 27500
+                    "restaurant_price": 27500,
+                    "description": ""
                 },
                 {
                     "name": "Smirnoff",
                     "room_service_price": 33000,
-                    "restaurant_price": 33000
+                    "restaurant_price": 33000,
+                    "description": ""
                 },
                 {
                     "name": "Cointreau",
                     "room_service_price": 49500,
-                    "restaurant_price": 49500
+                    "restaurant_price": 49500,
+                    "description": ""
                 },
                 {
                     "name": "Barcadi",
                     "room_service_price": 33000,
-                    "restaurant_price": 33000
+                    "restaurant_price": 33000,
+                    "description": ""
                 },
                 {
                     "name": "Absolute",
                     "room_service_price": 33000,
-                    "restaurant_price": 33000
+                    "restaurant_price": 33000,
+                    "description": ""
                 },
                 {
                     "name": "Red Label",
                     "room_service_price": 38500,
-                    "restaurant_price": 38500
+                    "restaurant_price": 38500,
+                    "description": ""
                 },
                 {
                     "name": "Black Label",
                     "room_service_price": 66000,
-                    "restaurant_price": 66000
+                    "restaurant_price": 66000,
+                    "description": ""
                 },
                 {
                     "name": "Malibu",
                     "room_service_price": 38500,
-                    "restaurant_price": 38500
+                    "restaurant_price": 38500,
+                    "description": ""
                 },
                 {
                     "name": "Martel VS",
                     "room_service_price": 99000,
-                    "restaurant_price": 99000
+                    "restaurant_price": 99000,
+                    "description": ""
                 },
                 {
                     "name": "Martel Blue Swift",
                     "room_service_price": 198000,
-                    "restaurant_price": 198000
+                    "restaurant_price": 198000,
+                    "description": ""
                 },
                 {
                     "name": "Jaggermeister",
                     "room_service_price": 38500,
-                    "restaurant_price": 38500
+                    "restaurant_price": 38500,
+                    "description": ""
                 }
             ]
         },
         {
-            "Cocktails/Mocktails": [
+            "Cocktails / Mocktails": [
                 {
                     "name": "Long Island",
                     "room_service_price": 11550,
-                    "restaurant_price": 11550
+                    "restaurant_price": 11550,
+                    "description": "Bacardi, tequila, gin, vodka, cointreau and coke"
                 },
                 {
                     "name": "Pina Colada",
                     "room_service_price": 7150,
-                    "restaurant_price": 7150
+                    "restaurant_price": 7150,
+                    "description": "Bacardi, Malibu rum, coconut cream & pineapple juice"
                 },
                 {
                     "name": "Margarita",
                     "room_service_price": 10450,
-                    "restaurant_price": 10450
+                    "restaurant_price": 10450,
+                    "description": "Tequila, Cointreau & lime juice"
                 },
                 {
                     "name": "Sex on the Beach",
                     "room_service_price": 9350,
-                    "restaurant_price": 9350
+                    "restaurant_price": 9350,
+                    "description": "Vodka, tequila, orange juice & grenadine"
                 },
                 {
                     "name": "Screw Driver",
                     "room_service_price": 6050,
-                    "restaurant_price": 6050
+                    "restaurant_price": 6050,
+                    "description": "Vodka & orange or cranberry juice"
                 },
                 {
                     "name": "Chapman",
                     "room_service_price": 5500,
-                    "restaurant_price": 5500
+                    "restaurant_price": 5500,
+                    "description": "Fanta, orange jiace, grenadine, cucumber, sprite and angostura bitters"
                 }
             ]
         }
