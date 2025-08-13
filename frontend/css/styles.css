@@ -138,7 +138,9 @@ nav {
     color: white;
     transform: translateY(-1px);
 }
-
+h3{
+    color: var(--accent-color);
+}
 /* Hero Section - Mobile First */
 .hero {
     height: 50vh;
@@ -297,10 +299,16 @@ nav {
 
 /* Menu Item Styles - Clean List Style */
 .menu-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
     margin-bottom: 2rem;
     padding: 1.5rem;
     transition: all 0.3s ease;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    background: rgba(255,255,255,0.85);
+    border-radius: 8px;
 }
 
 .menu-item:last-child {
@@ -540,14 +548,15 @@ footer {
 .menu-item-description {
     color: #666;
     font-size: 0.97rem;
-    margin-top: 0.3rem;
-    margin-bottom: 0.2rem;
+    margin-top: 0.4rem;
+    margin-bottom: 0.3rem;
     opacity: 0.85;
     line-height: 1.5;
     font-style: italic;
     word-break: break-word;
     width: 100%;
     display: block;
+    clear: both;
 }
 
 @media (max-width: 600px) {
@@ -558,7 +567,8 @@ footer {
     }
     .menu-item-description {
         font-size: 0.93rem;
-        margin-top: 0.15rem;
+        margin-top: 0.2rem;
+        margin-bottom: 0.2rem;
     }
 }
 
