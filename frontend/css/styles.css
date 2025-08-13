@@ -543,6 +543,7 @@ footer {
     justify-content: space-between;
     width: 100%;
     gap: 0.5rem;
+    flex-direction: row !important;
 }
 
 .menu-item-description {
