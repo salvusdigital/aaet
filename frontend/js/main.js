@@ -165,7 +165,7 @@ function getItemCategoryName(item) {
  */
 async function fetchCategories() {
     try {
-        const response = await fetch('http://localhost:8000/api/menu/categories');
+        const response = await fetch('https://menu.aaentertainment.ng/api/menu/categories');
         const data = await response.json();
         console.log('Categories fetched:', data);
 
@@ -192,7 +192,7 @@ async function fetchMenuData() {
     showLoadingState();
 
     try {
-        const response = await fetch('http://localhost:8000/api/menu');
+        const response = await fetch('https://menu.aaentertainment.ng/api/menu');
         // const response = await fetch('https://menu.aaentertainment.ng/api/menu');
         const data = await response.json();
         console.log('Raw menu data received:', data);
@@ -442,11 +442,17 @@ function createMenuItemHTML(item) {
         tagsHTML = `<div class="menu-item-tags">${item.tags.map(tag => `<span class='menu-item-tag'>${tag}</span>`).join('')}</div>`;
     }
 
+    // Add description if available
+    const descriptionHTML = item.description ? `<div class="menu-item-description">${item.description}</div>` : '';
+
     return `
         <div class="menu-item">
-            <span class="item-name">${item.name || 'Unnamed Item'}</span>
-            <span class="dots"></span>
-            <span class="item-price">${price}</span>
+            <div class="menu-item-row">
+                <span class="item-name">${item.name || 'Unnamed Item'}</span>
+                <span class="dots"></span>
+                <span class="item-price">${price}</span>
+            </div>
+            ${descriptionHTML}
         </div>
     `;
 }
