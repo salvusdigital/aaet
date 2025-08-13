@@ -453,6 +453,7 @@ function createMenuItemHTML(item) {
                 <span class="item-price">${price}</span>
             </div>
             ${descriptionHTML}
+            ${tagsHTML}
         </div>
     `;
 }
